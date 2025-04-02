@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/kedro-pymc-modelbuilder/index.html",
       "/posts/kedro-framework/index.html"
     ]
   }
