@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/embeddings_deepdive/index.html",
       "/posts/kedro-ray/index.html",
       "/posts/kedro-mlflow/index.html",
       "/posts/kedro-pymc-modelbuilder/index.html",

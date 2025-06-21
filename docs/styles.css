@@ -16,3 +16,7 @@
     text-indent: -9999px;   */
     transition: opacity 0.5s ease;
 }
+
+.listing-categories {
+  margin-top: 10px; /* Add space above the tags */
+}
