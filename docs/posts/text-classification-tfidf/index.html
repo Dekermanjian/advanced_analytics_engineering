@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.21">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -69,18 +69,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-629432c7d29b615b3888e3cdfd62b7a9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-11cbd3234f06388db87dcfbb7d560d62.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-629432c7d29b615b3888e3cdfd62b7a9.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e3031b2b07293ce5c0b259fcee51fff1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-a48ca002f196e9d794e386cf5960d24c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e3031b2b07293ce5c0b259fcee51fff1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-2ff84ce94f2e7fd20006061312b133c1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-241c542bec84a94dd796906e9232f61d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-2ff84ce94f2e7fd20006061312b133c1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2e339959b90c1d7f19a047c108ed48c7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-fe8157ccd301de198fc9a74faafbbac0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2e339959b90c1d7f19a047c108ed48c7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -152,7 +153,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -340,6 +341,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Advanced Analytics &amp; Engineering</span>
     </a>
@@ -753,7 +756,7 @@ y \sim Categorical(\textbf{p})
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
 <p>Let’s go ahead and pull the code from the prior post that pulls in the toy dataset and generates the TF-IDF embeddings.</p>
 <div id="9df2b6bc" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># imports</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># imports</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Literal</span>
@@ -770,15 +773,15 @@ y \sim Categorical(\textbf{p})
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.sparse <span class="im">import</span> csr_matrix</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> fetch_20newsgroups</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, confusion_matrix</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, confusion_matrix</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="abe5a51b" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a seed for reproducibility</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a seed for reproducibility</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>seed <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">map</span>(<span class="bu">ord</span>, <span class="st">"multinomialLR"</span>))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(seed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(seed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="d0b55a61" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># TF-IDF Functions</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># TF-IDF Functions</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tokenize(text: <span class="bu">str</span>, TOKEN_PATTERN <span class="op">=</span> re.<span class="bu">compile</span>(<span class="vs">r"</span><span class="fu">(?u)</span><span class="dv">\b\w\w</span><span class="op">+</span><span class="dv">\b</span><span class="vs">"</span>)) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> TOKEN_PATTERN.findall(text.lower())</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tokens</span>
@@ -838,10 +841,10 @@ y \sim Categorical(\textbf{p})
 <span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>                inverse_document_frequencies.append(<span class="dv">0</span>)</span>
 <span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>        inverse_document_frequencies <span class="op">=</span> np.array(inverse_document_frequencies)</span>
 <span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> term_frequencies <span class="op">*</span> inverse_document_frequencies[:, <span class="va">None</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> term_frequencies <span class="op">*</span> inverse_document_frequencies[:, <span class="va">None</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="f2f0296d" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pull in toy data</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pull in toy data</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>categories <span class="op">=</span> [</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"sci.med"</span>,</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"comp.graphics"</span>,</span>
@@ -849,10 +852,10 @@ y \sim Categorical(\textbf{p})
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>newsgroups_train <span class="op">=</span> fetch_20newsgroups(subset<span class="op">=</span><span class="st">'train'</span>, categories<span class="op">=</span>categories)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>newsgroups_test <span class="op">=</span> fetch_20newsgroups(subset<span class="op">=</span><span class="st">'test'</span>, categories<span class="op">=</span>categories)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>newsgroups_test <span class="op">=</span> fetch_20newsgroups(subset<span class="op">=</span><span class="st">'test'</span>, categories<span class="op">=</span>categories)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="1b0a888e" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create training dataset TF-IDF</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create training dataset TF-IDF</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>train_tokens <span class="op">=</span> [tokenize(text) <span class="cf">for</span> text <span class="kw">in</span> newsgroups_train.data]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>vocabulary <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">set</span>(<span class="bu">sum</span>(train_tokens, [])))</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>train_tf_idf <span class="op">=</span> tf_idf(vocabulary<span class="op">=</span>vocabulary, tokens<span class="op">=</span>train_tokens, mode<span class="op">=</span><span class="st">'fit'</span>)</span>
@@ -865,13 +868,13 @@ y \sim Categorical(\textbf{p})
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> train_tf_idf.T</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> newsgroups_train.target</span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> test_tf_idf.T</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> newsgroups_test.target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> newsgroups_test.target</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Here we will convert our sparse matrices from the dense representation with all the zeros to the CSR representation that we discussed above.</p>
 <div id="223a3f3e" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Sparse CSR Matrices</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Sparse CSR Matrices</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>X_train_sparse <span class="op">=</span> csr_matrix(X_train)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>X_test_sparse <span class="op">=</span> csr_matrix(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>X_test_sparse <span class="op">=</span> csr_matrix(X_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="vanilla-mlr-1" class="level2">
@@ -879,7 +882,7 @@ y \sim Categorical(\textbf{p})
 <p>Alright, with our TF-IDF embeddings created and converted to CSR we are ready to start building our model. Let’s start with the typical “vanilla” MLR model that assumes IIA. We are going to be doing all of this in a Bayesian framework which gives us the flexibility to extend this “vanilla” model to include more complex relationships.</p>
 <p>Notice that we are enforcing identifiability by enducing a sum to zero over the parameters across the classes and notice that we are computing our logits using a sparse matrix vector multiplication algorithm.</p>
 <div id="85f0071e" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MLR Model specification</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MLR Model specification</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>coords <span class="op">=</span> {</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"classes"</span>: newsgroups_test.target_names,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"features"</span>: vocabulary,</span>
@@ -903,25 +906,25 @@ y \sim Categorical(\textbf{p})
 <span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> alpha <span class="op">+</span> spt.structured_dot(X, coefs.T)</span>
 <span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Likelihood</span></span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    pm.Categorical(<span class="st">"y_obs"</span>, logit_p<span class="op">=</span>logits, observed<span class="op">=</span>y, dims<span class="op">=</span><span class="st">"num_obs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    pm.Categorical(<span class="st">"y_obs"</span>, logit_p<span class="op">=</span>logits, observed<span class="op">=</span>y, dims<span class="op">=</span><span class="st">"num_obs"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>One thing to note is that at the moment sparse tensor operations are not supported in sampling accelerators like <code>nutpie</code> or <code>numpyro</code> via <code>PyMC</code>. So we will have to sample with the default <code>PyMC</code> sampler.</p>
 <div id="a3a2a5d5" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sampling</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sampling</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> sparse_model:</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    idata <span class="op">=</span> pm.sample(mp_ctx<span class="op">=</span><span class="st">"spawn"</span>, random_seed<span class="op">=</span>rng)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    idata <span class="op">=</span> pm.sample(mp_ctx<span class="op">=</span><span class="st">"spawn"</span>, random_seed<span class="op">=</span>rng)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>With our samples in hand, let’s pull a summary of the learned weights and inspect what words based on the TF-IDF embeddings have the largest influence over each class.</p>
 <div id="f305ccaa" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get model summaries</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>summary_df <span class="op">=</span> az.summary(idata, kind<span class="op">=</span><span class="st">"stats"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get model summaries</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>summary_df <span class="op">=</span> az.summary(idata, kind<span class="op">=</span><span class="st">"stats"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>In the tables below, you’ll notice that in the brackets you have “[class name, feature name]” and these have been sorted by the posterior mean to represent the largest influential words per class.</p>
 <p>For the <code>comp.graphics</code> class words like “graphics” and “image” are influential to push a document to being classified as <code>comp.graphics</code>. This seems sensible to me.</p>
 <p>Similarly, the influential features for the other two classes also seem sensible.</p>
 <div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at weights learned for the comp.graphics class</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">coefs_raw</span><span class="ch">\[</span><span class="vs">comp"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at weights learned for the comp.graphics class</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">coefs_raw</span><span class="ch">\[</span><span class="vs">comp"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-vanilla-compgraphics" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="11">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-vanilla-compgraphics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -932,7 +935,7 @@ Table&nbsp;1: Most influencial words for class comp.graphics
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -944,70 +947,70 @@ Table&nbsp;1: Most influencial words for class comp.graphics
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, graphics]</th>
 <td>1.392</td>
 <td>0.482</td>
 <td>0.553</td>
 <td>2.351</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, image]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, image]</th>
 <td>0.802</td>
 <td>0.495</td>
 <td>-0.098</td>
 <td>1.746</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, file]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, file]</th>
 <td>0.762</td>
 <td>0.477</td>
 <td>-0.130</td>
 <td>1.671</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, 3d]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, 3d]</th>
 <td>0.758</td>
 <td>0.457</td>
 <td>-0.055</td>
 <td>1.653</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, hi]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, hi]</th>
 <td>0.625</td>
 <td>0.480</td>
 <td>-0.247</td>
 <td>1.548</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, files]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, files]</th>
 <td>0.619</td>
 <td>0.486</td>
 <td>-0.310</td>
 <td>1.508</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, code]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, code]</th>
 <td>0.612</td>
 <td>0.487</td>
 <td>-0.272</td>
 <td>1.526</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, video]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, video]</th>
 <td>0.601</td>
 <td>0.497</td>
 <td>-0.314</td>
 <td>1.525</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, format]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, format]</th>
 <td>0.595</td>
 <td>0.488</td>
 <td>-0.376</td>
 <td>1.462</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[comp.graphics, windows]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[comp.graphics, windows]</th>
 <td>0.579</td>
 <td>0.484</td>
 <td>-0.332</td>
@@ -1023,8 +1026,8 @@ Table&nbsp;1: Most influencial words for class comp.graphics
 </div>
 </div>
 <div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at weights learned for the sci.med class</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">coefs_raw</span><span class="ch">\[</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">med"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at weights learned for the sci.med class</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">coefs_raw</span><span class="ch">\[</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">med"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-vanilla-scimed" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="12">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-vanilla-scimed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1035,7 +1038,7 @@ Table&nbsp;2: Most influencial words for class sci.med
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1047,70 +1050,70 @@ Table&nbsp;2: Most influencial words for class sci.med
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, doctor]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, doctor]</th>
 <td>0.776</td>
 <td>0.480</td>
 <td>-0.098</td>
 <td>1.707</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, pitt]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, pitt]</th>
 <td>0.738</td>
 <td>0.473</td>
 <td>-0.153</td>
 <td>1.617</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, disease]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, disease]</th>
 <td>0.712</td>
 <td>0.470</td>
 <td>-0.210</td>
 <td>1.537</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, health]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, health]</th>
 <td>0.652</td>
 <td>0.487</td>
 <td>-0.238</td>
 <td>1.596</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, medical]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, medical]</th>
 <td>0.612</td>
 <td>0.482</td>
 <td>-0.249</td>
 <td>1.551</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, msg]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, msg]</th>
 <td>0.609</td>
 <td>0.480</td>
 <td>-0.276</td>
 <td>1.527</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, treatment]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, treatment]</th>
 <td>0.598</td>
 <td>0.487</td>
 <td>-0.316</td>
 <td>1.473</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, geb]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, geb]</th>
 <td>0.584</td>
 <td>0.488</td>
 <td>-0.296</td>
 <td>1.523</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, she]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, she]</th>
 <td>0.579</td>
 <td>0.480</td>
 <td>-0.269</td>
 <td>1.528</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.med, banks]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.med, banks]</th>
 <td>0.578</td>
 <td>0.498</td>
 <td>-0.363</td>
@@ -1126,8 +1129,8 @@ Table&nbsp;2: Most influencial words for class sci.med
 </div>
 </div>
 <div class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at weights learned for the sci.space class</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">coefs_raw</span><span class="ch">\[</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">space"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Look at weights learned for the sci.space class</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">coefs_raw</span><span class="ch">\[</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">space"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-vanilla-scispace" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="13">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-vanilla-scispace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1138,7 +1141,7 @@ Table&nbsp;3: Most influencial words for class sci.space
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1150,70 +1153,70 @@ Table&nbsp;3: Most influencial words for class sci.space
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, space]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, space]</th>
 <td>1.725</td>
 <td>0.478</td>
 <td>0.841</td>
 <td>2.631</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, orbit]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, orbit]</th>
 <td>0.903</td>
 <td>0.487</td>
 <td>-0.047</td>
 <td>1.764</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, nasa]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, nasa]</th>
 <td>0.804</td>
 <td>0.483</td>
 <td>-0.116</td>
 <td>1.672</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, moon]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, moon]</th>
 <td>0.731</td>
 <td>0.485</td>
 <td>-0.226</td>
 <td>1.610</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, shuttle]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, shuttle]</th>
 <td>0.667</td>
 <td>0.461</td>
 <td>-0.212</td>
 <td>1.526</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, pat]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, pat]</th>
 <td>0.651</td>
 <td>0.495</td>
 <td>-0.307</td>
 <td>1.546</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, launch]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, launch]</th>
 <td>0.639</td>
 <td>0.483</td>
 <td>-0.282</td>
 <td>1.494</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, henry]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, henry]</th>
 <td>0.573</td>
 <td>0.485</td>
 <td>-0.300</td>
 <td>1.500</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, digex]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, digex]</th>
 <td>0.572</td>
 <td>0.503</td>
 <td>-0.363</td>
 <td>1.521</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_raw[sci.space, planets]</td>
+<th data-quarto-table-cell-role="th">coefs_raw[sci.space, planets]</th>
 <td>0.542</td>
 <td>0.475</td>
 <td>-0.303</td>
@@ -1234,9 +1237,9 @@ Table&nbsp;3: Most influencial words for class sci.space
 <p>Below, we plot the posterior weights for the feature “space”, which is the most influential feature for class <code>sci.space</code>, for the classes <code>comp.graphics</code> and <code>sci.med</code>.</p>
 <p>Here you see the effects of IIA, where it is clear that there is no correlation between the two class weights for that feature.</p>
 <div id="54f74bad" class="cell light-mode" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># look at IIA correlations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># look at IIA correlations</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8'</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>az.plot_pair(idata, var_names<span class="op">=</span>[<span class="st">'coefs_raw'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>az.plot_pair(idata, var_names<span class="op">=</span>[<span class="st">'coefs_raw'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1247,9 +1250,9 @@ Table&nbsp;3: Most influencial words for class sci.space
 </div>
 </div>
 <div id="14d66e68" class="cell dark-mode" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># look at IIA correlations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># look at IIA correlations</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'dark_background'</span>)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>az.plot_pair(idata, var_names<span class="op">=</span>[<span class="st">'coefs_raw'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>az.plot_pair(idata, var_names<span class="op">=</span>[<span class="st">'coefs_raw'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1263,7 +1266,7 @@ Table&nbsp;3: Most influencial words for class sci.space
 <p>Let’s produce out-of-sample predictions using our test dataset and compute some standard classification evaluation metrics.</p>
 <p>Looking at the <code>f1-scores</code>, the model performs well at differentiating between the three classes.</p>
 <div id="f1198996" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Out of sample predictions</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Out of sample predictions</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> sparse_model:</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    pm.set_data(</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        new_data<span class="op">=</span>{</span>
@@ -1274,14 +1277,14 @@ Table&nbsp;3: Most influencial words for class sci.space
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"num_obs"</span>: np.arange(<span class="bu">len</span>(y_test))</span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        }</span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    idata_posterior <span class="op">=</span> pm.sample_posterior_predictive(idata, predictions<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    idata_posterior <span class="op">=</span> pm.sample_posterior_predictive(idata, predictions<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="e1c9ebcb" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Evaluations</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>idata_posterior[<span class="st">'posterior_predictive'</span>] <span class="op">=</span> idata_posterior.predictions</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>idata_posterior[<span class="st">'observed_data'</span>] <span class="op">=</span> xr.Dataset({<span class="st">"y_obs"</span>: xr.DataArray(y_test)})</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> stats.mode(az.extract(idata_posterior, group<span class="op">=</span><span class="st">"predictions"</span>, var_names<span class="op">=</span><span class="st">"y_obs"</span>).values, axis<span class="op">=</span><span class="dv">1</span>).mode</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_true<span class="op">=</span>y_test, y_pred<span class="op">=</span>y_pred))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_true<span class="op">=</span>y_test, y_pred<span class="op">=</span>y_pred))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              precision    recall  f1-score   support
 
@@ -1315,7 +1318,7 @@ Warning
 </div>
 </div>
 <div id="d30424e1" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Features and classes</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Features and classes</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>D <span class="op">=</span> X_train_sparse.shape[<span class="dv">1</span>]</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1351,15 +1354,15 @@ Warning
 <span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>    pm.Categorical(<span class="st">"y_obs"</span>, logit_p<span class="op">=</span>logits, observed<span class="op">=</span>y, dims<span class="op">=</span><span class="st">"num_obs"</span>)</span>
 <span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> sparse_correlated_model:</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    correlated_idata <span class="op">=</span> pm.sample(mp_ctx<span class="op">=</span><span class="st">"spawn"</span>, target_accept<span class="op">=</span><span class="fl">0.9</span>, cores<span class="op">=</span><span class="dv">8</span>, random_seed<span class="op">=</span>rng)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    correlated_idata <span class="op">=</span> pm.sample(mp_ctx<span class="op">=</span><span class="st">"spawn"</span>, target_accept<span class="op">=</span><span class="fl">0.9</span>, cores<span class="op">=</span><span class="dv">8</span>, random_seed<span class="op">=</span>rng)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Let’s take a look at the posterior means of the correlations between classes that the model estimated.</p>
 <p>Okay, looks like the correlations are indeed small.</p>
 <div id="f318d23b" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>corr_tbl <span class="op">=</span> az.summary(correlated_idata, var_names<span class="op">=</span>[<span class="st">"class_cov_corr"</span>], kind<span class="op">=</span><span class="st">"stats"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>corr_tbl <span class="op">=</span> az.summary(correlated_idata, var_names<span class="op">=</span>[<span class="st">"class_cov_corr"</span>], kind<span class="op">=</span><span class="st">"stats"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>corr_tbl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>corr_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-cov-corr" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="20">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cov-corr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1370,7 +1373,7 @@ Table&nbsp;4: Estimated Correlations between Classes
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1382,63 +1385,63 @@ Table&nbsp;4: Estimated Correlations between Classes
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">class_cov_corr[0, 0]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[0, 0]</th>
 <td>1.000</td>
 <td>0.000</td>
 <td>1.000</td>
 <td>1.000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">class_cov_corr[0, 1]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[0, 1]</th>
 <td>0.086</td>
 <td>0.479</td>
 <td>-0.616</td>
 <td>1.000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">class_cov_corr[0, 2]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[0, 2]</th>
 <td>-0.067</td>
 <td>0.368</td>
 <td>-0.767</td>
 <td>0.530</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">class_cov_corr[1, 0]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[1, 0]</th>
 <td>0.086</td>
 <td>0.479</td>
 <td>-0.616</td>
 <td>1.000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">class_cov_corr[1, 1]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[1, 1]</th>
 <td>1.000</td>
 <td>0.000</td>
 <td>1.000</td>
 <td>1.000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">class_cov_corr[1, 2]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[1, 2]</th>
 <td>-0.025</td>
 <td>0.366</td>
 <td>-0.719</td>
 <td>0.608</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">class_cov_corr[2, 0]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[2, 0]</th>
 <td>-0.067</td>
 <td>0.368</td>
 <td>-0.767</td>
 <td>0.530</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">class_cov_corr[2, 1]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[2, 1]</th>
 <td>-0.025</td>
 <td>0.366</td>
 <td>-0.719</td>
 <td>0.608</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">class_cov_corr[2, 2]</td>
+<th data-quarto-table-cell-role="th">class_cov_corr[2, 2]</th>
 <td>1.000</td>
 <td>0.000</td>
 <td>1.000</td>
@@ -1457,8 +1460,8 @@ Table&nbsp;4: Estimated Correlations between Classes
 <p>Notice because of our transposed coefficients in the model definintion we now have the features first and the class second in the brackets.</p>
 <p>Looks like our weights, relatively speaking, are still sensible. You should notice that the weight values themselves are different.</p>
 <div class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cor_summary_df <span class="op">=</span> az.summary(correlated_idata, var_names<span class="op">=</span>[<span class="st">"coefs_T"</span>], kind<span class="op">=</span><span class="st">"stats"</span>)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>cor_summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">comp</span><span class="dv">.</span><span class="vs">graphics</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cor_summary_df <span class="op">=</span> az.summary(correlated_idata, var_names<span class="op">=</span>[<span class="st">"coefs_T"</span>], kind<span class="op">=</span><span class="st">"stats"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>cor_summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">comp</span><span class="dv">.</span><span class="vs">graphics</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-cov-compgraphics" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="21">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cov-compgraphics-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1469,7 +1472,7 @@ Table&nbsp;5: Most influencial words for class comp.graphics - Structured Covari
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1481,70 +1484,70 @@ Table&nbsp;5: Most influencial words for class comp.graphics - Structured Covari
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[graphics, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[graphics, comp.graphics]</th>
 <td>3.821</td>
 <td>2.641</td>
 <td>-0.180</td>
 <td>8.096</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[image, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[image, comp.graphics]</th>
 <td>2.216</td>
 <td>1.860</td>
 <td>-0.246</td>
 <td>5.738</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[3d, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[3d, comp.graphics]</th>
 <td>2.124</td>
 <td>1.836</td>
 <td>-0.474</td>
 <td>5.549</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[file, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[file, comp.graphics]</th>
 <td>2.094</td>
 <td>1.803</td>
 <td>-0.473</td>
 <td>5.526</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[files, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[files, comp.graphics]</th>
 <td>1.728</td>
 <td>1.726</td>
 <td>-0.834</td>
 <td>5.102</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[hi, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[hi, comp.graphics]</th>
 <td>1.721</td>
 <td>1.667</td>
 <td>-0.621</td>
 <td>5.040</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[code, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[code, comp.graphics]</th>
 <td>1.677</td>
 <td>1.674</td>
 <td>-0.727</td>
 <td>5.086</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[format, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[format, comp.graphics]</th>
 <td>1.658</td>
 <td>1.625</td>
 <td>-0.818</td>
 <td>4.752</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[video, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[video, comp.graphics]</th>
 <td>1.658</td>
 <td>1.671</td>
 <td>-0.859</td>
 <td>4.992</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[card, comp.graphics]</td>
+<th data-quarto-table-cell-role="th">coefs_T[card, comp.graphics]</th>
 <td>1.596</td>
 <td>1.644</td>
 <td>-0.863</td>
@@ -1560,7 +1563,7 @@ Table&nbsp;5: Most influencial words for class comp.graphics - Structured Covari
 </div>
 </div>
 <div class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cor_summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">med</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>cor_summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">med</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-cov-scimed" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="22">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cov-scimed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1571,7 +1574,7 @@ Table&nbsp;6: Most influencial words for class sci.med - Structured Covariance M
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1583,70 +1586,70 @@ Table&nbsp;6: Most influencial words for class sci.med - Structured Covariance M
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[doctor, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[doctor, sci.med]</th>
 <td>1.684</td>
 <td>1.482</td>
 <td>-0.646</td>
 <td>4.573</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[pitt, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[pitt, sci.med]</th>
 <td>1.586</td>
 <td>1.469</td>
 <td>-0.584</td>
 <td>4.579</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[disease, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[disease, sci.med]</th>
 <td>1.457</td>
 <td>1.565</td>
 <td>-0.601</td>
 <td>4.513</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[msg, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[msg, sci.med]</th>
 <td>1.355</td>
 <td>1.426</td>
 <td>-0.820</td>
 <td>4.245</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[health, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[health, sci.med]</th>
 <td>1.343</td>
 <td>1.517</td>
 <td>-0.901</td>
 <td>4.404</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[treatment, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[treatment, sci.med]</th>
 <td>1.308</td>
 <td>1.397</td>
 <td>-0.808</td>
 <td>4.234</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[medical, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[medical, sci.med]</th>
 <td>1.303</td>
 <td>1.433</td>
 <td>-0.784</td>
 <td>4.233</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[she, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[she, sci.med]</th>
 <td>1.251</td>
 <td>1.379</td>
 <td>-0.809</td>
 <td>4.101</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[banks, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[banks, sci.med]</th>
 <td>1.196</td>
 <td>1.445</td>
 <td>-0.995</td>
 <td>4.186</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[geb, sci.med]</td>
+<th data-quarto-table-cell-role="th">coefs_T[geb, sci.med]</th>
 <td>1.170</td>
 <td>1.406</td>
 <td>-0.897</td>
@@ -1662,7 +1665,7 @@ Table&nbsp;6: Most influencial words for class sci.med - Structured Covariance M
 </div>
 </div>
 <div class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cor_summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">space</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>cor_summary_df.<span class="bu">filter</span>(regex<span class="op">=</span><span class="vs">r"</span><span class="fu">(?i)</span><span class="vs">sci</span><span class="dv">.</span><span class="vs">space</span><span class="ch">\]</span><span class="dv">$</span><span class="vs">"</span>, axis<span class="op">=</span><span class="st">'index'</span>).sort_values(<span class="st">"mean"</span>, ascending<span class="op">=</span><span class="va">False</span>).head(<span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-cov-scispace" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="23">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cov-scispace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1673,7 +1676,7 @@ Table&nbsp;7: Most influencial words for class sci.space - Structured Covariance
 <div>
 
 
-<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1685,70 +1688,70 @@ Table&nbsp;7: Most influencial words for class sci.space - Structured Covariance
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[space, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[space, sci.space]</th>
 <td>3.200</td>
 <td>2.602</td>
 <td>-0.243</td>
 <td>7.963</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[orbit, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[orbit, sci.space]</th>
 <td>1.657</td>
 <td>1.632</td>
 <td>-0.514</td>
 <td>4.835</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[nasa, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[nasa, sci.space]</th>
 <td>1.480</td>
 <td>1.497</td>
 <td>-0.514</td>
 <td>4.473</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[moon, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[moon, sci.space]</th>
 <td>1.367</td>
 <td>1.486</td>
 <td>-0.517</td>
 <td>4.470</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[shuttle, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[shuttle, sci.space]</th>
 <td>1.227</td>
 <td>1.428</td>
 <td>-0.866</td>
 <td>4.140</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[launch, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[launch, sci.space]</th>
 <td>1.199</td>
 <td>1.426</td>
 <td>-0.885</td>
 <td>4.083</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[pat, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[pat, sci.space]</th>
 <td>1.196</td>
 <td>1.386</td>
 <td>-0.787</td>
 <td>3.967</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[digex, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[digex, sci.space]</th>
 <td>1.056</td>
 <td>1.335</td>
 <td>-0.873</td>
 <td>3.982</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">coefs_T[henry, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[henry, sci.space]</th>
 <td>1.041</td>
 <td>1.312</td>
 <td>-0.935</td>
 <td>3.683</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">coefs_T[earth, sci.space]</td>
+<th data-quarto-table-cell-role="th">coefs_T[earth, sci.space]</th>
 <td>1.011</td>
 <td>1.352</td>
 <td>-1.093</td>
@@ -1766,8 +1769,8 @@ Table&nbsp;7: Most influencial words for class sci.space - Structured Covariance
 <p>Let’s inspect the same feature for the same two classes that we did earlier to check whether our structured covariance has appropriately delt with IIA.</p>
 <p>Looking at the plot below, we certainly see positive correlation between the two class weights for the “space” feature!</p>
 <div id="82ec0837" class="cell light-mode" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8'</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>az.plot_pair(correlated_idata, var_names<span class="op">=</span>[<span class="st">'coefs_T'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'seaborn-v0_8'</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>az.plot_pair(correlated_idata, var_names<span class="op">=</span>[<span class="st">'coefs_T'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1778,8 +1781,8 @@ Table&nbsp;7: Most influencial words for class sci.space - Structured Covariance
 </div>
 </div>
 <div id="31fd23a3" class="cell dark-mode" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'dark_background'</span>)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>az.plot_pair(correlated_idata, var_names<span class="op">=</span>[<span class="st">'coefs_T'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'dark_background'</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>az.plot_pair(correlated_idata, var_names<span class="op">=</span>[<span class="st">'coefs_T'</span>], coords<span class="op">=</span>{<span class="st">"classes"</span>: [<span class="st">'comp.graphics'</span>, <span class="st">'sci.med'</span>], <span class="st">"features"</span>: [<span class="st">'space'</span>]})<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1792,7 +1795,7 @@ Table&nbsp;7: Most influencial words for class sci.space - Structured Covariance
 <p>Now let’s generate out-of-sample predictions and evaluate our <code>f1-scores</code> to see if we have any differences from the previous “vanilla” model.</p>
 <p>Looking at the <code>f1-scores</code>, seems like we have a slight improvement due to the additional information captured by the dependecies across the classes.</p>
 <div id="e29410ee" class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> sparse_correlated_model:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> sparse_correlated_model:</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    pm.set_data(</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>        new_data<span class="op">=</span>{</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"X"</span>: X_test_sparse, </span>
@@ -1802,13 +1805,13 @@ Table&nbsp;7: Most influencial words for class sci.space - Structured Covariance
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"num_obs"</span>: np.arange(<span class="bu">len</span>(y_test))</span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        }</span>
 <span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    correlated_idata_posterior <span class="op">=</span> pm.sample_posterior_predictive(correlated_idata, predictions<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    correlated_idata_posterior <span class="op">=</span> pm.sample_posterior_predictive(correlated_idata, predictions<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div id="bd946828" class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>correlated_idata_posterior[<span class="st">'posterior_predictive'</span>] <span class="op">=</span> correlated_idata_posterior.predictions</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>correlated_idata_posterior[<span class="st">'posterior_predictive'</span>] <span class="op">=</span> correlated_idata_posterior.predictions</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>correlated_idata_posterior[<span class="st">'observed_data'</span>] <span class="op">=</span> xr.Dataset({<span class="st">"y_obs"</span>: xr.DataArray(y_test)})</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>correlated_y_pred <span class="op">=</span> stats.mode(az.extract(correlated_idata_posterior, group<span class="op">=</span><span class="st">"predictions"</span>, var_names<span class="op">=</span><span class="st">"y_obs"</span>).values, axis<span class="op">=</span><span class="dv">1</span>).mode</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_true<span class="op">=</span>y_test, y_pred<span class="op">=</span>correlated_y_pred))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_true<span class="op">=</span>y_test, y_pred<span class="op">=</span>correlated_y_pred))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              precision    recall  f1-score   support
 
@@ -1827,7 +1830,7 @@ weighted avg       0.94      0.94      0.94      1179
 <p>My speculation for why these classes are more challenging to discriminate may be due to polysemous words that can be found in both domains.</p>
 <p>For example, words like “screen” in computer graphics can obviously mean the computer screen whereas in medicine it can mean to screen for a disease or condition. Another one I can think of may be the word “virus” where in computer graphics could be referring to a malicous attack versus in medicine which I guess also refers to a malicious attack but you understand what I am saying here.</p>
 <div id="1d1f45a7" class="cell light-mode" data-execution_count="28">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>fig.add_traces(</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    [</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>        go.Heatmap(</span>
@@ -1843,7 +1846,7 @@ weighted avg       0.94      0.94      0.94      1179
 <span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>fig.update_layout(</span>
 <span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    xaxis<span class="op">=</span><span class="bu">dict</span>(title<span class="op">=</span><span class="st">"Actual Class"</span>),</span>
 <span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    yaxis<span class="op">=</span><span class="bu">dict</span>(autorange<span class="op">=</span><span class="st">'reversed'</span>, title <span class="op">=</span> <span class="st">"Predicted Class"</span>)</span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>                            <div id="13c0f850-59ea-4e30-8bf1-5ac0d134ceb9" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                require(["plotly"], function(Plotly) {                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("13c0f850-59ea-4e30-8bf1-5ac0d134ceb9")) {                    Plotly.newPlot(                        "13c0f850-59ea-4e30-8bf1-5ac0d134ceb9",                        [{"colorscale":[[0.0,"rgb(103,0,31)"],[0.1,"rgb(178,24,43)"],[0.2,"rgb(214,96,77)"],[0.3,"rgb(244,165,130)"],[0.4,"rgb(253,219,199)"],[0.5,"rgb(247,247,247)"],[0.6,"rgb(209,229,240)"],[0.7,"rgb(146,197,222)"],[0.8,"rgb(67,147,195)"],[0.9,"rgb(33,102,172)"],[1.0,"rgb(5,48,97)"]],"text":[[375,8,6],[27,364,5],[12,9,373]],"texttemplate":"%{text}","x":["comp.graphics","sci.med","sci.space"],"y":["comp.graphics","sci.med","sci.space"],"z":[[375,8,6],[27,364,5],[12,9,373]],"type":"heatmap"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"},"margin":{"b":0,"l":0,"r":0,"t":30}}},"yaxis":{"autorange":"reversed","title":{"text":"Predicted Class"}},"xaxis":{"title":{"text":"Actual Class"}}},                        {"responsive": true}                    ).then(function(){
                             
@@ -1874,7 +1877,7 @@ if (outputEl) {{
 </div>
 </div>
 <div id="192a9888" class="cell dark-mode" data-execution_count="29">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> go.Figure()</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>fig.add_traces(</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    [</span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        go.Heatmap(</span>
@@ -1897,7 +1900,7 @@ if (outputEl) {{
 <span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>        size<span class="op">=</span><span class="dv">12</span>,</span>
 <span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"white"</span></span>
 <span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>                            <div id="49263058-bce3-486a-ab2b-50e6cd4312cd" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                require(["plotly"], function(Plotly) {                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("49263058-bce3-486a-ab2b-50e6cd4312cd")) {                    Plotly.newPlot(                        "49263058-bce3-486a-ab2b-50e6cd4312cd",                        [{"colorscale":[[0.0,"rgb(103,0,31)"],[0.1,"rgb(178,24,43)"],[0.2,"rgb(214,96,77)"],[0.3,"rgb(244,165,130)"],[0.4,"rgb(253,219,199)"],[0.5,"rgb(247,247,247)"],[0.6,"rgb(209,229,240)"],[0.7,"rgb(146,197,222)"],[0.8,"rgb(67,147,195)"],[0.9,"rgb(33,102,172)"],[1.0,"rgb(5,48,97)"]],"text":[[375,8,6],[27,364,5],[12,9,373]],"texttemplate":"%{text}","x":["comp.graphics","sci.med","sci.space"],"y":["comp.graphics","sci.med","sci.space"],"z":[[375,8,6],[27,364,5],[12,9,373]],"type":"heatmap"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"},"margin":{"b":0,"l":0,"r":0,"t":30}}},"xaxis":{"title":{"text":"Actual Class"},"gridcolor":"rgba(68, 68, 68, 0.5)"},"yaxis":{"autorange":"reversed","title":{"text":"Predicted Class"},"gridcolor":"rgba(68, 68, 68, 0.5)"},"font":{"family":"Verdana","size":12,"color":"white"},"plot_bgcolor":"black","paper_bgcolor":"rgba(68, 68, 68, 0.5)"},                        {"responsive": true}                    ).then(function(){
                             

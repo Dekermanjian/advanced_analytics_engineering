@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.21">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -69,18 +69,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-629432c7d29b615b3888e3cdfd62b7a9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-11cbd3234f06388db87dcfbb7d560d62.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-629432c7d29b615b3888e3cdfd62b7a9.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e3031b2b07293ce5c0b259fcee51fff1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-a48ca002f196e9d794e386cf5960d24c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e3031b2b07293ce5c0b259fcee51fff1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-2ff84ce94f2e7fd20006061312b133c1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-241c542bec84a94dd796906e9232f61d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-2ff84ce94f2e7fd20006061312b133c1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2e339959b90c1d7f19a047c108ed48c7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-fe8157ccd301de198fc9a74faafbbac0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2e339959b90c1d7f19a047c108ed48c7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -151,7 +152,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -340,6 +341,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Advanced Analytics &amp; Engineering</span>
     </a>
@@ -478,7 +481,7 @@ window.Quarto = {
 <section id="getting-started" class="level1">
 <h1>Getting Started</h1>
 <p>To start we need to install some additional dependencies into our environment that we created in the previous post. <code>PyMC</code> is easier to install using <code>conda</code> because there are some non-Python dependencies like a <code>C++</code> compiler that <code>conda</code> is able to resolve for you. So let’s switch from using <code>pip</code> for our project package manager to using <code>conda</code> by redefining our <code>requirements.txt</code> file into an <code>environment.yml</code> file.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ./environment.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ./environment.yml</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> my_environment_name</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">channels</span><span class="kw">:</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> conda-forge</span></span>
@@ -501,15 +504,15 @@ window.Quarto = {
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> plotly~=5.24.0</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> openpyxl~=3.1.0</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> kedro-docker~=0.6.2</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> pymc-extras==0.2.3</span><span class="co"> # Added new dependency</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> pymc-extras==0.2.3</span><span class="co"> # Added new dependency</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Notice that we are installing <code>PyMC</code> a probabilistic programming language that will allow us to define our Bayesian time-series model, <code>numpyro</code> which provides a <code>Jax</code> backend for sampling speed-ups compared to the native sampler, and <code>pymc-extras</code> which contains the <code>ModelBuilder</code> class that we will use as a scaffolding around our model.</p>
 <p>You can create this environment using <code>conda</code> at the command-line:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env create <span class="at">-f</span> environment.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env create <span class="at">-f</span> environment.yml</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="creating-an-ml-pipeline" class="level1">
 <h1>Creating an ML Pipeline</h1>
 <p>We need to create a new Kedro pipeline that will contain all of our code related to machine learning.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> pipeline create ML</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> pipeline create ML</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Great! Now similary to how we defined our nodes in our data processing pipeline we will do the same for our ML pipeline. We are going to need to create nodes that do the following:</p>
 <ul>
 <li>split our training data into train and test portions</li>
@@ -523,7 +526,7 @@ window.Quarto = {
 <section id="train-test-split" class="level2">
 <h2 class="anchored" data-anchor-id="train-test-split">Train-Test Split</h2>
 <p>Let’s define how we are going split our dataset so that we can evaluate our model’s performance later. If you recall, we are dealing with time-series data across twelve Brazilian cities. Our interest is in forecasting the average monthly temperatures of these cities. Looking at the data you will notice that different cities started collecting data at different time points but the last measurement of October 2019 is shared by all cities (even if the measurement is missing). So, let’s hold out one year of data (12 measurements) for each city to be our test set.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/nodes.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/nodes.py</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_test_split(data: pl.DataFrame, testing_window: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[pl.DataFrame, pl.DataFrame]:</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Splits time-series dataset into test and train splits</span></span>
@@ -555,10 +558,10 @@ window.Quarto = {
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        .sort(<span class="st">"city"</span>, <span class="st">"date"</span>)</span>
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> training_dataset, testing_dataset</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> training_dataset, testing_dataset</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Our <code>train_test_split()</code> function takes a parameter defining the testing set window size. This is a configuration that you may want to change in the future. Kedro generates configuration files for every pipeline that you created and that is where we will put all of our configuration parameters. Let’s define our testing_window parameter now.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/conf/base/parameters_ML.yml</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">testing_window</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/conf/base/parameters_ML.yml</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">testing_window</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="bayesian-structural-time-series" class="level2">
 <h2 class="anchored" data-anchor-id="bayesian-structural-time-series">Bayesian Structural Time Series</h2>
@@ -570,7 +573,7 @@ window.Quarto = {
 <p><span class="math display">\[ temperature \sim N(\mu, \sigma) \]</span> <span class="math display">\[ \mu = f(x) + \beta_{fourier}X_{fourier\_terms} \]</span> <span class="math display">\[ f(x) \sim GP(0, K(x, x'; \eta, \ell)) \]</span> <span class="math display">\[ \beta_{fourier} \sim N(0, 0.5) \]</span> <span class="math display">\[ \eta \sim HalfNormal(1.0) \]</span> <span class="math display">\[ \ell \sim Gamma(48, 2) \]</span> <span class="math display">\[ \sigma \sim HalfNormal(0.2) \]</span></p>
 <p>Where our Gaussian Process covariance matrix <span class="math inline">\(K\)</span> uses the <code>Exponentiated Quadratic</code> kernel. <span class="math display">\[ K(x, x') = exp[-\frac{(x - x')^{2}}{2\ell^{2}}] \]</span></p>
 <p>In <code>PyMC</code> this would look like this:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model() <span class="im">as</span> model:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model() <span class="im">as</span> model:</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    model.add_coord(<span class="st">"obs_id"</span>, train_time_range)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    model.add_coord(</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"fourier_features"</span>,</span>
@@ -613,14 +616,14 @@ window.Quarto = {
 <span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        sigma<span class="op">=</span>error,</span>
 <span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        observed<span class="op">=</span>temperature_normalized,</span>
 <span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>        dims<span class="op">=</span><span class="st">"obs_id"</span>,</span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>At this point we could pass in the expected data (time_range, fourier_terms, and temperature_normalized) for a city and train the time-series. However, there would be less back-tracking if we go ahead and define our model along with the necessary processing of the inputs, the method for generating forecasts, and the methods for saving and loading our trained model.</p>
 </section>
 <section id="configuring-modelbuilder" class="level2">
 <h2 class="anchored" data-anchor-id="configuring-modelbuilder">Configuring ModelBuilder</h2>
 <p>The <code>ModelBuilder</code> class from the <code>pymc-extras</code> package gives us a nice scaffolding that facilitates taking <code>PyMC</code> models into production. There are seven required methods that we need to define inside of our model class that inherits from <code>ModelBuilder</code>. However, it is often the case that we need to override some default methods in accordance to our modeling needs. Let’s go over the required methods first.</p>
 <p>We need to implement <code>_generate_and_preprocess_model_data()</code> which is a method that performs our final processing of the data before it is fed into the model. In our case, we normalize the data and define our fourier features to capture yearly (12 months) seasonality.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Method Implementation</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Method Implementation</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _generate_and_preprocess_model_data(<span class="va">self</span>, X: pl.DataFrame, y: pl.Series, normalize: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>):</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Last mile data processing of inputs expected by the model</span></span>
@@ -647,7 +650,7 @@ window.Quarto = {
 <span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_std <span class="op">=</span> np.nanstd(y)</span>
 <span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_normalized <span class="op">=</span> (y <span class="op">-</span> <span class="va">self</span>.y_mean) <span class="op">/</span> <span class="va">self</span>.y_std</span>
 <span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_normalized <span class="op">=</span> y</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_normalized <span class="op">=</span> y</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-caution callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -662,7 +665,7 @@ Caution
 </div>
 </div>
 <p>Next we need to define how we are going to feed new data to our model when we are ready to make forecasts. Since we are building a time-series model with no exogenous predictor variables, we only need to define how far out into the future we want to generate forecasts.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Method Implementation</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Method Implementation</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _data_setter(<span class="va">self</span>, n_ahead: <span class="bu">int</span>):</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Generates required data for producing forecasts</span></span>
@@ -682,9 +685,9 @@ Caution
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> order <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="va">self</span>.n_modes <span class="op">+</span> <span class="dv">1</span>)</span>
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> func <span class="kw">in</span> (<span class="st">"sin"</span>, <span class="st">"cos"</span>)</span>
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Certainly we will need to define how to build our model by using the <code>build_model()</code> method. You’ll notice that we call our previously defined method <code>_generate_and_preprocess_model_data()</code> here.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Method Implementation</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Method Implementation</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> build_model(<span class="va">self</span>, X: pl.DataFrame, y: pl.Series, normalize_target: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>, <span class="op">**</span>kwargs):</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Defines the PyMC model structure</span></span>
@@ -739,9 +742,9 @@ Caution
 <span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>            sigma<span class="op">=</span>error,</span>
 <span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>            observed<span class="op">=</span><span class="va">self</span>.y_normalized,</span>
 <span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>            dims<span class="op">=</span><span class="st">"obs_id"</span>,</span>
-<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>            )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>            )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Finally, the last three required methods are all methods that define configurations for our model. As we mentioned earlier, all configurations should be handled by <code>Kedro</code> in our projects’ <code>conf/</code> directory. So we are going to return empty dicts as our default configurations.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Methods Implementations</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Required Methods Implementations</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="at">@staticmethod</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_default_model_config() <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    model_config <span class="op">=</span> {}</span>
@@ -766,9 +769,9 @@ Caution
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="co">    Only needs to be implemented if your model configurations contain unserializable objects.</span></span>
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="co">    You need to convert the non-serializable objects to serializable ones here.</span></span>
 <span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.model_config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.model_config</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Let’s go ahead and define our model and sampler configurations in the <code>parameters_ML.yml</code> file.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/conf/base/parameters_ML.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/conf/base/parameters_ML.yml</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">testing_window</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">model_config</span><span class="kw">:</span></span>
@@ -785,11 +788,11 @@ Caution
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">draws</span><span class="kw">:</span><span class="at"> </span><span class="dv">1000</span></span>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tune</span><span class="kw">:</span><span class="at"> </span><span class="dv">1000</span></span>
 <span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">chains</span><span class="kw">:</span><span class="at"> </span><span class="dv">4</span></span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">target_accept</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.95</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">target_accept</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.95</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Our model configurations contain the priors that we defined for our model above. Whereas, the sampler configurations define parameters related to our MCMC sampler.</p>
 <p>With the required <code>ModelBuilder</code> methods out of the way, let’s talk about some of the methods that we will override to accomodate our specific use case.</p>
 <p>First, since we are using a time-series model our predictions are generated differently than how you’d generate predictions from a typical regression or classification task. So we need to make changes to the <code>sample_posterior_predictive()</code> method to accomdate a time-series model. We take the approach of defining a new model specifically for forecasting purposes. Notice that we are calling <code>_data_setter()</code> to generate our future model input, which is our forecast horizon.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Override method</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Override method</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_posterior_predictive(<span class="va">self</span>, n_ahead: <span class="bu">int</span>, extend_idata: <span class="bu">bool</span>, combined: <span class="bu">bool</span>, <span class="op">**</span>kwargs):</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>._data_setter(n_ahead)</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -869,9 +872,9 @@ Caution
 <span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a>        post_pred, <span class="st">"predictions"</span>, combined<span class="op">=</span>combined</span>
 <span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> posterior_predictive_samples</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> posterior_predictive_samples</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We also need to update the <code>fit()</code> method for a couple of reasons. The first is because we implemented a <code>normalize_target</code> method and we need to propogate that into the <code>fit()</code> method which calls our <code>build_model()</code> method. Second, because the defualt <code>fit()</code> method defines additional sampler configurations that we don’t want because we have already centralized all of our configurations to be handled by <code>Kedro</code>.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Override method</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder Override method</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit(<span class="va">self</span>, X: pl.DataFrame, y: pl.Series, normalize_target: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>) <span class="op">-&gt;</span> az.InferenceData:</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Fits the model to the provided dataset</span></span>
@@ -895,9 +898,9 @@ Caution
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.idata.add_groups(fit_data<span class="op">=</span>combined_data.to_xarray())</span>
 <span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.idata</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.idata</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Lastly (I promise), we need to define a new method that will handle our model evaluations. We are going to use the root mean squared error as a metric to evaluate our model. We will also measure the coverage of our 80% Highest Density Interval (HDI). Additionally, it is a good idea to include in our model serialization the city the model is fitted to, and if we are standardizing the data then we should also include the mean and standard deviation of our target temperature values.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder override Init</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ModelBuilder override Init</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">__init__</span>(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        model_config: <span class="bu">dict</span> <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span>,</span>
@@ -990,9 +993,9 @@ Caution
 <span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
 <span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>    idata.attrs[<span class="st">"city"</span>] <span class="op">=</span> <span class="va">self</span>.city</span>
 <span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a>    idata.attrs[<span class="st">"y_mean"</span>] <span class="op">=</span> <span class="va">self</span>.y_mean</span>
-<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>    idata.attrs[<span class="st">"y_std"</span>] <span class="op">=</span> <span class="va">self</span>.y_std</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>    idata.attrs[<span class="st">"y_std"</span>] <span class="op">=</span> <span class="va">self</span>.y_std</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Combining everything together we have our time-series model implemented as:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/ts_model.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/ts_model.py</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> abc <span class="im">import</span> abstractmethod</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1355,12 +1358,12 @@ Caution
 <span id="cb15-361"><a href="#cb15-361" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
 <span id="cb15-362"><a href="#cb15-362" aria-hidden="true" tabindex="-1"></a>        idata.attrs[<span class="st">"city"</span>] <span class="op">=</span> <span class="va">self</span>.city</span>
 <span id="cb15-363"><a href="#cb15-363" aria-hidden="true" tabindex="-1"></a>        idata.attrs[<span class="st">"y_mean"</span>] <span class="op">=</span> <span class="va">self</span>.y_mean</span>
-<span id="cb15-364"><a href="#cb15-364" aria-hidden="true" tabindex="-1"></a>        idata.attrs[<span class="st">"y_std"</span>] <span class="op">=</span> <span class="va">self</span>.y_std</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-364"><a href="#cb15-364" aria-hidden="true" tabindex="-1"></a>        idata.attrs[<span class="st">"y_std"</span>] <span class="op">=</span> <span class="va">self</span>.y_std</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="training-node" class="level2">
 <h2 class="anchored" data-anchor-id="training-node">Training Node</h2>
 <p>Now that we have our model configured with <code>ModelBuilder</code> it is time to define our training node:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/src/climate_brazil/pipelines/ML/nodes.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#/src/climate_brazil/pipelines/ML/nodes.py</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(training_dataset: pl.DataFrame, model_config: <span class="bu">dict</span>, sampler_config: <span class="bu">dict</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Train time-series models</span></span>
@@ -1377,7 +1380,7 @@ Caution
 <span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        model.fit(X<span class="op">=</span>city_dataset[<span class="st">'date'</span>], y<span class="op">=</span>city_dataset[<span class="st">'temperature'</span>], normalize_target<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>        city_models[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>] <span class="op">=</span> model</span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> city_models</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> city_models</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1395,7 +1398,7 @@ Important
 <section id="creating-a-custom-kedro-dataset" class="level3">
 <h3 class="anchored" data-anchor-id="creating-a-custom-kedro-dataset">Creating a Custom Kedro Dataset</h3>
 <p>Creating a custom dataset can be quite simple. All we need to do is inheret from <code>Kedro</code>’s <code>AbstractDataset</code> and define the <code>init</code>, <code>save</code>, <code>load</code>, and <code>describe</code> methods. In our case, the <code>ModelBuilder</code> class has <code>save</code> and <code>load</code> methods that accept a filepath and we will use those methods in our custom dataset:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/datasets/pymc_model_dataset.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/datasets/pymc_model_dataset.py</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path, PurePosixPath</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1434,12 +1437,12 @@ Important
 <span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _describe(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">str</span>, Any]:</span>
 <span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Returns a dict that describes the attributes of the dataset."""</span></span>
-<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">dict</span>(filepath<span class="op">=</span><span class="va">self</span>._filepath)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">dict</span>(filepath<span class="op">=</span><span class="va">self</span>._filepath)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="train-catalog-entry" class="level3">
 <h3 class="anchored" data-anchor-id="train-catalog-entry">Train Catalog Entry</h3>
 <p>With our custom dataset defined let’s define entries for our training and testing data as well as for our trained models.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># conf/base/catalog.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># conf/base/catalog.yml</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw data ---------------------------------------</span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cities_temperatures</span><span class="kw">:</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> partitions.PartitionedDataset</span></span>
@@ -1516,7 +1519,7 @@ Important
 <span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a><span class="fu">Vitoria_model</span><span class="kw">:</span></span>
 <span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> climate_brazil.datasets.pymc_model_dataset.PyMCModelDataset</span></span>
-<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">filepath</span><span class="kw">:</span><span class="at"> data/06_models/Vitoria_model.nc</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">filepath</span><span class="kw">:</span><span class="at"> data/06_models/Vitoria_model.nc</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1535,7 +1538,7 @@ Note
 <section id="forecasting-node" class="level2">
 <h2 class="anchored" data-anchor-id="forecasting-node">Forecasting Node</h2>
 <p>Finally, we need to define how to generate our forecasts. We would like our forecasting node to have the ability to perform evaluations if we pass in the testing dataset as an argument and for the moment we just want to log out our evaluation metrics to stdout.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/datasets/pymc_forecast_dataset.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/datasets/pymc_forecast_dataset.py</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forecast(model: TSModel, n_ahead: <span class="bu">int</span>, ground_truth: Optional[pl.DataFrame] <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> xr.Dataset:</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Generates forecasts from trained time-series and produces evaluations if ground truth is passed in.</span></span>
@@ -1549,9 +1552,9 @@ Note
 <span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ground_truth <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        evaluations <span class="op">=</span> model.evaluate(y_true<span class="op">=</span>ground_truth.<span class="bu">filter</span>(pl.col(<span class="st">"city"</span>)<span class="op">==</span>model.idata.attrs[<span class="st">'city'</span>])[<span class="st">"temperature"</span>], forecasts<span class="op">=</span>forecasts, back_transform<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="ss">f"</span><span class="sc">{</span>model<span class="sc">.</span>idata<span class="sc">.</span>attrs[<span class="st">'city'</span>]<span class="sc">}</span><span class="ss"> Evaluations: </span><span class="sc">{</span>evaluations<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> forecasts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> forecasts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Notice that we need to pass in an <code>n_ahead</code> parameter that defines the forecast horizon. Now is a good time to add that parameter into <code>/conf/base/parameters_ML.yml</code></p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">testing_window</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">testing_window</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">n_ahead</span><span class="kw">:</span><span class="at"> </span><span class="dv">12</span></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="fu">model_config</span><span class="kw">:</span></span>
@@ -1569,9 +1572,9 @@ Note
 <span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tune</span><span class="kw">:</span><span class="at"> </span><span class="dv">1000</span></span>
 <span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">chains</span><span class="kw">:</span><span class="at"> </span><span class="dv">4</span></span>
 <span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">target_accept</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.95</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mp_ctx</span><span class="kw">:</span><span class="at"> spawn</span><span class="co"> # might need this if you are running on MacOS</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mp_ctx</span><span class="kw">:</span><span class="at"> spawn</span><span class="co"> # might need this if you are running on MacOS</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Our forecast output will be an <code>xarray</code> dataset and we will go ahead and save that to disk in <code>NETCDF</code> format. Once again, we will create a custom <code>Kedro</code> dataset for that.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/datasets/pymc_forecast_dataset.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/datasets/pymc_forecast_dataset.py</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path, PurePosixPath</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1608,7 +1611,7 @@ Note
 <span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _describe(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">dict</span>[<span class="bu">str</span>, Any]:</span>
 <span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Returns a dict that describes the attributes of the dataset."""</span></span>
-<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">dict</span>(filepath<span class="op">=</span><span class="va">self</span>._filepath)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">dict</span>(filepath<span class="op">=</span><span class="va">self</span>._filepath)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 <section id="defining-the-ml-pipeline" class="level1">
@@ -1617,7 +1620,7 @@ Note
 <section id="train" class="level2">
 <h2 class="anchored" data-anchor-id="train">Train</h2>
 <p>Here we are going to introduce <code>tags</code>, another <code>Kedro</code> feature that allows you to run specific nodes by tag category. At this stage our pipeline will be the training split node followed by the training node.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/pipeline.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/pipeline.py</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline <span class="im">import</span> node, Pipeline, pipeline  <span class="co"># noqa</span></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> .nodes <span class="im">import</span> train_test_split, train, forecast</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1657,7 +1660,7 @@ Note
 <span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span><span class="st">"train"</span>,</span>
 <span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>            tags<span class="op">=</span>[<span class="st">"train"</span>]</span>
 <span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>    ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>    ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-caution callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1675,7 +1678,7 @@ Caution
 <section id="forecast" class="level2">
 <h2 class="anchored" data-anchor-id="forecast">Forecast</h2>
 <p>This is where we are going to leverage the flexibility of <code>tags</code>. We are going to create two sub-pipelines for our forecasts. The first sub-pipeline will be for training purposes, this is when we have ground-truth data to pass in for evaluations. The second will be when we are using our time-series model in production and we do not have the ground-truth available. Our full ML pipeline will look like this:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/pipeline.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/pipelines/ML/pipeline.py</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.pipeline <span class="im">import</span> node, Pipeline, pipeline  <span class="co"># noqa</span></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> .nodes <span class="im">import</span> train_test_split, train, forecast</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -1748,12 +1751,12 @@ Caution
 <span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> city <span class="kw">in</span> cities</span>
 <span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pipeline(split_train_nodes <span class="op">+</span> forecast_training_nodes <span class="op">+</span> forecast_nodes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pipeline(split_train_nodes <span class="op">+</span> forecast_training_nodes <span class="op">+</span> forecast_nodes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="defining-custom-pipelines" class="level2">
 <h2 class="anchored" data-anchor-id="defining-custom-pipelines">Defining Custom Pipelines</h2>
 <p>Previously, we let <code>Kedro</code> automatically register our pipelines based on the project pipelines we created. However, we now have sub-pipelines that we would like to define based on our tags. We can do so in <code>src/climate_brazil/pipeline_registry.py</code>:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#src/climate_brazil/pipeline_registry.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">#src/climate_brazil/pipeline_registry.py</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">"""Project pipelines."""</span></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.project <span class="im">import</span> find_pipelines</span>
@@ -1778,7 +1781,7 @@ Caution
 <span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">"train"</span>: dp_pipeline <span class="op">+</span> training_pipeline,</span>
 <span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">"forecast"</span>: forecast_pipeline,</span>
 <span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">"__default__"</span>: dp_pipeline <span class="op">+</span> training_pipeline</span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Notice how we broke down our ML pipeline into two sub-pipelines. Also, notice how we defined the train pipeline to consist of both the data processing pipeline and the training pipeline. We also assigned the train pipeline to be the default pipeline. This means if we execute <code>kedro run</code> without specifying a specific pipeline it will run the train pipeline.</p>
 </section>
 </section>
@@ -1787,20 +1790,20 @@ Caution
 <section id="training-pipeline" class="level2">
 <h2 class="anchored" data-anchor-id="training-pipeline">Training Pipeline</h2>
 <p>You can execute your training pipeline by either executing</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>or</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run <span class="at">--pipeline</span> train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run <span class="at">--pipeline</span> train</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Let’s go ahead and run one of the above to train the model and generate forecasts on the test set with evaluations.</p>
 </section>
 <section id="forecasting-pipeline" class="level2">
 <h2 class="anchored" data-anchor-id="forecasting-pipeline">Forecasting pipeline</h2>
 <p>If you already have a trained model and you don’t have the ground truth for evaluations you can execute</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run <span class="at">--pipeline</span> forecast</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run <span class="at">--pipeline</span> forecast</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="visualizing-forecasts" class="level2">
 <h2 class="anchored" data-anchor-id="visualizing-forecasts">Visualizing Forecasts</h2>
 <p>We’ve seen our evaluation metrics logged to stdout, which by the way is written to <code>/info.log</code>, let’s also look at our fitted model and forecasts against the actual data. To do that let’s add a node that will handle generating these plots in our pipeline.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forecast_plot(training_dataset: pl.DataFrame, testing_dataset: pl.DataFrame, model: TSModel, forecast: xr.Dataset) <span class="op">-&gt;</span> go.Figure:</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forecast_plot(training_dataset: pl.DataFrame, testing_dataset: pl.DataFrame, model: TSModel, forecast: xr.Dataset) <span class="op">-&gt;</span> go.Figure:</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Generates plot showing in-sample posterior predictive performance as well as out-of-sample forecasts</span></span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co">    ---</span></span>
@@ -1931,14 +1934,14 @@ Caution
 <span id="cb28-129"><a href="#cb28-129" aria-hidden="true" tabindex="-1"></a>            title<span class="op">=</span><span class="st">"Temperature"</span></span>
 <span id="cb28-130"><a href="#cb28-130" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb28-131"><a href="#cb28-131" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb28-132"><a href="#cb28-132" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-132"><a href="#cb28-132" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fig</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Let’s make sure we define the outputs from our node so that we persist the figures to disk.</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Forecast plots: This is a dataset factory that will save all of our figures</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Forecast plots: This is a dataset factory that will save all of our figures</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">"{city}_plot"</span><span class="kw">:</span></span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">type</span><span class="kw">:</span><span class="at"> plotly.JSONDataset</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">filepath</span><span class="kw">:</span><span class="at"> data/08_reporting/{city}_plot.json</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">filepath</span><span class="kw">:</span><span class="at"> data/08_reporting/{city}_plot.json</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Next, we add the node to our pipeline.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add to /src/climate_brazil/pipelines/ML/pipeline.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add to /src/climate_brazil/pipelines/ML/pipeline.py</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>plot_node <span class="op">=</span> [</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    node(</span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        func<span class="op">=</span>forecast_plot,</span>
@@ -1960,9 +1963,9 @@ Caution
 <span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> forecast_training_nodes </span>
 <span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> forecast_nodes </span>
 <span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> plot_node</span>
-<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Great! Now, let’s only execute our <code>forecast_plot</code> node since we’ve already ran the pipeline that generates our models and forecasts.</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run <span class="at">--nodes</span> forecast_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kedro</span> run <span class="at">--nodes</span> forecast_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>That will generate the following figures:</p>
 <!-- Force plotly to recompute layout if a new panel tab is active -->
 <script type="text/javascript" charset="utf-8">

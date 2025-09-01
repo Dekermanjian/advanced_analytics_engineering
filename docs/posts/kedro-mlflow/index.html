@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.21">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -69,18 +69,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="../../">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-629432c7d29b615b3888e3cdfd62b7a9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-11cbd3234f06388db87dcfbb7d560d62.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-629432c7d29b615b3888e3cdfd62b7a9.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e3031b2b07293ce5c0b259fcee51fff1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-a48ca002f196e9d794e386cf5960d24c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e3031b2b07293ce5c0b259fcee51fff1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-2ff84ce94f2e7fd20006061312b133c1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-241c542bec84a94dd796906e9232f61d.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-2ff84ce94f2e7fd20006061312b133c1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2e339959b90c1d7f19a047c108ed48c7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-fe8157ccd301de198fc9a74faafbbac0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2e339959b90c1d7f19a047c108ed48c7.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -292,6 +293,8 @@ gtag('config', 'G-36QNMRMV1B', { 'anonymize_ip': true});
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Advanced Analytics &amp; Engineering</span>
     </a>
@@ -432,7 +435,7 @@ Caution
 <p>Depending on what opperating system you are using you may need to install <code>psycopg2-binary</code> intead of <code>psycopg2</code>. In this post we are going to be running everything from inside containers that are running <code>Linux</code>. So we will be using <code>psycopg2-binary</code>.</p>
 </div>
 </div>
-<div class="sourceCode" id="cb1"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> my_environment_name</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> my_environment_name</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">channels</span><span class="kw">:</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> conda-forge</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> defaults</span></span>
@@ -456,12 +459,12 @@ Caution
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> kedro-docker~=0.6.2</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> pymc-extras==0.2.3</span></span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> mlflow==2.19.0</span><span class="co"> # New dependency</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> psycopg2-binary==2.9.10</span><span class="co"> # New dependency</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> psycopg2-binary==2.9.10</span><span class="co"> # New dependency</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="setting-up-mlflow" class="level1">
 <h1>Setting up MLFlow</h1>
 <p>Now is a good time to transition from running our pipelines in virtual environments on our machine to running inside of containers. Let’s modify the <code>Dockerfile</code> that we generated in <a href="../../posts/kedro-framework/index.html">part one</a> of this series when we introduced the <code>kedro-docker</code> plugin. We are going to switch from using <code>UV</code> and <code>pip</code> to manage our dependencies when building our image to using <code>Conda</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./Dockerfile</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./Dockerfile</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">ARG</span> BASE_IMAGE=python:3.9-slim</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> $BASE_IMAGE as runtime-environment</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -503,7 +506,7 @@ Caution
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPOSE</span> 8888</span>
 <span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"kedro"</span>, <span class="st">"run"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"kedro"</span>, <span class="st">"run"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Now that our <code>Kedro</code> project can run inside a container let’s configure <code>MLFlow</code>. We will need to configure the following:</p>
 <ul>
 <li>Define a backend store where metrics, parameters, and metadata are stored</li>
@@ -514,11 +517,11 @@ Caution
 <section id="backend-store" class="level2">
 <h2 class="anchored" data-anchor-id="backend-store">Backend Store</h2>
 <p>As we mentioned earlier, we are going to use PostgreSQL to store our metrics, parameters, and other metadata. In a docker compose file, let’s define our PostgreSQL service. You can name the service however you like; we will name it <code>mlflow-logs</code>. We also need to define a username, password, and database name for our service. We will name our database <code>mlflowdb</code>. We are going to pass in the username and password as an environment variable using secrets. For that you need to make sure you set those variables in your environment. On Linux/MacOS you can set an environment variable like so:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSTGRES_USER</span><span class="op">=</span>some_user_name</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">POSTGRES_USER</span><span class="op">=</span>some_user_name</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>On Windows using PowerShell you can set it like this:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$env</span><span class="op">:</span><span class="va">POSTGRES_USER</span> <span class="op">=</span> <span class="st">"some_user_name"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="va">$env</span><span class="op">:</span><span class="va">POSTGRES_USER</span> <span class="op">=</span> <span class="st">"some_user_name"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In addition, we need to make sure that what we log into our database persists after the container is brought down. We will define a docker volume and call it <code>pg_mlflow_db</code>. Our <code>docker-compose.yml</code> file looks like this so far:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mlflow-logs</span><span class="kw">:</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:16.4</span></span>
@@ -541,7 +544,7 @@ Caution
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span></span>
 <span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_USER</span></span>
 <span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-caution callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -559,7 +562,7 @@ Caution
 <section id="artifact-store" class="level2">
 <h2 class="anchored" data-anchor-id="artifact-store">Artifact Store</h2>
 <p>We need a place to store larger file objects like our models, figures, or artifacts. For that, we are going to define another service in our <code>docker-compose.yml</code> that will host a <code>MinIO</code> S3-compatible object store. Again, we define a username and password like we did before. Let’s also define a default bucket that will be created on creation of the service where we will store our artifacts. Again, like we did for our backend store our artifact store needs a persistant volume. So far we have:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mlflow-logs</span><span class="kw">:</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:16.4</span></span>
@@ -603,7 +606,7 @@ Caution
 <span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span></span>
 <span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_USER</span></span>
 <span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="tracking-server" class="level2">
 <h2 class="anchored" data-anchor-id="tracking-server">Tracking Server</h2>
@@ -616,7 +619,7 @@ Caution
 <li><b>AWS_SECRET_ACCESS_KEY</b>: This is the secret access key ID to our MinIO service. It can be the root password (not recommended) or bucket specific secret access key</li>
 </ul>
 <p>Let’s go ahead and add our tracking-server service to our compose file:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mlflow-logs</span><span class="kw">:</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:16.4</span></span>
@@ -682,7 +685,7 @@ Caution
 <span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span></span>
 <span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_USER</span></span>
 <span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span></span>
-<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -700,7 +703,7 @@ Important
 <section id="kedro-project-image" class="level2">
 <h2 class="anchored" data-anchor-id="kedro-project-image">Kedro Project Image</h2>
 <p>The final service we will be adding in this section is the image of our <code>Kedro</code> project. We set a profile of manual on this service so that the container isn’t brought up automatically. We do this because it is likely that you want this service to run on a schedule so we just let the scheduler handle bringing the service up. Notice that we set the environment variable <code>MLFLOW_TRACKING_URI</code> to the service name and port that is running our <code>MLFlow</code> tracking server. This will allow us to communicate from our Kedro project service.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mlflow-logs</span><span class="kw">:</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> postgres:16.4</span></span>
@@ -777,7 +780,7 @@ Important
 <span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_USER</span><span class="kw">:</span></span>
 <span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_USER</span></span>
 <span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">POSTGRES_PASSWORD</span><span class="kw">:</span></span>
-<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span><span class="at"> POSTGRES_PASSWORD</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 <section id="integrating-mlflow" class="level1">
@@ -795,7 +798,7 @@ Important
 </ul>
 <p>We are going to use hooks to inject additional logging and customize saving methods by logging metrics and parameters, and saving models/artifacts using <code>MLFlow</code>.</p>
 <p>To define hooks in <code>Kedro</code> we need to create a new file <code>hooks.py</code> inside of <code>/src/climate_brazil/</code> and create a class that will contain our hook’s logic as it’s methods. The scaffolding will look like this:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.hooks <span class="im">import</span> hook_impl</span>
@@ -812,7 +815,7 @@ Important
 <span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">@hook_impl</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_pipeline_run(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -830,7 +833,7 @@ Note
 <section id="configure-mlflow" class="level2">
 <h2 class="anchored" data-anchor-id="configure-mlflow">Configure MLFlow</h2>
 <p>Before we start experiment tracking with <code>MLFlow</code>, let’s set up some configuration variables inside of <code>conf/base/parameters_ML.yml</code>. First, let’s have the option to either use or not use <code>MLFlow</code>. Second, artifact logging can use up quite a bit of storage, so let’s make that optional as well. Finally, let’s set an experiment name and tags that will help differentiate experiment runs.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#conf/base/parameters_ML.yml</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#conf/base/parameters_ML.yml</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mlflow_config</span><span class="kw">:</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">use_mlflow</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">log_artifacts</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span></span>
@@ -838,12 +841,12 @@ Note
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tags</span><span class="kw">:</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">model</span><span class="kw">:</span><span class="at"> structural time-series</span></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">trend_component</span><span class="kw">:</span><span class="at"> Gaussian Process</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">seasonal_component</span><span class="kw">:</span><span class="at"> Fourier</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">seasonal_component</span><span class="kw">:</span><span class="at"> Fourier</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="initialize-mlflow" class="level2">
 <h2 class="anchored" data-anchor-id="initialize-mlflow">Initialize MLFlow</h2>
 <p>Now we need to initialze <code>MLFlow</code> whenever we start a run of our pipeline. As a reminder we are going to do that using the <code>Kedro</code> hook we defined scaffolding for earlier.</p>
-<div class="sourceCode" id="annotated-cell-11"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-11"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-11-4"><a href="#annotated-cell-11-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.hooks <span class="im">import</span> hook_impl</span>
@@ -864,7 +867,7 @@ Note
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-11-19" class="code-annotation-target"><a href="#annotated-cell-11-19" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.run_ids[<span class="st">"parent_run_id"</span>] <span class="op">=</span> mlflow.active_run().info.run_id</span>
 <span id="annotated-cell-11-20"><a href="#annotated-cell-11-20" aria-hidden="true" tabindex="-1"></a>            <span class="co"># If you have tags set for the run set them in MLFlow</span></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-11" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-11-21" class="code-annotation-target"><a href="#annotated-cell-11-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'tags'</span>]:</span>
-<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a>                mlflow.set_tags(<span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'tags'</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-11-22"><a href="#annotated-cell-11-22" aria-hidden="true" tabindex="-1"></a>                mlflow.set_tags(<span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'tags'</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-11" data-target-annotation="1">1</dt>
 <dd>
@@ -904,7 +907,7 @@ Tip
 <section id="tracking-prior-sampler-configurations" class="level2">
 <h2 class="anchored" data-anchor-id="tracking-prior-sampler-configurations">Tracking Prior &amp; Sampler Configurations</h2>
 <p>As soon as we start an <code>MLFlow</code> run we can start logging the parameters for our priors and our sampler configurations that we defined in <code>/conf/base/parameters_ML.yml</code>. Let’s go ahead and log those with <code>MLFlow</code> inside our <code>__init__()</code> method:</p>
-<div class="sourceCode" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-12"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlflow</span>
@@ -929,7 +932,7 @@ Tip
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-12-23" class="code-annotation-target"><a href="#annotated-cell-12-23" aria-hidden="true" tabindex="-1"></a>            mlflow.log_params(<span class="va">self</span>.params[<span class="st">'sampler_config'</span>])</span>
 <span id="annotated-cell-12-24"><a href="#annotated-cell-12-24" aria-hidden="true" tabindex="-1"></a>            <span class="co"># If you have tags set for the run set them in MLFlow</span></span>
 <span id="annotated-cell-12-25"><a href="#annotated-cell-12-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'tags'</span>]:</span>
-<span id="annotated-cell-12-26"><a href="#annotated-cell-12-26" aria-hidden="true" tabindex="-1"></a>                mlflow.set_tags(<span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'tags'</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-12-26"><a href="#annotated-cell-12-26" aria-hidden="true" tabindex="-1"></a>                mlflow.set_tags(<span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'tags'</span>])</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
 <dd>
@@ -944,7 +947,7 @@ Tip
 <section id="tracking-model-specifications" class="level2">
 <h2 class="anchored" data-anchor-id="tracking-model-specifications">Tracking Model Specifications</h2>
 <p>PyMC allows you to plot a graphical representation of the model using GraphViz. These plots can facilitate comparing different model specifications across experiment runs without needing to read through code. So, we will generate these figures and log them as artifacts. It’s also a good idea to define one run of our experiment as running through all of the cities. So, we will create nested runs for each city within our top-level parent run.</p>
-<div class="sourceCode" id="annotated-cell-13"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-13"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlflow</span>
@@ -1009,7 +1012,7 @@ Tip
 <span id="annotated-cell-13-63"><a href="#annotated-cell-13-63" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># log graph representation of model</span></span>
 <span id="annotated-cell-13-64"><a href="#annotated-cell-13-64" aria-hidden="true" tabindex="-1"></a>                        mlflow.log_artifact(local_path<span class="op">=</span>local_path, artifact_path<span class="op">=</span><span class="st">"figures"</span>)</span>
 <span id="annotated-cell-13-65"><a href="#annotated-cell-13-65" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># Define the inputs the model expects when forecasting</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-13-66" class="code-annotation-target"><a href="#annotated-cell-13-66" aria-hidden="true" tabindex="-1"></a>                    mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="7" onclick="event.preventDefault();">7</a><span id="annotated-cell-13-66" class="code-annotation-target"><a href="#annotated-cell-13-66" aria-hidden="true" tabindex="-1"></a>                    mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
 <dd>
@@ -1044,7 +1047,7 @@ Tip
 <section id="logging-divergences-and-infrence-data-attributes" class="level2">
 <h2 class="anchored" data-anchor-id="logging-divergences-and-infrence-data-attributes">Logging Divergences and Infrence Data Attributes</h2>
 <p>It is also useful to log any divergences you come across during sampling because as you fit more and more models it can be difficult to keep track of any sampling problems. We will also log our Inference Data attributes which will include the model ID that <code>ModelBuilder</code> gives a new instance of our model, the city name, and the mean and standard deviation of our average temperatures for each city.</p>
-<div class="sourceCode" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-14"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlflow</span>
@@ -1118,7 +1121,7 @@ Tip
 <span id="annotated-cell-14-72"><a href="#annotated-cell-14-72" aria-hidden="true" tabindex="-1"></a>                        )</span>
 <span id="annotated-cell-14-73"><a href="#annotated-cell-14-73" aria-hidden="true" tabindex="-1"></a>                    )</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-74" class="code-annotation-target"><a href="#annotated-cell-14-74" aria-hidden="true" tabindex="-1"></a>                    mlflow.log_params(outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>].idata.attrs)</span>
-<span id="annotated-cell-14-75"><a href="#annotated-cell-14-75" aria-hidden="true" tabindex="-1"></a>                    mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-14-75"><a href="#annotated-cell-14-75" aria-hidden="true" tabindex="-1"></a>                    mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
 <dd>
@@ -1133,7 +1136,7 @@ Tip
 <section id="logging-metrics" class="level2">
 <h2 class="anchored" data-anchor-id="logging-metrics">Logging Metrics</h2>
 <p>Obviously, we would want to log some metrics that give us an indication of how well our model is performing. In the previous post, we decided to evaluate our model using the root mean square error (RMSE) and the 80% Highest Density Interval (HDI) coverage. Let’s go ahead and log those metrics.</p>
-<div class="sourceCode" id="annotated-cell-15"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-15"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-15-2"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlflow</span>
@@ -1220,7 +1223,7 @@ Tip
 <span id="annotated-cell-15-85"><a href="#annotated-cell-15-85" aria-hidden="true" tabindex="-1"></a>                    parent_run_id<span class="op">=</span><span class="va">self</span>.run_ids[<span class="st">'parent_run_id'</span>]</span>
 <span id="annotated-cell-15-86"><a href="#annotated-cell-15-86" aria-hidden="true" tabindex="-1"></a>                )</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-15-87" class="code-annotation-target"><a href="#annotated-cell-15-87" aria-hidden="true" tabindex="-1"></a>                mlflow.log_metrics(outputs[<span class="ss">f'</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_evaluation'</span>])</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-15-88" class="code-annotation-target"><a href="#annotated-cell-15-88" aria-hidden="true" tabindex="-1"></a>                mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-15-88" class="code-annotation-target"><a href="#annotated-cell-15-88" aria-hidden="true" tabindex="-1"></a>                mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
 <dd>
@@ -1247,7 +1250,7 @@ Tip
 <section id="saving-a-custom-mlflow-model" class="level2">
 <h2 class="anchored" data-anchor-id="saving-a-custom-mlflow-model">Saving a Custom MLFlow Model</h2>
 <p><code>MLFlow</code> has several flavors of model frameworks already built-in that allow you to save your trained model into an easily deployable <code>MLFlow</code> model object. Behind the scenes <code>MLFlow</code> defines how the model should be loaded and how predictions are to be made using the model. Since we have built a custom solution using the Probabilistic Programming Language (PPL) <code>PyMC</code> we need to tell <code>MLFlow</code> how to load and use our model during forecasting time.</p>
-<div class="sourceCode" id="annotated-cell-16"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># src/climate_brazil/pipelines/ML/mlflow_model_wrapper.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-16"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-16-1"><a href="#annotated-cell-16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># src/climate_brazil/pipelines/ML/mlflow_model_wrapper.py</span></span>
 <span id="annotated-cell-16-2"><a href="#annotated-cell-16-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="annotated-cell-16-3"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-16-4"><a href="#annotated-cell-16-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlflow.pyfunc <span class="im">import</span> Context, PythonModel</span>
@@ -1282,7 +1285,7 @@ Tip
 <span id="annotated-cell-16-33"><a href="#annotated-cell-16-33" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> preds.rename_vars(</span>
 <span id="annotated-cell-16-34"><a href="#annotated-cell-16-34" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"temperature_normalized_fut"</span>: <span class="st">"temperature_fut"</span>}</span>
 <span id="annotated-cell-16-35"><a href="#annotated-cell-16-35" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="annotated-cell-16-36"><a href="#annotated-cell-16-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> json.dumps(preds.to_dataframe().reset_index().to_dict(<span class="st">'records'</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-16-36"><a href="#annotated-cell-16-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> json.dumps(preds.to_dataframe().reset_index().to_dict(<span class="st">'records'</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-16" data-target-annotation="1">1</dt>
 <dd>
@@ -1294,7 +1297,7 @@ Tip
 </dd>
 </dl>
 <p>Now that we can log our model with <code>MLFlow</code> let’s add that logic to our hook:</p>
-<div class="sourceCode" id="annotated-cell-17"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-17"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-17-2"><a href="#annotated-cell-17-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-17-3"><a href="#annotated-cell-17-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-17-4"><a href="#annotated-cell-17-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlflow</span>
@@ -1411,7 +1414,7 @@ Tip
 <span id="annotated-cell-17-115"><a href="#annotated-cell-17-115" aria-hidden="true" tabindex="-1"></a><span class="co">        after the Kedro pipeline finishes.</span></span>
 <span id="annotated-cell-17-116"><a href="#annotated-cell-17-116" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
 <span id="annotated-cell-17-117"><a href="#annotated-cell-17-117" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mlflow.active_run():</span>
-<span id="annotated-cell-17-118"><a href="#annotated-cell-17-118" aria-hidden="true" tabindex="-1"></a>            mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-17-118"><a href="#annotated-cell-17-118" aria-hidden="true" tabindex="-1"></a>            mlflow.end_run()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-17" data-target-annotation="1">1</dt>
 <dd>
@@ -1434,17 +1437,17 @@ Tip
 <section id="activating-hooks" class="level2">
 <h2 class="anchored" data-anchor-id="activating-hooks">Activating Hooks</h2>
 <p>It is quite simple to activate a <code>Kedro</code> hook. We just need to import our hook class into <code>/src/climate_brazil/settings.py</code> and add the to the file the line:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/settings.py</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/settings.py</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Hooks are executed in a Last-In-First-Out (LIFO) order.</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> climate_brazil.hooks <span class="im">import</span> ModelTrackingHooks</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>HOOKS <span class="op">=</span> (ModelTrackingHooks(),)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>HOOKS <span class="op">=</span> (ModelTrackingHooks(),)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="executing-our-pipeline" class="level2">
 <h2 class="anchored" data-anchor-id="executing-our-pipeline">Executing our pipeline</h2>
 <p>Okay, it is showtime! Let’s re-build our pipeline image and run our pipeline.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose build climate-brazil</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode zsh code-with-copy"><code class="sourceCode zsh"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose build climate-brazil</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span> climate-brazil</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span> climate-brazil</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
