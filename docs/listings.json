@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/glove_embeddings/index.html",
       "/posts/skipgram_embeddings/index.html",
       "/posts/text-classification-tfidf/index.html",
       "/posts/embeddings_deepdive/index.html",
