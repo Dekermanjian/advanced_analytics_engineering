@@ -1,10 +1,10 @@
 /* quarto syntax highlight colors */
 :root {
-  --quarto-hl-kw-color: #ebdbb2;
+  --quarto-hl-kw-color: #3c3836;
   --quarto-hl-fu-color: #689d6a;
   --quarto-hl-va-color: #458588;
   --quarto-hl-cf-color: #cc241d;
-  --quarto-hl-op-color: #ebdbb2;
+  --quarto-hl-op-color: #3c3836;
   --quarto-hl-bu-color: #d65d0e;
   --quarto-hl-ex-color: #689d6a;
   --quarto-hl-pp-color: #d65d0e;
@@ -38,24 +38,24 @@
 
 /* syntax highlight based on Pandoc's rules */
 pre > code.sourceCode > span {
-  color: #ebdbb2;
+  color: #3c3836;
   font-style: inherit;
 }
 
 code.sourceCode > span {
-  color: #ebdbb2;
+  color: #3c3836;
   font-style: inherit;
 }
 
 div.sourceCode,
 div.sourceCode pre.sourceCode {
-  color: #ebdbb2;
+  color: #3c3836;
   font-style: inherit;
 }
 
 /* Normal */
 code span {
-  color: #ebdbb2;
+  color: #3c3836;
   font-style: inherit;
 }
 
@@ -163,13 +163,13 @@ code span.in {
 
 /* Keyword */
 code span.kw {
-  color: #ebdbb2;
+  color: #3c3836;
   font-weight: bold;
 }
 
 /* Operator */
 code span.op {
-  color: #ebdbb2;
+  color: #3c3836;
 }
 
 /* Preprocessor */
@@ -180,7 +180,7 @@ code span.pp {
 /* RegionMarker */
 code span.re {
   color: #928374;
-  background-color: #1d2021;
+  background-color: #f9f5d7;
 }
 
 /* SpecialChar */
@@ -218,4 +218,4 @@ code span.wa {
   content: "</";
 }
 
-/*# sourceMappingURL=c5e09bd9068cc7aad177d59db72ad247.css.map */
+/*# sourceMappingURL=8ee780b8f7f76e4ab4b87e35bcc291ef.css.map */
