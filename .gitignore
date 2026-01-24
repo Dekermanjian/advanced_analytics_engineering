@@ -3,3 +3,5 @@
 **/*.quarto_ipynb
 /docs
 /_site/
+**/.jupyter_cache/
+**/.ruff_cache/
