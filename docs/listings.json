@@ -1,0 +1,15 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/glove_embeddings/index.html",
+      "/posts/skipgram_embeddings/index.html",
+      "/posts/text-classification-tfidf/index.html",
+      "/posts/embeddings_deepdive/index.html",
+      "/posts/kedro-ray/index.html",
+      "/posts/kedro-mlflow/index.html",
+      "/posts/kedro-pymc-modelbuilder/index.html",
+      "/posts/kedro-framework/index.html"
+    ]
+  }
+]
