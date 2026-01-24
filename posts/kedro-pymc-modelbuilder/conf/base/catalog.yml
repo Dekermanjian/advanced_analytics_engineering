@@ -1,0 +1,144 @@
+# conf/base/catalog.yml
+# Raw data ---------------------------------------
+cities_temperatures:
+  type: partitions.PartitionedDataset
+  path: data/01_raw/
+  dataset: 
+    type: polars.LazyPolarsDataset
+    file_format: csv
+
+# Processed data ---------------------------------------
+cities_temperatures_processed:
+  type: polars.EagerPolarsDataset
+  file_format: parquet
+  filepath: data/02_intermediate/cities_temperatures_processed.pq
+
+cities_ts_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/cities_ts_plot.json
+
+# Model inputs ------------------------------------------
+training_dataset:
+  type: polars.EagerPolarsDataset
+  file_format: parquet
+  filepath: data/05_model_input/training_dataset.pq
+
+testing_dataset:
+  type: polars.EagerPolarsDataset
+  file_format: parquet
+  filepath: data/05_model_input/testing_dataset.pq
+
+# Models -----------------------------------------
+Belem_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Belem_model.nc
+
+Curitiba_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Curitiba_model.nc
+
+Fortaleza_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Fortaleza_model.nc
+
+Goiania_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Goiania_model.nc
+
+Macapa_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Macapa_model.nc
+
+Manaus_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Manaus_model.nc
+
+Recife_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Recife_model.nc
+
+Rio_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Rio_model.nc
+
+Salvador_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Salvador_model.nc
+
+Sao_Luiz_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Sao_Luiz_model.nc
+
+Sao_Paulo_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Sao_Paulo_model.nc
+
+Vitoria_model:
+  type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+  filepath: data/06_models/Vitoria_model.nc
+
+city_models:
+  type: partitions.PartitionedDataset
+  path: data/06_models/
+  dataset: 
+    type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
+
+# Model outputs ------------------------------------------
+Belem_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Belem_forecast.nc
+
+Curitiba_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Curitiba_forecast.nc
+
+Fortaleza_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Fortaleza_forecast.nc
+
+Goiania_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Goiania_forecast.nc
+
+Macapa_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Macapa_forecast.nc
+
+Manaus_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Manaus_forecast.nc
+
+Recife_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Recife_forecast.nc
+
+Rio_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Rio_forecast.nc
+
+Salvador_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Salvador_forecast.nc
+
+Sao_Luiz_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Sao_Luiz_forecast.nc
+
+Sao_Paulo_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Sao_Paulo_forecast.nc
+
+Vitoria_forecasts_evaluation:
+  type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+  filepath: data/07_model_output/Vitoria_forecast.nc
+
+city_forecasts:
+  type: partitions.PartitionedDataset
+  path: data/07_model_output/
+  dataset: 
+    type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
+
+# Forecast plots
+"{city}_plot":
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/{city}_plot.json

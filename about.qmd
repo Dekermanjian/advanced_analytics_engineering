@@ -1,0 +1,23 @@
+---
+title: "About"
+image: hShot.jpg
+about:
+  template: jolla
+  image-width: 10em
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: http://www.linkedin.com/in/jonathan-dekermanjian
+    - icon: github
+      text: Github
+      href: https://github.com/Dekermanjian
+
+---
+
+Welcome to my blog! 
+
+My name is Jonathan Dekermanjian and I am a data professional with nearly 10 years of experience. I have worked both in academia as a data science researcher as well as in industry as a data scientist & machine learning engineer.
+
+If you'd like to learn more about me please click on the LinkedIn link below!
+
+The purpose of this blog is to talk about interesting advanced analytics and engineering topics that will benefit others who are also data professionals.

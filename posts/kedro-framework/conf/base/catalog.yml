@@ -1,0 +1,18 @@
+# conf/base/catalog.yml
+# Raw data ---------------------------------------
+cities_temperatures:
+  type: partitions.PartitionedDataset
+  path: data/01_raw/
+  dataset: 
+    type: polars.LazyPolarsDataset
+    file_format: csv
+
+# Processed data ---------------------------------------
+cities_temperatures_processed:
+  type: polars.EagerPolarsDataset
+  file_format: parquet
+  filepath: data/02_intermediate/cities_temperatures_processed.pq
+
+cities_ts_plot:
+  type: plotly.JSONDataset
+  filepath: data/08_reporting/cities_ts_plot.json

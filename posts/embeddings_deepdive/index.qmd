@@ -1,0 +1,494 @@
+---
+title: "How Machines Comprehend Language<br><sub>Introduction to Vector Embeddings</sub>"
+author: "Jonathan Dekermanjian"
+date: "2025-06-21"
+categories: [Natural Language Processing]
+code-annotations: below
+css: styles.css
+image: "thumbnail.png"
+bibliography: references.bib
+nocite: |
+  @*
+---
+
+# Overview
+
+In this first post of a series on Natural Language Processing (NLP), we introduce the foundational techniques for converting textual language into numerical representations that can be used in a wide range of downstream tasks, including text classification, machine translation, question answering, chatbots, and more.
+
+# Introduction
+
+Language is the primary means by which humans transmit and receive information. It is ubiquitous; found in written form, whether in physical books or digital content across the internet, as well as in spoken form, either live or recorded. Because language is so pervasive, there are tremendous opportunities to automate tasks such as language translation, text classification for search and retrieval, and sentiment analysis.
+
+However, machines do not inherently understand sequences of letters or sounds. Therefore, it is essential to represent language in a form that machines can process; namely, as numbers. There are many ways to transform textual data into numerical representations, and the method you choose can significantly impact the performance of your downstream tasks.
+
+In the following sections, we will explore various techniques for representing text as numbers, highlighting the strengths and weaknesses of each approach. 
+
+# What are Vector Embeddings?
+
+Vector embeddings as the name suggests are vectors of numerical values. Their purpose is to tranform information from a high dimensional space to a lower dimension latent space, while retaining relevant information to a myriad of downstream specific tasks. 
+
+You can think of a high dimensional space as a magical space where the possibilities of some particular event are numerous. As a simple example, let's imagine the space of all the English words. If your event is selecting a word then you have over 600,000 possibilities. In comparison, imagine a space with all the English letters and now your event is selecting a letter from that space. The number of possibilities is much smaller. 
+
+Let's briefly talk about latent spaces. A latent space is typically the resultant of the transformation from a high dimensional space to a lower dimensional space, while retaining relevant information to some task. Let's look at a simple conceptual example of transforming information from one space to another of a lower dimension. 
+
+Take the following sentence: [**"The quick brown fox jumps over the lazy dog."**]{style="color: blue;"}
+
+now compare that to the following: [**"Te qck brwn fx jmps ovr te lzy dg.".**]{style="color: blue;"}
+
+Conceptually, the second "sentence" is in a latent space where we have compressed the information into a lower dimensional space (by ommiting some of the letters) while still retaining the relevant information for a specific task; sentence comprehension in this case. 
+
+# Types of Embeddings
+
+Not all embeddings are created equal. There are different kinds of vector embeddings that are better suited for different tasks. In the following sections we will touch on:
+
+1. Sparse Embeddings
+
+2. Dense Embeddings
+    * Static Dense Embeddings
+    * Contextual Dense Embeddings
+
+## Sparse Embeddings
+
+A sparse embedding is one in which the majority of the values of the vector are 0. The simplest case of a sparse embedding is a one-hot representation of a vocabulary. 
+
+For example, let's assume that a given vocabular consists of $N = 30,000$ words and we want to represent the words in the sentence "The quick brown fox jumps over the lazy dog." with a sparse one-hot representation. We would represent each word as a vector of size $N = 30,000$ where out of those 30,000 entries only one entry is non-zero; The position of the vector that corresponds with that specific word in the sentence. An example of a sparse vector can be seen in @tbl-sparse-vector, here we assume our entire vocabulary is only the six words that compose the prior example sentence from above.
+
+```{python}
+#| echo: false
+#| label: tbl-sparse-vector
+#| tbl-cap: "A sparse vector encoding the word fox"
+import pandas as pd
+sentence = "the quick brown fox jumps over the lazy dog"
+tokens = sentence.split(" ")
+vocab = sorted(set(tokens))
+sparse_vector = pd.DataFrame(
+    {
+        token: [1 if token == "fox" else 0]
+        for token in vocab
+    },
+    index=["fox"]
+)
+sparse_vector
+```
+
+### Co-occurrence Matrices
+
+One of the earliest tools we had to understanding word relationships and semantics were these co-occurence matrices. These matrices represent how frequently words occur together. 
+
+There are a few flavors of a co-occurrence matrix:
+
+1. Window-based co-occurrence: This is when the rows of the matrix are the words in your vocabulary, the columns are context words that are i positions adjacent to the target word, and the cells in the matrix represent the counts of co-occurrence @tbl-window-cooccurrence.
+
+2. Sentence-based co-occurrence: The matrix rows and columns are the same as with window-based, however, now the cells in the matrix represent the count of sentences the target word co-occurs with the context word.
+
+3. Document-based co-occurrence: The words in the vocabulary still represent the rows of the matrix, however, now each column represents a target document in your corpus, and the cells represent the counts of occurence of the target word inside the target document.
+
+```{python}
+#| echo: false
+#| label: tbl-window-cooccurrence
+#| tbl-cap: "A window based co-occurrence matrix. (Window of size 3)"
+import numpy as np
+window_size = 3
+
+tokens = sentence.split()
+vocab = sorted(set(tokens))
+vocab_index = {word: i for i, word in enumerate(vocab)}
+
+# Init matrix
+cooc = np.zeros((len(vocab), len(vocab)), dtype=int)
+
+for i, center_word in enumerate(tokens):
+    center_idx = vocab_index[center_word]
+    # Look at window around the word
+    for j in range(max(i - window_size, 0), min(i + window_size + 1, len(tokens))):
+        if i != j:
+            context_word = tokens[j]
+            context_idx = vocab_index[context_word]
+            cooc[center_idx, context_idx] += 1
+
+
+cooc_df = pd.DataFrame(cooc, index=vocab, columns=vocab)
+cooc_df
+
+```
+
+As you may have already guessed, using the raw frequencies of words occuring besides words, in sentences, or in documents is not adequate in measuring the relationships of words. There are algorithms that improve upon raw frequency co-occurence.
+
+### Postive Pointwise Mutual Information
+
+For window and sentence based co-occurence, we can, generally, get better word relationships by using the Positive Pointwise Mutual Information (PPMI) algorithm. The PPMI algorithm is based on the Pointwise Mutual Information (PMI) equation:
+
+$$
+PMI_{\text(target\_word, context\_word)} = log(\frac{P\text(target\_word, context\_word)}{P\text(target\_word) \times P\text(context\_word)})
+$$
+
+The PMI is a ratio of the joint probability of two words, in this case, and the product of the marginal probabilities of each individual word. If two words are independent then the ratio would be one due to 
+$$
+P(A, B) = P(A) \times P(B)
+$$
+
+Thus, the PMI measures how much more or less two words co-occur than we would expect if they were independent. 
+
+As it turns out, figuring out how much **less** two words co-occur requires us to have a very large corpus which in many cases is not feesible and that is why we use the PPMI instead to only measure how much more two words co-occur than expected.
+
+$$
+PPMI_{\text(target\_word, context\_word)} = max(PMI_{\text(target\_word, context\_word)}, 0)
+$$
+
+
+```{python}
+#| echo: false
+#| label: tbl-ppmi
+#| tbl-cap: "A mock example of a PPMI matrix"
+
+pmi = np.random.normal(0, 2, size = (len(vocab), len(vocab)))
+ppmi = np.where(pmi < 0, 0, pmi)
+ppmi_df = pd.DataFrame(ppmi, index=vocab, columns=vocab)
+ppmi_df
+```
+
+### Term Frequency Inverse Document Frequency
+
+For document based co-occurence, we can improve upon raw frequency co-occurence matrices by using the Term Frequency Inverse Document Frequency (TF-IDF) algorithm. The algorithm is quite simple, we compute the term frequency which is defined as:
+
+$$
+tf_{term, document} = 
+ \begin{cases}
+  1 + log_{10}(count(term, document)), & \text{if } count(term, document) \gt 0 \\ 
+  0, & \text{otherwise} 
+ \end{cases}
+$$
+
+The term frequency is a count of a given term in a specific document that is then squashed down with a $log_{10}$ transformation. Next, we compute the inverse document frequency which is simply:
+
+$$
+idf_{term} = \log_{10}(\frac{\text{Total Number of Documents}}{\text{Number of Documents that includes term}})
+$$
+
+Finally, the TF-IDF weighted value for a particular term $w_{term}$ is the product of the term frequency and the inverse document frequency:
+
+$$
+w_{term} = tf_{term, document} \times idf_{term}
+$$
+
+The TF-IDF algorithm is typically used in information retrieval when you are looking for a particular document based on some query composed of a handful of keywords.
+
+```{python}
+#| echo: false
+#| label: tbl-tf-idf
+#| tbl-cap: "A mock example of a TF-IDF matrix"
+
+tf_idf_mock = pd.DataFrame(
+    {
+        "document1": np.random.normal(3, 1, size=len(vocab)),
+        "document2": np.random.normal(3, 1, size=len(vocab)),
+        "document3": np.random.normal(3, 1, size=len(vocab)),
+    },
+    index = [vocab]
+)
+tf_idf_mock
+```
+
+## Dense Embeddings
+
+It turns out that we can represent word relationships and semantics with much shorter vectors that are real valued and dense. Unlike the previous sparse vectors we talked about these vectors are not mostly zero-counts and since they are not counts they can be negative. In addition, these dense vectors perform better than their sparse counterparts in almost every downstream Natural Language Processing (NLP) task. One thing to note is that these dense vectors no longer have a clear interpretation, unlike the sparse vectors that represent the co-occurence counts of words, words in sentences, or words in documents.
+
+There are two types of dense embeddings:
+
+1. Static Embeddings @tbl-dense-vector
+
+2. Contextual/Dynamic Embeddings
+
+
+```{python}
+#| echo: false
+#| label: tbl-dense-vector
+#| tbl-cap: "A dense vector encoding of dimension 16 statically representing the word fox"
+
+
+dense_vector = pd.DataFrame(np.random.normal(0, 1, size=(1, 16)), index=["fox"])
+dense_vector
+```
+
+### Static Embeddings
+
+When we say an embedding is static we mean that each word in our vocabulary only has one vector associated with it. You may already notice an obvious limitation with this approach when a word has multiple meanings. For example, the word ship can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. The implication is that a static embedding can not disambigouate different meanings of the same word.
+
+:::{.callout-note}
+
+Words that have multiple word senses are called polysemous words
+
+:::
+
+Limitations put aside, there are two popular algorithms to generate dense static embedding for NLP tasks are:
+
+1. Word2Vec
+    * Continuous Bag-of-word
+    * Skip-gram with negative sampling
+
+2. Global Vectors for Word Representation (GloVE)
+
+#### Word2Vec - Skip-Gram with Negative Sampling
+
+Word2Vec is the name of a software that produces static embeddings. Word2Vec has two different algorithms to produce these embeddings:
+
+1. Continuos Bag-of-Words
+2. Skip-gram with Negative Sampling
+
+We will focus on the skip-gram method because, generally, it performs better. Skip-gram with negative sampling is a self-supervised method that works by training a logistic regression to predict if a context word is likely to occur with a target word. The true samples are generated by using a sliding window around each target word, while the negative samples are randomly sampled words from the corpus. The prediction task, however, is not the main outcome the key is that the weights that the classifier learns for each token are taken to be the embeddings. The implication is that if the prediction task is successful then the weights (each word has its own weight) encode a sufficiently good relationship between the words to achieve this task. 
+
+:::{.callout-note}
+
+This section is purposely sparse because we will have an entire post dedicated to diving deep into Skip-gram with negative sampling word2vec embeddings including implementing them from scratch
+
+:::
+
+#### Global Vectors for Word Representation
+
+Global Vectors (GloVE) generates embeddings by leveraging ratios of conditional probabilities derived from a word-word co-occurence matrix. Unlike skip-gram that generates embeddings locally around a sliding window, GloVE embeddings are global. Also unlike skip-gram, GloVE learns the embeddings directly by optimizing word vectors against the log of the co-occurence counts between the two words the vectors are representing. Both GloVE and Word2Vec generate good static embeddings, however when it comes to interpratibility GloVE has the advantage due to the following properties:
+
+* You can directly inspect matrix relationships which are composed directly of probabilistic meaning
+* GloVE learns the embeddings based on probability ratios which encourage semantic analogies; like the famous example of king - man + woman = queen
+
+:::{.callout-note}
+
+This section is purposely sparse because we will have an entire post dedicated to diving deep into GloVE embeddings including implementing them from scratch
+
+:::
+
+### Contextual Embeddings
+
+A step up from static embeddings are contextual embeddings. These embeddings capture the meaning of words in the given context as opposed to the general meaning of the word that we get with static embeddings. Generally, contextual embeddings are learned by transformer models that have multiple attention heads. These embeddings are also dynamic in that unlike static embeddings that have a fixed embedding layer, contextual embeddings are computed on the fly using a combination of a static embedding layer, a segment embedding layer to differentiate between input sentences and a positional embedding layer used to pass through information on the position of a word within a sentence. 
+
+:::{.callout-note}
+
+We will do a deep dive on transformer models and how they work in a dedicated post
+
+:::
+
+#### Bidirectional Encoder Respresentation Transformer (BERT)
+
+Arguably the most popular transformer model that produces contextual embeddings is BERT. The key properties that allow BERT to learn contextual embeddings are:
+
+* Bidirectional self-attention which allows contextualization over the entire sentence instead of only from the previous words.
+* Multiple self-attention heads to capture different linguistic relationships like syntax, co-reference, or long-range interactions.
+
+The model is pre-trained on masked language modeling (MLM) and next sentence prediction (NSP) tasks. Word level representation is mostly learned via the MLM task. Whereas, the NSP task was designed to encode sentence relationship into the model to be used for downstream tasks such as paraphrase detection, detecting if two sentences agree or disagree, or detecting if a sentence coherently follows another sentence. However, after further research it seems that NSP is not very effective and is not actually required to be able to use BERT or its descendants for sentence relationship tasks.
+
+:::{.callout-note}
+
+This section is purposely sparse because we will have an entire post dedicated to diving deep into the BERT architecture including implementing it from scratch
+
+:::
+
+# Why Embeddings Matter?
+
+Vector embeddings are pre-requisite to many downstream tasks such as:
+
+* Text classification
+* Search / Retreival, very important for things like Retrieval Augmented Generation (RAG)
+* Machine translation
+* Named Entity Recognition
+* Question Answering systems and chat bots
+* Text summarization
+* Recommendation engines
+
+The quality of your embeddings strongly influences your model's performance on all of those tasks! 
+
+# How Are Embeddings Used?
+
+There are three ways that vector can be used:
+
+* Vector embeddings can encode a latent features that are passed directly into a classifier. One example is text classification.
+* Vector embeddings are compared to one another using a distance metric to find nearest neighbors. One example is search and retrieval.
+* Vector embeddings encode a latent feature vector that is then decoded back into a higher dimensional space. One example is machine translation.
+
+# Hands-on Example
+
+Let's take a look at an example of TF-IDF, since we went over this algorithm in detail earlier. For this example we will use the news group dataset as a toy dataset. For the purposes of this example we will only look at three document classes "science - medicine", "computer - graphics" and "science - space". Here each list item within the data dictionary key is a news article that corresponds to one of the three topics we filtered.
+
+```{python}
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
+
+categories = [
+    "sci.med",
+    "comp.graphics",
+    "sci.space",
+]
+
+newsgroups_train = fetch_20newsgroups(subset='train', categories=categories)
+```
+
+Now, in order to generate a TF-IDF matrix out of the data we need to first process the data and tokenize each document. Once we have our tokens, we can define our vocabulary to be the set of unique tokens across all documents. Next, we need to compute the term frequencies for our vocabulary across all of our documents (shape = size of vocabulary X number of documents) and the inverse document frequencies of our vocabulary across our documents (shape = size of vocabulary). Finally, we multiply our term frequencies with our inverse document frequencies to get the TF-IDF matrix.
+
+```{python}
+import re
+from collections import Counter
+
+def tokenize(text: str, TOKEN_PATTERN: re.Pattern = re.compile(r"(?u)\b\w\w+\b")) -> list[str]:
+    tokens = TOKEN_PATTERN.findall(text.lower())
+    return tokens
+
+def tf_log(count: int) -> float:
+    return 1 + np.log10(count)
+
+def idf(doc_count: int, num_documents: int) -> float:
+    return np.log10(num_documents / doc_count)
+
+```
+
+```{python}
+# Tokenize each document (this is a list of lists representing list of tokens inside of each document)
+train_tokens = [tokenize(text) for text in newsgroups_train.data]
+# Our total vocabulary
+vocabulary = sorted(set(sum(train_tokens, [])))
+
+# Count of terms in each document
+doc_term_counts = [Counter(doc) for doc in train_tokens]
+
+# Compute TF matrix (see formula above)
+term_frequencies = []
+for term in vocabulary:
+    term_frequencies.append([
+        tf_log(doc.get(term, 0)) if doc.get(term, 0) > 0 else 0
+        for doc in doc_term_counts
+    ])
+term_frequencies = np.array(term_frequencies)
+
+num_documents = term_frequencies.shape[1]
+
+# Number of documents a term appears in
+document_frequencies = np.sum(term_frequencies > 0, axis=1)
+
+inverse_document_frequencies = []
+for doc_count in document_frequencies:
+    inverse_document_frequencies.append(idf(doc_count, num_documents))
+
+inverse_document_frequencies = np.array(inverse_document_frequencies)
+
+# Compute TF-IDF matrix
+train_tf_idf = term_frequencies * inverse_document_frequencies[:, None]
+```
+
+
+## Embedding Projections
+
+To inspect our embeddings visually we are going to project from our high-dimensional space of ~35,000 down to 3-dimensions. In order to acheive this projection we are going to use the UMAP (Uniform Manifold Approximation and Projection) algorithm. The algorithm works by constructing a weighted graph in the original space and then learns via stochastic gradient descent (minimizes the cross entropy loss) to project a space in the reduced space that maintains local and global distances of points.
+
+:::{.callout-caution}
+You might be thinking to yourself "Oh, we are going from a space of ~35,000 to a latent space of 3, so we are generating an embedding of an embedding!" and you would be correct. However, remember that embeddings are not created equal. The TF-IDF embeddings are constructed to emphasize symantic representation of the words across the documents while the UMAP embeddings are constructed to capture the structure of the data in the high dimensional space and maintain it in the latent space.
+:::
+
+### UMAP Details (optional)
+
+The first step of the algorithm is to find a set of $k$ nearest neighbors for each point in $x_{i} \in \mathbb{R^{D}}$ (in our case the dimension is the number of documents) using a distance metric $d(x_{i}, x_{j})$ (we will use cosine as our distance metric).
+
+Next, for each neighbor $x_{j}$ of $x_{i}$ we compute a weighted edge
+
+$$
+w_{ij} = exp( - \frac{d(x_{i}, x_{j}) - \rho_{i}}{\sigma_{i}} )
+$$
+
+Where $\rho_{i}$ is the local connectivity which represents the distance to the nearest neighbor of $x_{i}$ and $\sigma_{i}$ is a smoothness parameter that is chosen to induce the entropy of the distribution to be $log(k)$
+
+At this point we have a directed weighted graph from each point $x_{i}$ to its neighbor $x_{j}$, but a directed graph by definition violates mutual similarity $w_{ij} \ne w_{ji}$ which is why UMAP converts the graph to an undirected graph. To convert our directed graph to an undirected one we use a probabilistic union of edges
+
+$$
+P_{ij} = w_{ij} + w_{ji} - w_{ij}w_{ji}
+$$
+
+Next we initialize our coordinates in low-dimensional space $y_{i} \in \mathbb{R^{d}}$ here you can use random initialization or you can start with PCA (Principal Component Analysis) or some other advanced method (we will use PCA).
+
+UMAP defines edge weights in the low dimensional space using a parametric curve
+
+$$
+Q_{ij} = \frac{1}{1 + a||y_{i} - y_{j}||^{2b}}
+$$
+
+where $||y_{i} - y_{j}||$ is the euclidean distance and $a,b$ are learned constants that influence how tight/spread out clusters are and is controlled by the `min_dist` argument, which defaults to 0.1. $a, b$ are estimated such that as the distance $d$ increases the similarity function $f(d)$ decays toward zero.
+
+$$
+f(d) = \frac{1}{ 1 + ad^{2b}}
+$$
+
+The function satisfies $f(0) = 1$ representing maximal similarity, and controls how rapidly points are pulled together or pushed apart in the embedding space.
+ 
+
+Finally, UMAP uses stochastic gradient descent to minimize the cross entropy between $Q_{ij}$ and $P_{ij}$ where the cross entropy loss is defined as
+
+$$
+L = \sum_{i < j} [-P_{ij}logQ_{ij} - (1-P_{ij})log(1 - Q_{ij})]
+$$
+
+## Visualize Embeddings in 3D Space
+
+Below you can clearly see that the TF-IDF embeddings encode a representation that is able to discriminate between the three filtered topics in our toy dataset. 
+
+:::{.callout-important}
+
+It is not necessary that the topics be seperable at the reduced dimensional space that our UMAP algorithm generates for these topics to be seperable in their original (TF-IDF) dimension. You may encounter cases where algorithms like Multinomial Regression or Multinomial Naive Bayes can still classify the texts even when your UMAP representation can't separate the classes.
+
+:::
+
+```{python}
+#| output: false
+import umap
+umap_model = umap.UMAP(n_components=3, metric="cosine", init="pca")
+projected_embeddings = umap_model.fit_transform(train_tf_idf.T)
+```
+
+```{python}
+labels_mapping = {k: v for k, v in zip(range(3), newsgroups_train.target_names)}
+projected_embeddings_df = pd.DataFrame(projected_embeddings)
+projected_embeddings_df.columns = ['x', 'y', 'z']
+projected_embeddings_df['document_class'] = [labels_mapping.get(l) for l in newsgroups_train.target]
+```
+
+```{python}
+#| classes: light-mode
+import plotly.express as px
+fig = px.scatter_3d(projected_embeddings_df, x='x', y='y', z='z', color="document_class")
+fig.update_layout(
+    shapes=[
+        dict(
+            type='rect',
+            xref='paper',
+            yref='paper',
+            x0=0.0, x1=1.0,
+            y0=0.0, y1=1.0,
+            line={'width': 3}
+        )
+    ]
+)
+```
+
+```{python}
+#| echo: false
+#| classes: dark-mode
+import plotly.express as px
+fig = px.scatter_3d(projected_embeddings_df, x='x', y='y', z='z', color="document_class")
+fig.update_layout(
+    xaxis=dict(title="Actual Class", gridcolor = 'rgba(68, 68, 68, 0.5)'),
+    yaxis=dict(autorange='reversed', title = "Predicted Class", gridcolor = 'rgba(68, 68, 68, 0.5)'),
+    plot_bgcolor='black',
+    paper_bgcolor='rgba(68, 68, 68, 0.5)',
+    font=dict(
+        family="Verdana",
+        size=12,
+        color="white"
+    ),
+)
+```
+
+# Coming Next
+
+We have outlined a few interesting topics to dive into more detail in following posts. We will take a look at the Skip-Gram with Negative Sampling and Global Vectors algorithms and build them from scratch. Following that, we will breakdown how Transformer models work and look at the BERT algorithm and build that from scratch as well. 
+
+I hope to see you there!
+
+# References
+
+::: {#refs}
+:::

@@ -1,0 +1,551 @@
+---
+title: "How Machines Comprehend Language<br><sub>Skip-Gram with Negative Sampling Algorithm</sub>"
+author: "Jonathan Dekermanjian"
+date: "2025-08-31"
+categories: [Natural Language Processing]
+code-annotations: below
+draft: false
+execute: 
+  kernel: jax_recsys
+  cache: true
+---
+
+# Overview
+
+We explore the Skip-Gram with Negative Sampling algorithm and implement it in JAX from scratch
+
+# Introduction
+
+In this short post we are going to do a deep dive on the Skip-Gram with Negative Sampling (SGNS) algorithm. SGNS is one of the two algorithms used in Word2Vec that generates dense static embeddings. These embeddings have a fixed dimension, canonically 300 dimensional, and each token in our vocabular is statically assigned one and only one embedding irrepsective of multiple word senses. 
+
+The key aspects to understading how embeddings are learned under this paradigm are:
+
+1. Understanding the concept of a sliding window
+2. Understanding how training examples are generated
+3. Understanding how the loss function works
+
+Therefore, we are going to focus on the above aspects throughout this post. First, though, we need to find some data to use for when we get are hands dirty in the hands-on portion of this post.
+
+
+# Download and Prepare Data
+
+To train our SGNS embeddings we are going to need some data. For this we will use an open source library called (Project Gutenberg)[https://www.gutenberg.org], which has a collection of books that are freely available for use. We are going to include five political books as our corpus. You can download and lightly pre-process the text before saving the data to a text file with the following code snippet. 
+
+## Download
+
+```{python}
+# Imports
+import jax
+import jax.numpy as jnp
+import numpy as np
+from jax import random, jit, grad
+from flax import linen as nn
+from typing import Tuple, List
+from nltk.tokenize import word_tokenize, sent_tokenize
+from collections import Counter
+import tensorflow as tf
+import optax as optim
+from tqdm import tqdm
+import requests
+```
+
+
+```{python}
+#| eval: false
+def clean_gutenberg_text(text: str) -> str:
+    """
+    Helper that cleans the downloaded Project Gutenberg text
+
+    Parameters
+    ----------
+    text: 
+        The downloaded text
+    """
+    # Find start marker
+    start_idx = text.find("*** START OF")
+    if start_idx != -1:
+        text = text[start_idx:]
+        # Skip the marker line
+        text = text.split("\n", 1)[1]
+
+    # Find end marker
+    end_idx = text.find("*** END OF")
+    if end_idx != -1:
+        text = text[:end_idx]
+
+    # Remove repeated blank lines
+    lines = [line.strip() for line in text.splitlines()]
+    lines = [line for line in lines if line]  # drop empty
+    return "\n".join(lines)
+
+urls = [
+    "https://www.gutenberg.org/cache/epub/18/pg18.txt",      # Federalist Papers
+    "https://www.gutenberg.org/files/815/815-0.txt",         # Democracy in America
+    "https://www.gutenberg.org/files/1232/1232-0.txt",       # The Prince
+    "https://www.gutenberg.org/files/132/132-0.txt",         # Art of War
+    "https://www.gutenberg.org/files/34901/34901-0.txt"      # On Liberty
+]
+
+merged_text = ""
+for url in urls:
+    raw_text = requests.get(url).text
+    clean_text = clean_gutenberg_text(raw_text)
+    merged_text += clean_text + "\n\n"
+
+with open("political_corpus.txt", "w", encoding="utf-8") as f:
+    f.write(merged_text)
+
+```
+
+## Preprocessing Utilities
+
+We are going to need a few helper functions:
+
+1. A way to tokenize our text and remove low occurence tokens
+2. A way to map a token to an index
+3. A way to map an index to a token
+
+Below you can see these functions defined.
+
+```{python}
+def tokenize_and_filter(text: str, min_occurrence: int) -> list[str]:
+    """
+    Tokenizes input text and filters out tokens that occur less than or equal to `min_occurrence` times.
+
+    Parameters
+    ----------
+    text: str
+        Input text to be tokenized.
+    min_occurrence: int
+        Minimum number of times a token must appear in the text to be included.
+
+    Returns
+    -------
+    list[str]: 
+        A list of tokens that occur more than `min_occurrence` times.
+    """
+    # Convert text to lowercase and tokenize
+    tokens = word_tokenize(text.lower().strip())
+
+    # Count occurrences of each token
+    token_counts = Counter(tokens)
+
+    # Filter tokens based on minimum occurrence threshold
+    filtered_tokens = [token for token in tokens if token_counts[token] > min_occurrence]
+
+    return filtered_tokens
+```
+
+```{python}
+def build_word_index(text: str, min_occurence: int = 0) -> tuple[dict[str, int], list[str]]:
+    """
+    Builds a word-to-index mapping (vocabulary) from input text, including a special <unk> token.
+
+    Parameters
+    ----------
+    text: str
+        Input text to extract vocabulary from.
+    min_occurrence: int
+        Minimum number of times a token must appear in the text to be included.
+
+    Returns
+    -------
+    Tuple[Dict[str, int], List[str]]: 
+        - word_to_index: A dictionary mapping each word to a unique integer ID.
+        - vocabulary: A sorted list of unique vocabulary words including "<unk>".
+    """
+    # Tokenize and get unique words
+    unique_tokens = set(tokenize_and_filter(text, min_occurrence=min_occurence))
+
+    # Add special token for unknown words
+    vocabulary = sorted(unique_tokens) + ["<unk>"]
+
+    # Create word-to-index mapping
+    word_to_index = {word: idx for idx, word in enumerate(vocabulary)}
+
+    return word_to_index, vocabulary
+
+```
+
+```{python}
+def tokens_to_ids(text: str, word_to_index: dict[str, int], min_occurence: int = 0) -> list[int]:
+    """
+    Converts a text string into a list of integer token IDs using a provided word-to-index mapping.
+    Unknown tokens are mapped to the ID of the "<unk>" token.
+
+    Parameters
+    ----------
+    text: str
+        Input text to convert.
+    word_to_index: dict[str, int]
+        A dictionary mapping words to their corresponding integer IDs.
+    min_occurrence: int
+        Minimum number of times a token must appear in the text to be included.
+
+    Returns
+    -------
+    list[int]:
+        A list of integer IDs representing the tokenized input text.
+    """
+    tokens = tokenize_and_filter(text, min_occurrence=min_occurence)
+    token_ids = [word_to_index.get(token, word_to_index["<unk>"]) for token in tokens]
+    return token_ids
+
+```
+
+# Skip-Gram With Negative Sampling (SGNS)
+
+There are really two parts to understanding how SGNS embeddings come together. First, is understanding how the training examples are generated. Second, is understanding how the loss function is computed.
+
+## Skip-Gram Pairs 
+
+We call our training example `Skip-Gram Pairs`, and what that means is that we are pairing our tokens into (inputs and targets). The way that we accomplish this is by selecting a context (targets) window size that determines how many targets each center word (input) will have and selecting the maximum length of any given sequence of tokens. 
+
+For example, our context window size is 2 and our sequence of tokens lets say is:
+
+[**"The quick brown fox jumps over the lazy dog."**]{style="color: blue;"}
+
+We start by sliding our window over each token to contruct our Skip-Gram Pairs. Our window size is equal to [context_window_size $\times$ 2 + 1 = 5]{style="color: orange;"}. As we slide our window over the sequence, we need to ensure that we our center position is on a token that allows 2 tokens to the left and 2 tokens to the right to be included as our context tokens. For our example sequence, this means the first center word that we can accomodate with our window size is the token "brown". So we will have the following:
+
+1. "<span style="color:blue;">The</span> <span style="color:blue;">quick</span> <span style="color:red;">brown</span> <span style="color:blue;">fox</span> <span style="color:blue;">jumps</span>"
+
+2. "<span style="color:blue;">quick</span> <span style="color:blue;">brown</span> <span style="color:red;">fox</span> <span style="color:blue;">jumps</span> <span style="color:blue;">over</span>"
+
+3. "<span style="color:blue;">brown</span> <span style="color:blue;">fox</span> <span style="color:red;">jumps</span> <span style="color:blue;">over</span> <span style="color:blue;">the</span>"
+
+4. "<span style="color:blue;">fox</span> <span style="color:blue;">jumps</span> <span style="color:red;">over</span> <span style="color:blue;">the</span> <span style="color:blue;">lazy</span>"
+
+5. "<span style="color:blue;">jumps</span> <span style="color:blue;">over</span> <span style="color:red;">the</span> <span style="color:blue;">lazy</span> <span style="color:blue;">dog</span>"
+
+We can represent the above Skip-Gram pairs in a tabular format. Below is an example of the first window of skip-gram pairs.
+
+```{python}
+#| echo: false
+#| eval: true
+#| label: tbl-skipgram-pair-vector
+#| tbl-cap: "Tabular representation of Skip-Gram pair"
+
+import pandas as pd
+
+from IPython.display import display, HTML
+
+def format_df(df):
+    """format the dataframe for display without index"""
+    return display(HTML(df.to_html(index=False)))
+
+format_df(pd.DataFrame(
+    {
+        "Center": ["brown"] * 4,
+        "Context": ["the", "quick", "fox", "jumps"]
+    }
+))
+```
+
+```{python}
+def generate_skipgram_pairs(sentences: list[str], word_to_index: dict[str, int], max_sequence_length: int, context_window_size: int) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """
+    Generate training pairs for the Skip-Gram model from a batch of input texts.
+
+    Parameters
+    ----------
+    sentences: list[str]
+        A list of input text strings.
+    word_to_index: dict[str, int]
+        A mapping from tokens (words) to their corresponding integer IDs.
+    max_sequence_length: int
+        The maximum number of tokens to use per input text.
+    context_window_size: int
+        The number of words to use on each side of the center word as context.
+
+    Returns
+    -------
+    tuple[jnp.ndarray, jnp.ndarray]: 
+        - center_words: 1D array of center word IDs (inputs).
+        - context_words: 1D array of corresponding context word IDs (targets).
+    """
+    center_words, context_words = [], []
+
+    for text in sentences:
+        text = text.strip()
+        token_ids = tokens_to_ids(text, word_to_index)
+
+        # Skip sequences too short for the context window
+        if len(token_ids) < context_window_size * 2 + 1:
+            continue
+
+        # Truncate long sequences
+        if len(token_ids) > max_sequence_length:
+            token_ids = token_ids[:max_sequence_length]
+
+        # Slide a window over the token sequence
+        for i in range(len(token_ids) - context_window_size * 2):
+            window = token_ids[i: i + context_window_size * 2 + 1]
+            center = window[context_window_size]
+            context = window[:context_window_size] + window[context_window_size + 1:]
+
+            for context_word in context:
+                center_words.append(center)
+                context_words.append(context_word)
+
+    center_tensor = jnp.array(center_words, dtype=jnp.int32)
+    context_tensor = jnp.array(context_words, dtype=jnp.int32)
+
+    return center_tensor, context_tensor
+
+```
+
+## Loss Function
+
+Now that we understand how we are generating our examples, let's go over the loss function. We start by setting up our unigram probabilities that are used when we need to sample negative examples. We adjust the raw frequency counts to diversify the words we are sampling as our negative examples otherwise we almost always sample stop words. During the forward pass we simply take the dot product between our center words and context words as a measure of similarity. For our positive samples, we then compute the logistic loss 
+
+$$
+l(logits, labels) = max(logits, 0) - logits \times labels + log(1 + e^{-|logits|})
+$$
+
+where all the labels will be set to one, since this is our positive example. On the otherhand, we sample negative examples (15 in our case) and again compute the dot product between our center words and now our negative example. However, this time when we compute the loss we set the labels to zero since these are negative examples. We proceed by summing our loss over all the negative examples and we take the average similar to the positive example. Finally, we sum both positive and negative losses together to produce our final loss. 
+
+In the original paper the loss is written in terms of a sum of expectations:
+
+$$
+\mathbb{E}_{(w,c) \sim D} \left[ \log \sigma \big( v_w \cdot v_c \big) \right] 
+\;+\; 
+k \, \mathbb{E}_{c' \sim P_n} \left[ \log \sigma \big( - v_w \cdot v_{c'} \big) \right]
+$$
+
+Where $k$ is the number of negative examples and the left portion accounts for the positive example and the right portion account for the negative examples. 
+
+```{python}
+class SGNSLoss:
+    BETA = 0.75
+    NUM_SAMPLES = 15
+
+    def __init__(self, vocabulary, id_counts, key):
+        self.vocabulary = vocabulary
+        self.vocab_len = len(vocabulary)
+        self.key = key
+
+        # Precompute unigram distribution
+        freqs = jnp.array([id_counts[i] for i in range(self.vocab_len - 1)], dtype=jnp.float32)
+        transformed = freqs ** self.BETA
+        self.unigram_probs = transformed / transformed.sum()
+
+    def forward(self, params, batch):
+        center_ids, context_ids = batch
+        center = params[center_ids]  # (batch_size, embed_dim)
+        context = params[context_ids]  # (batch_size, embed_dim)
+
+        # Positive logits
+        true_logits = jnp.sum(center * context, axis=-1)
+        loss = self._bce_loss_with_logits(true_logits, jnp.ones_like(true_logits))
+
+        # Negative sampling
+        key, subkey = random.split(self.key)
+        neg_ids = random.categorical(subkey, jnp.log(self.unigram_probs), shape=(self.NUM_SAMPLES, center.shape[0]))
+        neg_embeds = params[neg_ids]  # (num_samples, batch_size, embed_dim)
+
+        # Compute loss for each negative sample
+        def neg_loss_fn(neg):
+            logits = jnp.sum(center * neg, axis=-1)
+            return self._bce_loss_with_logits(logits, jnp.zeros_like(logits))
+
+        neg_losses = jax.vmap(neg_loss_fn)(neg_embeds)
+        total_neg_loss = jnp.sum(neg_losses, axis=0)  # sum over negative samples
+
+        return loss + total_neg_loss.mean()
+
+    @staticmethod
+    def _bce_loss_with_logits(logits, labels):
+        return jnp.mean(jnp.maximum(logits, 0) - logits * labels + jnp.log1p(jnp.exp(-jnp.abs(logits))))
+
+```
+
+# Learning Embeddings
+Now that we know how Skip-Gram with Negative sampling works, how the training examples are generated, and how the loss function works, we can get to the hands-on portion and learn the weights of our embeddings matrix. 
+
+## Define Embedding Layer
+
+Below we define our Embeddings matrix using `Flax`. This is a very simple look-up table essentially that gets initialized using the `LeCun Normal` initialization method which is scaled standard normal distribution $N(0, \frac{1}{d})$ where d is the dimension of our embeddings matrix. 
+
+```{python}
+class SkipGramEmbeddings(nn.Module):
+    vocab_size: int
+    embed_len: int
+
+    @nn.compact
+    def __call__(self, center: jnp.ndarray, context: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
+        embedding = nn.Embed(num_embeddings=self.vocab_size, features=self.embed_len)
+        word_embeds = embedding.embedding  # Retrieve embedding matrix
+        return word_embeds[center], word_embeds[context]
+
+```
+
+## Load and Process Dataset
+We are ready to load and process the data that we scraped earlier. We are going to apply the helper functions we defined above to
+
+1. Get a mapping from a token to the numerical index and vice versa
+2. Get a set representing our total vocabulary
+3. Tokenize our corpus into list of sentences
+4. Generate our Skip-Gram pairs
+5. Compute the frequencies of each token
+
+```{python}
+with open('./political_corpus.txt', 'r', encoding='utf-8') as file:
+    text = file.read()
+```
+
+
+```{python}
+#| output: false
+word_to_index, vocabulary = build_word_index(text=text, min_occurence=10)
+index_to_word = {v:k for k,v in word_to_index.items()}
+sentences = sent_tokenize(text.lower().strip())
+dataset = generate_skipgram_pairs(sentences=sentences, word_to_index=word_to_index, max_sequence_length=200, context_window_size=2)
+id_counts = dict(
+    Counter(tokens_to_ids(text, word_to_index))
+)
+```
+
+
+## Define Hyperparameters & Training Loop
+
+Next we define our hyperparameters. We are going to set the embedding dimension to 300 to match what was used in the original implementation and we will go for 30 epochs with a batch size of 64. 
+
+We are going to use `tensorflow-datasets`'s data loader to iterate through our examples during training. We need to write up our update function to update the weights in our embeddings matrix and the training loop itself. 
+
+For the update, we simply apply the forward pass of the SGNS then compute the logistic loss, and finally calculate the gradient with respect to the parameters in our matrix. JAX will handle the computation of the gradients for us and we are using `Optax` to handle the updates. 
+
+One thing to mention is that we are using the Adaptive Moment Estimation (adam) optimizer with a learning rate of 1e-4. Finally, we need a helper function that will allow us to grab the nearest neighbors of a given token to inspect if our embeddings are actually learning anything useful. 
+
+```{python}
+# Hyperparameters
+vocab_size = len(vocabulary)
+embed_len = 300
+data_len = len(dataset[0])
+batch_size = 64
+epochs = 30
+learning_rate = 1e-4
+
+# set up the data loader and our PRNG keys
+dataloader = tf.data.Dataset.from_tensor_slices((dataset[0], dataset[1])).shuffle(100).batch(batch_size).prefetch(1)
+model_rng = random.PRNGKey(0)
+sgns_rng = random.PRNGKey(1)
+
+# Dummy data to init our variabels with
+dummy_center = jnp.zeros((batch_size,), dtype=jnp.int32)
+dummy_context = jnp.zeros((batch_size,), dtype=jnp.int32)
+
+# Init our embeddings, variables, and parameters
+model = SkipGramEmbeddings(vocab_size, embed_len)
+variables = model.init(model_rng, dummy_center, dummy_context)
+params = variables['params']['Embed_0']['embedding']
+sgns = SGNSLoss(vocabulary=vocabulary, id_counts=id_counts, key=sgns_rng)
+
+# Define our parameters
+optimizer = optim.adam(learning_rate)
+opt_init = optimizer.init
+opt_update = optimizer.update
+apply_updates = optim.apply_updates
+
+@jit
+def update(params, opt_state, batch):
+    """
+    Simple function to update embeddings weights
+    """
+    loss, g = jax.value_and_grad(sgns.forward)(params, batch)  # compute loss + gradient
+    updates, opt_state = opt_update(g, opt_state)
+    params = apply_updates(params, updates)
+    return opt_state, params, g, loss
+
+def train(params):
+    """
+    simple training loop
+    """
+    opt_state = opt_init(params)
+    train_it = dataloader.as_numpy_iterator()
+    for epoch in range(epochs):
+        print(f'Beginning epoch: {epoch + 1}/{epochs}')
+        epoch_loss = 0
+        for i, batch in enumerate(tqdm(train_it)):
+            opt_state, params, g, loss = update(params, opt_state, batch)
+            epoch_loss += loss
+        avg_loss = epoch_loss / (i + 1)
+        log_step(epoch, params, g, avg_loss)
+        train_it = dataloader.as_numpy_iterator()
+    return params
+
+def log_step(epoch, params, g, loss):
+    """
+    Simple function to print out summaries after each epoch
+    """
+    print(f'EPOCH: {epoch + 1} | LOSS: {loss:.4f}')
+    # Log embeddings!
+    print('\nLearned embeddings:')
+    print(f'word: "tyranny" neighbors: {nearest_neighbors("tyranny", params)}\n')
+
+```
+
+```{python}
+def nearest_neighbors(word: str, vectors: jnp.ndarray, k:int = 3) -> List[str]:
+    """
+    Finds k nearest neighbors to the given word using cosine similarity.
+
+    Parameters
+    ----------
+    word: str
+        Target word as a string.
+    vectors:  
+        Trained Embeddings
+    k: int
+        Number of nearest neighbors to return
+
+    Returns
+    -------
+    List[str]
+        Nearest neighbor tokens to word token
+    """
+    index = tokens_to_ids(word, word_to_index)
+    query = vectors[index[0]]
+
+    # Normalize vectors and query
+    vectors_norm = vectors / jnp.linalg.norm(vectors, axis=1, keepdims=True)
+    query_norm = query / jnp.linalg.norm(query)
+
+    # Compute cosine similarities
+    similarities = jnp.dot(vectors_norm, query_norm)
+
+    # Get top 10 indices (excluding the word itself)
+    top_indices = jnp.argsort(similarities)[::-1][1:k+1]
+
+    # Map back to words
+    return [index_to_word[idx] for idx in np.array(top_indices)]
+```
+
+## Train
+
+Alright, let's get this show on the road. This can take a bit of time to complete. On my laptop it takes about an hour to finish training. While training after each epoch we will print out the learned embeddings for the word "tyranny" to see how our learning is evolving.
+
+```{python}
+trained_params = train(params)
+```
+
+# Inspect learned embeddings
+
+Let's print out a few neighbor tokens to a few selected tokens and check if these make any sense.
+
+Looking at the results of the nearest neighbors we can see that there is some sense to the learned vector embeddings. The nearest neighbors to the state of Pennsylvania are other states, the nearest neigbor to nobles are the church, and that of war is criminal. 
+
+```{python}
+nearest_neighbors("pennsylvania", trained_params, 5)
+```
+
+```{python}
+nearest_neighbors("nobles", trained_params, 5)
+```
+
+```{python}
+nearest_neighbors("war", trained_params, 5)
+```
+
+# Conclusion
+
+In this short post we did a deep dive on the Skip-Gram with Negative sampling algorithm. Specifically, we focused on how training examples are generated, how the loss function is defined, and putting it all together manually using open-source scraped data with JAX.  

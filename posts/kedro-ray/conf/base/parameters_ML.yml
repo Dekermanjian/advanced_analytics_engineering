@@ -1,0 +1,33 @@
+# This is a boilerplate parameters config generated for pipeline 'ML'
+# using Kedro 0.19.11.
+#
+# Documentation for this file format can be found in "Parameters"
+# Link: https://docs.kedro.org/en/0.19.11/configuration/parameters.html
+testing_window: 12
+n_ahead: 12
+
+model_config:
+  error: 0.2
+  amplitude_trend: 1.0
+  ls_trend:
+    alpha: 48
+    beta: 2
+  beta_fourier:
+    mu: 0
+    sigma: 0.5
+
+sampler_config:
+  draws: 1000
+  tune: 1000
+  chains: 4
+  target_accept: 0.95
+  mp_ctx: spawn
+
+mlflow_config:
+  use_mlflow: true
+  log_artifacts: true
+  experiment_name: climate-brazil
+  tags:
+    model: structural time-series
+    trend_component: Gaussian Process
+    seasonal_component: Fourier

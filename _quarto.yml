@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Advanced Analytics & Engineering"
+  google-analytics: 'G-36QNMRMV1B'
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/Dekermanjian
+      - icon: linkedin
+        href: http://www.linkedin.com/in/jonathan-dekermanjian
+format:
+  html:
+    grid: 
+      body-width: 1000px
+      sidebar-width: 300px
+      margin-width: 200px
+    theme:
+      light:
+        - lux
+        - brand
+        - light.scss
+      dark:
+        - darkly
+        - brand
+        - dark.scss
+    css: styles.css
+    toc: true
+    toc-location: left
+    highlight-style: gruvbox
+
+
+

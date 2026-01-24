@@ -1,0 +1,16 @@
+{
+  "hash": "af5bf2b55686bcf2484135424d243883",
+  "result": {
+    "engine": "jupyter",
+    "markdown": "::: {#fig-test .cell execution_count=1}\n``` {.python .cell-code}\nimport numpy as np\nimport matplotlib.pyplot as plt\n# Prepare data\nx = np.linspace(0, 2 * np.pi, 400)\ny = np.sin(x)\n\n# Create figure and plot\nplt.figure(figsize=(6, 4))\nplt.plot(x, y, label='sin(x)', color='teal', linewidth=2)\n\n# Add labels and title\nplt.title(\"Simple Sine Wave\")\nplt.xlabel(\"x\")\nplt.ylabel(\"sin(x)\")\nplt.legend()\n\n# Show grid and display\nplt.grid(True)\nplt.tight_layout()\nplt.show()\n```\n\n::: {#fig-test-1 .cell-output .cell-output-display}\n```{=html}\n<pre style=\"white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace\"></pre>\n```\n\nExpected correlation does not exist due to IIA.\n:::\n\n::: {.cell-output .cell-output-display}\n![](tmp_files/figure-html/fig-test-output-2.png){#fig-test-2 width=565 height=372}\n:::\n:::\n\n\n",
+    "supporting": [
+      "tmp_files"
+    ],
+    "filters": [],
+    "includes": {
+      "include-in-header": [
+        "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js\" integrity=\"sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==\" crossorigin=\"anonymous\"></script>\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js\" integrity=\"sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==\" crossorigin=\"anonymous\" data-relocate-top=\"true\"></script>\n<script type=\"application/javascript\">define('jquery', [],function() {return window.jQuery;})</script>\n"
+      ]
+    }
+  }
+}

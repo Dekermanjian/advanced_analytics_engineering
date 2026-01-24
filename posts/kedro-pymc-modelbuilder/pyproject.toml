@@ -1,0 +1,65 @@
+[build-system]
+requires = [ "setuptools",]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.9"
+name = "kedro_framework"
+readme = "README.md"
+dynamic = [ "version",]
+dependencies = [ "ipython>=8.10", "jupyterlab>=3.0", "notebook", "kedro[jupyter]~=0.19.11", "kedro-datasets[pandas-csvdataset, pandas-exceldataset, pandas-parquetdataset, plotly-plotlydataset, plotly-jsondataset, matplotlib-matplotlibwriter]>=3.0", "kedro-viz>=6.7.0", "scikit-learn~=1.5.1", "seaborn~=0.12.1",]
+
+[project.scripts]
+kedro-framework = "kedro_framework.__main__:main"
+
+[project.optional-dependencies]
+dev = [ "pytest-cov~=3.0", "pytest-mock>=1.7.1, <2.0", "pytest~=7.2", "ruff~=0.1.8",]
+
+[tool.kedro]
+package_name = "kedro_framework"
+project_name = "kedro_framework"
+kedro_init_version = "0.19.11"
+tools = "['Linting', 'Custom Logging', 'Data Structure', 'Kedro Viz']"
+example_pipeline = "False"
+source_dir = "src"
+
+[tool.ruff]
+line-length = 88
+show-fixes = true
+select = [ "F", "W", "E", "I", "UP", "PL", "T201",]
+ignore = [ "E501",]
+
+[project.entry-points."kedro.hooks"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.setuptools.dynamic.version]
+attr = "kedro_framework.__version__"
+
+[tool.setuptools.packages.find]
+where = [ "src",]
+namespaces = false
+
+[tool.interrogate]
+ignore-init-method = false
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = false
+ignore-setters = false
+ignore-overloaded-functions = false
+fail-under = 80
+# example values
+exclude = ["tests", "docs", "build", "src/kedro_framework/__main__.py"]
+ext = []
+# possible values: 0 (minimal output), 1 (-v), 2 (-vv)
+verbose = 2
+quiet = false
+whitelist-regex = []
+color = true
+omit-covered-files = false

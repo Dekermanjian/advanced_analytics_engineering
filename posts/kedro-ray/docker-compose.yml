@@ -1,0 +1,113 @@
+services:
+  climate-brazil:
+    profiles:
+      - manual
+    build: .
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow-tracking-server:5000
+    depends_on:
+      - mlflow-tracking-server
+      - minio
+      - mlflow-logs
+
+  mlflow-tracking-server:
+    image: ghcr.io/mlflow/mlflow:v2.19.0
+    command: >
+      bash -c "
+        pip install -U pip
+        pip install psycopg2-binary boto3
+        mlflow server --host 0.0.0.0 --port 5000 --workers 1
+      "
+    ports:
+      - 5050:5000
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mlflow-logs:5432/mlflowdb
+      - MLFLOW_ARTIFACTS_DESTINATION=s3://mlflow
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - MLFLOW_S3_IGNORE_TLS=true
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    depends_on:
+      - minio
+      - mlflow-logs
+    stop_grace_period: 1s
+
+  minio:
+    container_name: minio
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    secrets:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    environment:
+      - MINIO_ROOT_USER_FILE=/run/secrets/AWS_ACCESS_KEY_ID
+      - MINIO_ROOT_PASSWORD_FILE=/run/secrets/AWS_SECRET_ACCESS_KEY
+      - MINIO_DEFAULT_BUCKETS=mlflow
+    volumes:
+      - minio_data:/bitnami/minio/data
+
+  mlflow-logs:
+    image: postgres:16.4
+    secrets:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/POSTGRES_USER
+      - POSTGRES_PASSWORD_FILE=/run/secrets/POSTGRES_PASSWORD
+      - POSTGRES_DB=mlflowdb
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_mlflow_db:/var/lib/postgresql/data
+
+  ray-head:
+    build: 
+      dockerfile: ray.Dockerfile
+    shm_size: 24G
+    command: >
+      ray start
+        --head
+        --port 6379
+        --dashboard-host 0.0.0.0
+        --ray-client-server-port 10001
+        --block
+    ports:
+      - "10001:10001"
+      - "6379:6379"
+      - "8265:8265"
+    deploy:
+      resources:
+        limits:
+          memory: 24G
+
+  ray-worker:
+    build: 
+      dockerfile: ray.Dockerfile
+    shm_size: 24G
+    command: >
+      ray start
+        --address ray-head:6379
+        --block
+    depends_on:
+      ray-head:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 24G
+
+volumes:
+  pg_mlflow_db:
+  minio_data:
+
+secrets:
+  AWS_ACCESS_KEY_ID:
+    environment: AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY:
+    environment: AWS_SECRET_ACCESS_KEY
+  POSTGRES_USER:
+    environment: POSTGRES_USER
+  POSTGRES_PASSWORD:
+    environment: POSTGRES_PASSWORD
