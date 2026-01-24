@@ -5,3 +5,6 @@
 /_site/
 **/.jupyter_cache/
 **/.ruff_cache/
+**/*.csv
+**/*.arrow
+**/checkpoints/
