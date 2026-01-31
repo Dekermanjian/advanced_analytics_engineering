@@ -10,23 +10,34 @@ draft: True
 execute: 
   cache: true
   eval: false
+bibliography: references.bib
+nocite: |
+  @*
 ---
 
 # Overview
 
-In this post we go over contextual embeddings and recurrent neural networks. Briefly describing their inner workings and walking through an implementation of Embeddings from Language Models (ELMo), basically from scratch using the Jax ecosystem.
+We go over contextual embeddings and recurrent neural networks. Describing their inner workings and walking through an implementation of Embeddings from Language Models (ELMo) from scratch, using the JAX ecosystem.
 
 # Introduction
 
-In previous posts we learned what embeddings are, why they are important, and we got our hands dirty by implementing two of the earliest foundational methods. If you need a refresher or just hadn't seen them you can check out my posts on [GloVe](/posts/glove_embeddings/index.qmd) and [Skip-gram with negative sampling](/posts/skipgram_embeddings/index.qmd). In this post we will briefly review the differences between static and contextual embeddings, we will discuss some of the methodologies used to create contextual embeddings leading us to learn about recurrent neural networks, and finally we will look at the architecture and implement from scratch Embeddings from Language Models (ELMo).
+In previous posts we learned what embeddings are, why they are important and how they can be levaraged in practice. We got our hands dirty by implementing two of the earliest foundational methods GloVe and Skip-gram with negative sampling (SGNS). 
+
+If you need a refresher or just hadn't seen them you can check out my posts on [GloVe](/posts/glove_embeddings/index.qmd) and [SGNS](/posts/skipgram_embeddings/index.qmd). 
+
+In this post we will briefly review the differences between static and contextual embeddings and discuss some of the methodologies used to create contextual embeddings. Leading us to the architecture of recurrent neural networks and how they are leveraged in contextual embeddings. 
+
+Finally, we will delve into the architecture of Embeddings from Language Models (ELMo), and implement it from scratch.
 
 # From Static to Contextual Embeddings
 
-As a reminder, an advantage of contextual embeddings is the ability to discriminate between polysemous words. For example, the word "ship" can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. In contrast, contextual embeddings are able to disambiguate the two meanings of the same word. 
+As a reminder, a strength of contextual embeddings is the ability to discriminate between polysemous words. For example, the word "ship" can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. In contrast, contextual embeddings are able to disambiguate the two meanings of the same word. 
 
-Our vectors need to be aware of context which means that now the sequence in which words occur must influence the resultant vectors. For example, if we look at the sentences "I need to ship it." and "I own a ship." to disambiguate the word "ship" you need to know about the words before and after "ship". This is different than when we were learning embeddings using Skip-gram with Negative Sampling (SGNS) where we used local context in training to predict a target word's context words then during inference we used a collapsed averaged representation of target words across our entire corpus. 
+Since our vectors now need to be aware of context, the sequence in which words occur must influence the resultant vectors. Importantly, not only during training must our vectors be aware of context but also during inference. Therefore, we must build vector embeddings dynamically (on the fly) during inference to ensure that this is the case. This contrasts with earlier methods like SGNS or GloVe:
 
-Similarly, when we implemented GloVe we again used local contexts to create a word-word co-occurrence matrix and then learn our embeddings by factorizing that matrix resulting in again an averaged vector embedding during inference for a given word across our corpus.
+* SGNS trains a vector for each word by predicting its local context, but at inference it simply looks up the pre‑computed static vector—there’s no per‑sentence adaptation.
+
+* GloVe builds a word‑co‑occurrence matrix and factorizes it, again yielding one static vector per word that is reused for every sentence.
 
 One way we include information from sequences is by using recurrent computation. This brings us to the topic of recurrent neural networks.
 
@@ -45,7 +56,7 @@ $$
 y_{t} = \psi(W_{y}h_{t} + b_{y})
 $$
 
-Where $x_{t}$, $h_{t}$, and $y_{t}$ are the input, hidden state, and output at time t, respectively. The weight matrices $W$ are linear operators that projects variables from one space into another. For example, $W_{x}$ projects $x_{t}$ into the hidden state space. Notice that these weight matrices are not indexed by t, signifying that they are shared across time and allows RNNs to generalize to varying sequence lengths.  
+Where $x_{t}$, $h_{t}$, and $y_{t}$ are the input, hidden state, and output at time t, respectively. The weight matrices $W$ are linear operators that project variables from one space into another. For example, $W_{x}$ projects $x_{t}$ into the hidden state space. Notice that these weight matrices are not indexed by t, signifying that they are shared across time and allows RNNs to generalize to varying sequence lengths.  
 
 ::: {style="background-color:#dcdce0; padding:1em; border-radius:6px;"}
 ```{mermaid}
@@ -65,14 +76,14 @@ flowchart BT
 :::
 
 
-The Elman RNN maintains only one hidden state where at each time step the same computation must compress all past information in the single $h_{t}$. This is challenging to do for longer time dependencies. Additionally, Elman RNNs are prone to vanishing/exploding gradients due to the gradients needing to repeatedly pass through $W_{h}$ and the nonlinearity $\phi$, via backpropagation through time. In practice, these limitations are enough to opt for a modified RNN architecture. 
+The Elman RNN maintains only one hidden state, at each time step the same computation must compress all past information into a single $h_{t}$. This is challenging to do for longer time dependencies. Additionally, Elman RNNs are prone to vanishing/exploding gradients due to the gradients needing to repeatedly pass through $W_{h}$ and the nonlinearity $\phi$, via backpropagation through time. In practice, these limitations are enough to opt for a modified RNN architecture. 
 
 
 ## Long Short-Term Memory
 
-A Long Short-Term Memory (LSTM) RNN is an architectural extension of the standard Elman RNN designed to mitigate the vanishing gradient problem when modeling long-range dependencies. The LSTM introduces gating mechanisms (input, forget, and output gates) that explicitly regulate how much past information is retained and how much new information is incorporated, rather than relying on implicit storage in the recurrent weights as in an Elman RNN. Crucially, the LSTM maintains a cell state whose update follows an additive structure, forming a linear path through time. This additive dynamics enables more stable gradient propagation and substantially reduces vanishing gradients during training.
+A Long Short-Term Memory (LSTM) RNN is an architectural extension of the standard Elman RNN designed to mitigate the vanishing gradient problem when modeling long-range dependencies. The LSTM introduces gating mechanisms (input, forget, and output gates) that explicitly regulate how much past information is retained and how much new information is incorporated, rather than relying on implicit storage in the recurrent weights as in an Elman RNN. Crucially, the LSTM maintains a cell state whose update follows an additive structure, forming a linear path through time. These additive dynamics enables more stable gradient propagation and substantially reduces vanishing gradients during training.
 
-Let's dive a little bit deeper here. Given an input at time $t$ $x_{t}$ and a previous hidden state $h_{t-1}$ and a previous cell state $c_{t-1}$, we have the following equations that control the evolution of the hidden and cell states over time.
+Let's dive a little bit deeper here. Given an input at time $t$, $x_{t}$, and a previous hidden state $h_{t-1}$ and a previous cell state $c_{t-1}$, we have the following equations that control the evolution of the hidden and cell states over time.
 
 First, the forget gate $f_{t}$ is a parametric control for the signal that should be propagated forward from the prior cell state $c_{t-1}$ to the current cell state $c_{t}$ that we are computing.
 
@@ -146,7 +157,9 @@ flowchart BT
 
 # Embeddings from Language Models
 
-Now that we briefly reviewed RNNs, specifically LSTMs, we are ready to talk about a deep learning architecture used to generate contextual embeddings. The influential Embeddings from Language Models (ELMo) architecture. Before transformers became popular ELMo was one of the dominant models for generating contextual embeddings. ELMo blends character‑level convolutional neural networks (CNN) token encodings for handling out-of-vocabulary (OOV) words, multi‑layer bidirectional LSTMs to capture both left-to-right and right-to-left long range dependencies, and a trainable weighted sum of their hidden states to produce word‑level embeddings that are both context‑sensitive and adaptable through fine‑tuning.
+Now that we better understanding of RNNs, specifically LSTMs, we are ready to talk about a deep learning architecture used to generate contextual embeddings. The influential Embeddings from Language Models (ELMo) architecture. 
+
+Before transformers became popular ELMo was one of the dominant models for generating contextual embeddings. ELMo blends character‑level convolutional neural networks (CNN) token encodings for handling out-of-vocabulary (OOV) words, multi‑layer bidirectional LSTMs to capture both left-to-right and right-to-left long range dependencies, and a trainable weighted sum of their hidden states to produce word‑level embeddings that are both context‑sensitive and adaptable through fine‑tuning.
 
 
 ## Architecture
@@ -282,9 +295,37 @@ $$
 
 # Hands-on Implementation
 
-Okay then, time to get our hands dirty! We are going to build an ELMo model from scratch using the JAX deep learning ecosystem. Specifically, we will pre-train the model using the aforementioned language modeling objective. Later, we will fine-tune our scalar mix on a downstream task to evaluate our embeddings. I hope you enjoy!
+Okay then, time to get our hands dirty! We are going to build an ELMo model from scratch using the JAX deep learning ecosystem. 
+
+Specifically, we will pre-train the model using the aforementioned language modeling objective. Subsequently, we will fine-tune our scalar mix on a downstream task to evaluate our embeddings. I hope you enjoy!
+
+In this part of the post, I’ll collapse all but the most important code cells, leaving only the ones I’ll discuss in depth open.
 
 ## Processing Utilities
+
+To get started we are going to need some toy data. I chose the c4 dataset provided by AllenAI because it had nice long textual examples that were relatively clean. 
+
+In order to keep things running on a local machine I took one million examples for training and 50,000 examples for validation. I personally streamed the data to my local disk for faster and easier of reinitialization. However, with the streaming dataset utility function we define you can also just stream the data directly from HuggingFace.
+
+We also need to initialize our vocabulary, at the character level for our character level CNN and at the word level to feed into our language modeling head. 
+
+For our character level vocabulary we simply use the characters that you'd typically see in english text, in addition to an index for a padding character and an unknown character. 
+
+Our word vocabulary is specified very similarly to how we have done it in the previous posts. We build a word vocabulary of up to 100,000 words with a minimum word frequency of 20 words. 
+
+:::{.callout-note}
+
+We use a simple tokenizer, splitting text on spaces, which is not canonically what ELMo utilizes in the original paper but works almost just as well.
+
+:::
+
+Finally, as I eluded to earlier we need a way to stream batches of our data to the model as we are training. The utility defined below handles shuffling, tokenizing, and encoding both characters and words before yielding them to the model. 
+
+:::{.callout-important}
+
+I have elected to use non-overlapping sequences because it is a lot faster and I am running on a local machine. For best results it would be best to use overlapping sequences. You can adjust this in the `__iter__` method.
+
+:::
 
 ```{python}
 #| code-fold: true
@@ -394,9 +435,7 @@ def build_word_vocab(dataset, batch_size=32, min_freq=20, max_vocab=100_000) -> 
         Iterable of records where each record is a mapping
         (``dict``) that contains a ``"text"`` key holding the raw string.
     batch_size
-        Number of records processed in a single counting pass.  Small
-        batches reduce peak memory usage when the underlying dataset is
-        large, but the final counts are the union of all batches.
+        Number of records processed in a single counting pass.
     min_freq
         Minimum frequency required for a word to be included in the
         resulting vocabularies.
@@ -415,9 +454,6 @@ def build_word_vocab(dataset, batch_size=32, min_freq=20, max_vocab=100_000) -> 
 
     Notes
     -----
-    * The function expects the dataset rows to contain a ``text`` field.
-      If your dataset uses a different key, adapt the ``row["text"]`` line
-      accordingly.
     * The tokenisation strategy is simplistic: it uses the standard
       ``str.split()`` which splits on any whitespace.  For more advanced
       tokenisation pipelines (e.g., handling sub‑words, hyphenated
@@ -457,7 +493,7 @@ def build_word_vocab(dataset, batch_size=32, min_freq=20, max_vocab=100_000) -> 
 class StreamingTextDataLoader:
     """
     A streaming data loader for text corpora that yields batches of tokenized
-    sequences suitable for training language models or other sequence‑based tasks.
+    sequences.
 
     This class supports streaming from an arbitrary dataset, automatically shuffling,
     tokenizing into fixed‑length windows (with stride = seq_len), and encoding both
@@ -470,16 +506,13 @@ class StreamingTextDataLoader:
         A dataset yielding rows that contain a text field (e.g., "text", "sentence",
         "review", or "content").  Each row should be a mapping from column name to value.
     vocab: dict[str, int] | Vocab object
-        Mapping from token strings to unique integer IDs.  Used to convert words into
-        ``word_ids`` and optionally for character vocabulary lookup.
+        Mapping from token strings to unique integer IDs.
     char_to_id: dict[str, int]
-        Mapping from characters to their integer IDs; needed for ``char_encode``.
+        Mapping from characters to their integer IDs.
     seq_len: int
-        Length of the input sequence window (number of tokens). Each yielded batch will
-        contain sequences of this size.
+        Length of the input sequence window (number of tokens). Each yielded batch will contain sequences of this size.
     word_len: int
-        Maximum length of each token when encoded at the character level. Tokens longer
-        than this are truncated; shorter ones are padded with ``PAD_CHAR``.
+        Maximum length of each token when encoded at the character level. Tokens longer than this are truncated; shorter ones are padded with ``PAD_CHAR``.
     batch_size: int
         Number of examples to accumulate before yielding a batched dictionary.
     shuffle_buffer: int, optional (default=2048)
@@ -513,8 +546,7 @@ class StreamingTextDataLoader:
     * The class performs a non‑overlapping stride split (`self.token_buffer =
       self.token_buffer[self.seq_len:]`) which can be changed to an overlapping stride
       if desired for better coverage.
-    * All returned arrays are JAX ``jnp`` objects, compatible with downstream ``jax`
-      transformations (e.g., ``vmap``, ``pmap``).
+    * All returned arrays are JAX ``jnp`` objects.
     """
     def __init__(self, ds, vocab, char_to_id, seq_len, word_len, batch_size, shuffle_buffer=2048, seed=0):
         self.ds = ds
@@ -605,6 +637,8 @@ class StreamingTextDataLoader:
 
 ## Build Vocabulary
 
+If you have also opted to save the toy dataset to disk, then the next step is to load it and build the word vocabulary. Note that we have already built the character vocabulary above.
+
 ```{python}
 #| code-fold: true
 
@@ -615,11 +649,34 @@ vocab, _ = build_word_vocab(hf_ds)
 
 ## Define Architecture Components
 
+We went over the bulk of the architecture up above with the diagrams and the LSTM overview, however, I wanted to focus on a component within the character-level CNN called the `highway`. 
+
+The CNN applies a set of parallel one‑dimensional convolutions with varying kernel widths over the character sequences. Each filter’s output is max‑pooled across the temporal dimension, and the pooled features from all filters are concatenated to form a fixed‑size vector. This vector is then fed into a `highway` network, which learns a gated mixture of the raw CNN output and a transformed version of it, yielding the final character‑level embedding.
+
+More specifically, we have our transformed piece of the input vector $x$ defined as
+
+$$
+trans = ReLU(W_{t}x + b_{t})
+$$
+
+and learnable gates defined as
+
+$$
+gate = \sigma(W_{g}x + b_{g})
+$$
+
+and we blend the two together with the following
+
+$$
+highway(x) = gate(x) \odot trans + (1 - gate(x)) \odot x
+$$
+
+You'll notice that it is possible for gates to be zero implying that the raw CNN outputs flow through unchanged. The `highway` layers add robustness to vanisihing/exploding gradients and to noisy CNN outputs. They also allow learning more diverse representations because the network can keep low-level, high-frequency patterns or mix them into higher-level, smoothed features. 
+
 ```{python}
 class Highway(nnx.Module):
     """
-    A simple ``Highway`` network module as introduced in *Hierarchical Multi‑Scale
-    Recurrent Neural Networks* (Srivastava & Salakhutdinov, 2013).
+    A simple ``Highway`` network module
 
     The layer implements the classic gating mechanism that controls how much of the
     transformed input should be let through versus left for a direct residual shortcut.
@@ -627,14 +684,9 @@ class Highway(nnx.Module):
     Parameters
     ----------
     dim : int
-        Dimensionality of the input and output vectors.  This size determines both
-        ``proj`` (feed‑forward) and ``trans`` (gate) linear transformations, which map
-        ``dim`` → ``dim``.
+        Dimensionality of the input and output vectors.
     rngs : nnx.Rngs
-        Random number generators used by the underlying ``nnx.Linear`` layers to
-        create their weights.  The caller typically passes ``nnx.Rngs(seed=...)`` or
-        a sub‑generator (e.g., ``rngs['weights']``) so that model initialisation can be
-        reproducible and/or partitioned across devices.
+        Random number generators.
 
     Returns
     -------
@@ -647,26 +699,16 @@ class Highway(nnx.Module):
 
         where
 
-        * ``proj(x)`` → ``H = relu(proj(x))`` is the transformed (candidate) signal,
-        * ``trans(x)`` → ``T = sigmoid(trans(x))`` is a gate in ``[0, 1]``,
+        * ``proj(x)`` --> ``H = relu(proj(x))`` is the transformed (candidate) signal,
+        * ``trans(x)`` --> ``T = sigmoid(trans(x))`` is a gate in ``[0, 1]``,
         * ``x * (1 - T)`` passes through the original input weighted by the complement of
           the gate.
 
-        The result can be interpreted as:  
-
-        - If the gate ``T`` ≈ 1 → output ≈ H (the transformed path dominates),  
-        - If the gate ``T`` ≈ 0 → output ≈ x (the residual path dominates).
-
-    Notes
-    -----
-    * This implementation deliberately uses **nnx.Linear** (instead of JAX's built‑in
-      ``nn.Dense``) to stay compatible with the ``nnx.Module`` API and to expose a user-
-      supplied RNG for deterministic initialisation.
     """
     def __init__(self, dim, *, rngs: nnx.Rngs):
-        # linear transforms are nnx.Linear
         self.proj = nnx.Linear(dim, dim, rngs=rngs)
         self.trans = nnx.Linear(dim, dim, rngs=rngs)
+
     def __call__(self, x):
         H = jax.nn.relu(self.proj(x))
         T = jax.nn.sigmoid(self.trans(x))
@@ -697,16 +739,11 @@ class CharCNN(nnx.Module):
     filters : Sequence[tuple[int, int]]
         A list of `(width, out_channels)` pairs that specify the
         kernel width and number of output channels for each 1‑D
-        convolution.  For example, ``[(3, 50), (4, 50), (5, 50)]``
-        creates three separate convolutions with widths 3, 4, and 5
-        respectively.  The concatenated output dimension of the
-        convolution stack equals the sum of all ``out_channels``.
+        convolution.
 
     highway_layers : int
         Number of Highway layers applied after the convolution
-        stack.  Each Highway layer implements a gated residual
-        connection and is useful for learning identity mappings
-        while still providing non‑linear transformations.
+        stack.
 
     proj_dim : int | None, default ``None``
         If given, a final linear projection is applied to the
@@ -716,9 +753,7 @@ class CharCNN(nnx.Module):
         convolution channels.
 
     rngs : nnx.Rngs
-        Random number generator pool used to initialize weights and
-        biases of the embedding, convolution, Highway, and
-        projection layers.
+        Random number generator.
 
     Notes
     -----
@@ -740,13 +775,10 @@ class CharCNN(nnx.Module):
     -------
     jnp.ndarray
         Character‑derived embedding of shape ``[B, T, proj_dim]`` if a
-        projection layer is supplied, otherwise
-        ``[B, T, total_filters]``.
+        projection layer is supplied, otherwise ``[B, T, total_filters]``.
     """
     def __init__(self, vocab_size, char_dim, filters, highway_layers, proj_dim=None, *, rngs: nnx.Rngs):
-        # embedding
         self.emb = nnx.Embed(vocab_size, char_dim, rngs=rngs)
-        # convolution filters: we'll create a small nnx.Conv for each width
         self.convs = nnx.List([nnx.Conv(
             in_features=char_dim,
             out_features=out_channels,
@@ -763,18 +795,17 @@ class CharCNN(nnx.Module):
         if proj_dim is not None:
             self.proj = nnx.Linear(total_filters, proj_dim, rngs=rngs)
 
-    def __call__(self, char_ids):  # char_ids: [B, T, W] ints
+    def __call__(self, char_ids):
         B, T, W = char_ids.shape
         # embed -> [B, T, W, D]
-        x = self.emb(char_ids)  # embed handles indexing for you
+        x = self.emb(char_ids)
         # apply convs along the word-length axis: we first reshape to merge batch/time
         x_flat = x.reshape((B*T, W, x.shape[-1]))  # [B*T, W, D]
         conv_outs = []
         for conv in self.convs:
-            # nnx.Conv expects [..., length, channels] then kernel over length
             y = conv(x_flat)  # [B*T, new_len, out_ch]
             y = jax.nn.relu(y)
-            y = jnp.max(y, axis=1)  # max-pool over positions -> [B*T, out_ch]
+            y = jnp.max(y, axis=1)  # max-pool over positions
             conv_outs.append(y)
         x_cat = jnp.concatenate(conv_outs, axis=-1)  # [B*T, total_filters]
         # highways
@@ -783,7 +814,10 @@ class CharCNN(nnx.Module):
         if self.proj_dim is not None:
             x_cat = self.proj(x_cat)  # [B*T, proj_dim]
         return x_cat.reshape((B, T, -1))  # [B, T, embed_dim]
+```
 
+```{python}
+#| code-fold: true
 
 class LSTMCell(nnx.Module):
     """
@@ -793,26 +827,22 @@ class LSTMCell(nnx.Module):
     Parameters
     ----------
     input_dim : int
-        Dimensionality of the input vector ``x_t`` (e.g. word embedding
-        size).
+        Dimensionality of the input vector ``x_t``
     hidden_dim : int
         Number of LSTM hidden units; defines the size of the hidden
         state ``h`` and cell state ``c``.
     dropout : float, default 0.0
         Dropout probability applied to both the input vector and the
-        recurrent hidden state when ``deterministic=False``.  Valid
-        values are in ``[0, 1)``; ``0`` disables dropout.
+        recurrent hidden state when ``deterministic=False``.
     rngs : nnx.Rngs | None, default ``None``
-        RNG pool used for initializing the weight matrices
-        ``Wx`` and ``Wh``.  If ``None`` the default RNG pool from
-        the parent module is used.
+        Random number generators.
 
     Notes
     -----
     * Internal weight maps:
 
-      ``Wx : input_dim: 4·hidden_dim``  
-      ``Wh : hidden_dim: 4·hidden_dim``
+      ``Wx : input_dim: 4 x hidden_dim``  
+      ``Wh : hidden_dim: 4 x hidden_dim``
 
       The four output channels correspond respectively to the
       *input*, *forget*, *output*, and *candidate* gates.
@@ -884,29 +914,28 @@ class BiLSTMLayer(nnx.Module):
     Parameters
     ----------
     in_dim : int
-        Dimensionality of input tokens (`D` in the shape `(B, T, D)`).
+        Dimensionality of input tokens.
     hidden_dim : int
         Size of the hidden state in each direction (`h` and `c`).
     dropout : float, default 0.0
         Dropout probability applied inside each :class:`LSTMCell`.  The
         same dropout probability is used for both forward and backward
-        streams.  Valid values are in ``[0, 1)``; ``0`` disables dropout.
+        streams.
     rngs : nnx.Rngs | None, default ``None``
-        RNG pool used to initialise the two :class:`LSTMCell` instances.
-        If ``None`` the module inherits the RNG from its parent.
+        Random number generators
 
     Notes
     -----
-    * **RNG handling** –  
+    * **RNG handling** -  
       When ``deterministic=False`` a single ``jax_rng`` is split once
       into two keys (for forward and backward).  These keys are then
       split further into a per‑time‑step key that is passed to
       :class:`LSTMCell`.  For deterministic execution ``rngs_fwd`` and
       ``rngs_bwd`` are lists of ``None``.
-    * **State management** –  
+    * **State management** -  
       Each direction starts from a zero initial hidden and cell state of
       shape ``(B, hidden_dim)``.
-    * **Output dimensions** –  
+    * **Output dimensions** -  
       For an input of shape ``(B, T, D)`` the three returned tensors have
       shapes:
         * ``hs_fwd``: ``(B, T, hidden_dim)``
@@ -917,9 +946,9 @@ class BiLSTMLayer(nnx.Module):
     -------
     tuple
         ``(hs_fwd, hs_bwd, hs_concat)``
-        * ``hs_fwd`` – hidden states produced by the forward LSTM,
-        * ``hs_bwd`` – hidden states produced by the backward LSTM,
-        * ``hs_concat`` – concatenation of ``hs_fwd`` and ``hs_bwd``.
+        * ``hs_fwd`` - hidden states produced by the forward LSTM,
+        * ``hs_bwd`` - hidden states produced by the backward LSTM,
+        * ``hs_concat`` - concatenation of ``hs_fwd`` and ``hs_bwd``.
 
     """
     def __init__(self, in_dim, hidden_dim, dropout=0.0, *, rngs=None):
@@ -966,10 +995,7 @@ class StackedBiLSTM(nnx.Module):
     A stack of bidirectional LSTM layers implemented with :class:`BiLSTMLayer`.
 
     Each layer receives the concatenated hidden states of its predecessors
-    (``h_fwd`` || ``h_bwd``) as input, thus the input dimensionality of
-    subsequent layers doubles relative to the first layer. This design is
-    common in sequence‑to‑sequence and encoder‑decoder architectures where
-    both forward and backward context are preserved.
+    (``h_fwd`` || ``h_bwd``) as input.
 
     Parameters
     ----------
@@ -979,40 +1005,24 @@ class StackedBiLSTM(nnx.Module):
         will be `2 * hidden_dim`.
     hidden_dim : int
         Hidden size of each unidirectional LSTM within every
-        :class:`BiLSTMLayer`.  The actual output of a layer therefore
+        :class:`BiLSTMLayer`.  The actual output of a layer
         has shape ``(B, T, 2 * hidden_dim)``.
     num_layers : int
         Number of stacked bidirectional layers.
     dropout : float, default 0.0
-        Dropout probability applied inside each :class:`LSTMCell`.  Dropout
-        is *only* applied when ``deterministic=False``; otherwise it is
-        bypassed.
+        Dropout probability applied inside each :class:`LSTMCell`.
     rngs : nnx.Rngs | None, default ``None``
-        RNG pool used to initialise all child modules.  ``None`` defaults
-        to the parent module’s RNG.
-
-    Notes
-    -----
-    * **State propagation** –  
-      Each layer starts with its own zero initial hidden/cell states
-      internally when calling its :class:`BiLSTMLayer`. The forward and
-      backward states are returned separately for potential analysis or
-      debugging.
-    * **RNG workflow** –  
-      When ``deterministic=False`` the input ``jax_rng`` is split once
-      per layer, providing each :class:`BiLSTMLayer` with a distinct
-      RNG.  When ``deterministic=True`` no RNG is used and all
-      dropout calls are bypassed.
+        Random number generators
 
     Returns
     ------- 
-      1. ``outs`` – A list containing the *raw input* followed by the
+      1. ``outs`` - A list containing the *raw input* followed by the
          concatenated output of each layer.  Hence ``len(outs) ==
          num_layers + 1`` and the last element has shape
          ``(B, T, 2 * hidden_dim)``.
-      2. ``fwd_states`` – A list of the forward hidden states from each
+      2. ``fwd_states`` - A list of the forward hidden states from each
          layer (shape ``(B, T, hidden_dim)``).
-      3. ``bwd_states`` – A list of the backward hidden states from each
+      3. ``bwd_states`` - A list of the backward hidden states from each
          layer (shape ``(B, T, hidden_dim)``).
 
     """
@@ -1046,8 +1056,6 @@ class LMHead(nnx.Module):
 
     The module consists of a single linear transformation that maps the
     last hidden dimension of the model to a vector of size ``vocab_size``.
-    It is intended to be used as the final layer of a causal or
-    bidirectional language model.
 
     Parameters
     ----------
@@ -1056,22 +1064,12 @@ class LMHead(nnx.Module):
     vocab_size : int
         Size of the target vocabulary (number of output logits).
     rngs : nnx.Rngs
-        RNG pool used to initialise the underlying linear layer.
-
-    Notes
-    -----
-    * **Output shape** – If ``h`` has shape ``(B, T, hidden_dim)``, the
-      method returns logits of shape ``(B, T, vocab_size)``.
-    * The implementation uses :class:`flax.nnx.Linear`, which applies a
-      bias term internally.  No activation is applied; the logits are
-      typically passed to ``jax.nn.log_softmax`` or cross‑entropy loss
-      during training.
+        Random number generators
 
     Returns
     -------
     jax.numpy.ndarray
-        Logits of shape ``(B, T, vocab_size)`` ready for loss
-        computation or inference.
+        Logits of shape ``(B, T, vocab_size)``
 
     """
     def __init__(self, hidden_dim, vocab_size, *, rngs: nnx.Rngs):
@@ -1081,15 +1079,31 @@ class LMHead(nnx.Module):
 
 ```
 
+
+We define our ELMo model by initializing and chaining together the subcomponents:
+
+1. Character Level CNN
+2. Bidirectional LSTM
+3. Language Modeling Heads
+
+In addition, we also initialize ELMo's scalar mix parameters that are used to adapt the embeddings during fine-tuning on downstream specific tasks, and we define model regularization in the form of dropout. Our ELMo model has three layers of dropout, at the input layer, the LSTM layer, and the output layer. 
+
+In our implementation you'll notice we project outputs into a common dimension to ensure the dimensional correctness for matrix multiplication, and you'll also notice that the method `forward_embeddings` is only used during fine-tuning to tune the scalar mix parameters on downstream specific tasks. 
+
+
+:::{.callout-important}
+
+Output dropout regularizes language-model training, not downstream embeddings. Scalar-mixed embeddings themselves are not dropout-regularized in this implementation.
+
+:::
+
 ```{python}
 class ElmoModel(nnx.Module):
     """
-    ELMo‑style character‑level language model.
-
     The model implements the core components of the original ELMo
     architecture: a character‑level CNN that produces sub‑word
     representations, a stack of bidirectional LSTMs that encode the
-    sentence, and forward/backward language‑model heads.  A
+    sentence, and forward/backward language‑model heads. A
     *scalar‑mix* (parameterised by a softmax over learnable weights)
     combines the character‑CNN output and every LSTM layer into a
     fixed‑dimensional semantic vector (`common_dim`).  This vector can
@@ -1110,7 +1124,7 @@ class ElmoModel(nnx.Module):
         Dimensionality of the output of the projection layer that comes
         after the character CNN.
     common_dim : int
-        Dimensionality of the final ELMo embedding (the “common space”).
+        Dimensionality of the final ELMo embedding.
     hidden_dim : int
         Hidden state size of each BiLSTM cell.
     num_layers : int
@@ -1143,7 +1157,7 @@ class ElmoModel(nnx.Module):
     * The scalar mix treats the character‑CNN output as layer 0 and
       each BiLSTM layer as a subsequent layer.  The weight vector
       (`self.scalar_weights`) is soft‑maxed so that the weights sum
-      to 1.  The result is scaled by the learnable `gamma` parameter.
+      to 1. The result is scaled by the learnable `gamma` parameter.
     * During evaluation (``deterministic=True``) drop‑outs are disabled
       and the same provided RNG is used to keep the computation
       deterministic.
@@ -1157,7 +1171,7 @@ class ElmoModel(nnx.Module):
         -------
         char_embs : jnp.ndarray
             The raw output of the character CNN, shape
-            `(batch, seq_len, word_len, proj_dim)`.
+            `(batch, seq_len, proj_dim)`.
         fwd_states : List[jnp.ndarray]
             Forward LSTM states for each of the ``num_layers`` layers,
             each of shape `(batch, seq_len, hidden_dim)`.
@@ -1200,27 +1214,26 @@ class ElmoModel(nnx.Module):
                  proj_dim, common_dim, hidden_dim, num_layers, word_vocab_size,
                  input_dropout=0.1, lstm_dropout=0.1, output_dropout=0.1, *,
                  rngs: nnx.Rngs):
-        # --- Submodules ---
+        # Submodules
         self.char_cnn = CharCNN(char_vocab_size, char_dim, filters, highway_layers, proj_dim=proj_dim, rngs=rngs)
-        
         self.bilstm = StackedBiLSTM(proj_dim, hidden_dim, num_layers, dropout=lstm_dropout, rngs=rngs)
         self.fwd_head = LMHead(hidden_dim, word_vocab_size, rngs=rngs)
         self.bwd_head = LMHead(hidden_dim, word_vocab_size, rngs=rngs)
 
-        # --- Scalar mix for ELMo embeddings ---
+        # Scalar mix for ELMo embeddings
         self.common_dim = common_dim
         self.scalar_weights = nnx.Param(jnp.zeros(num_layers + 1))
         self.gamma = nnx.Param(jnp.array(1.0))
 
-        # --- Projection layers to common_dim (NNX-safe) ---
+        # Projection layers to common_dim
         self.layer_projections = nnx.List()
 
-        # CharCNN output: proj_dim → common_dim
+        # CharCNN output to common dim
         self.layer_projections.append(
             nnx.Linear(proj_dim, common_dim, rngs=rngs)
         )
 
-        # BiLSTM layers: (2 * hidden_dim) → common_dim
+        # BiLSTM layers (2 * hidden_dim) to common_dim
         for _ in range(num_layers):
             self.layer_projections.append(
                 nnx.Linear(2 * hidden_dim, common_dim, rngs=rngs)
@@ -1286,7 +1299,10 @@ class ElmoModel(nnx.Module):
 
 ## Loss Function
 
+We have already discussed the learning objective, below is an implementation of a masked cross entropy loss function that masks padding from the loss computation. 
+
 ```{python}
+#| code-fold: true
 #| eval: false
 
 def masked_cross_entropy(logits, targets, pad_id=0):
@@ -1318,16 +1334,6 @@ def masked_cross_entropy(logits, targets, pad_id=0):
         tokens plus a small constant ``1e-12`` to avoid division by
         zero.
 
-    Notes
-    -----
-    * ``jax.nn.log_softmax`` is applied along the last dimension
-      (the vocabulary axis).
-    * ``jax.nn.one_hot`` is used to create a one‑hot representation of
-      ``targets`` which allows broadcasting against the log‑probabilities.
-    * The mask is cast to ``float32``; any token whose target equals
-      ``pad_id`` will contribute a multiplier of ``0`` to the loss and
-      therefore will not affect the final average.
-
     """
     vocab_size = logits.shape[-1]
     log_probs = jax.nn.log_softmax(logits, axis=-1)
@@ -1339,6 +1345,15 @@ def masked_cross_entropy(logits, targets, pad_id=0):
 
 
 ## Define Training Loop
+
+Next, we define the training loop, which encompasses the standard steps performed for each batch: executing the forward pass, computing gradients, and updating model parameters. This requires initializing the model and optimizer, configuring checkpointing to persist training state, and iterating over the training step for the desired number of epochs. These components follow conventional neural network training practice and do not introduce any ELMo-specific complexity.
+
+There are, however, two practical considerations worth noting:
+
+1. We intentionally select hyperparameters corresponding to a reduced ELMo configuration, as the full-scale model is computationally infeasible on the available hardware.
+2. We limit pre-training to five epochs for the same reason.
+
+Despite these constraints, even this abbreviated pre-training regimen yields clearly observable improvements on downstream tasks, as demonstrated in subsequent sections.
 
 ```{python}
 #| code-fold: true
@@ -1368,8 +1383,7 @@ def train_step(optimizer, batch, jax_rng):
           containing the target token indices for the language‑model head.
     jax_rng : jax.random.PRNGKey
         Random number generator used for dropout and other stochastic
-        components of the model.  A new key will be split and passed to
-        the model during the forward pass.
+        components of the model.
 
     Returns
     -------
@@ -1382,19 +1396,6 @@ def train_step(optimizer, batch, jax_rng):
 
     Notes
     -----
-    * Dropout is enabled for the forward pass by passing ``deterministic=False``.
-      During inference or evaluation the optimiser should call the model
-      with ``deterministic=True``.
-    * The loss function internally masks padding tokens using
-      :func:`masked_cross_entropy`.  The forward loss uses the target
-      token at position *i+1* to predict the token at *i*, while the
-      backward loss predicts the preceding token.  This mirrors the
-      bidirectional language‑model objective used in the original
-      ELMo paper.
-    * Gradients are computed using the `nnx.grad` helper which returns
-      a dictionary mapping each leaf parameter in the model to its
-      gradient.  This dictionary is directly handed to
-      ``optimizer.update``.
     * The optimiser should store the model in the ``optimizer.model``
       attribute.  After the update, modifications to ``optimizer.model``
       reflect the new parameters.
@@ -1480,8 +1481,8 @@ optimizer = nnx.ModelAndOptimizer(model, tx)
 
 class ELMoTrainer:
     """
-    A training wrapper for an ELMobidirectional language model
-    implemented with **NNX**.  It handles epoch‑wise training, validation
+    A training wrapper for an ELMo bidirectional language model.  
+    It handles epoch‑wise training, validation
     loss computation, and an early‑stopping strategy.
 
     Parameters
@@ -1494,9 +1495,7 @@ class ELMoTrainer:
         loss after which training is stopped early and the best model
         parameters are restored.
     rng_seed : int, optional (default=0)
-        Seed for the JAX random number generator.  A fresh RNG key is
-        created in the constructor and split during each training step to
-        keep the random streams deterministic across runs.
+        Seed for the JAX random number generator.
 
     Attributes
     ----------
@@ -1513,7 +1512,7 @@ class ELMoTrainer:
         Stored as a JAX ``Mutable`` state so that they can be copied back
         into ``optimizer.model`` on early‑stopping.
     jax_rng : jax.random.PRNGKey
-        Current random key.  Split once per batch in :meth:`train_epoch`.
+        Current random key.
 
     Methods
     -------
@@ -1595,9 +1594,17 @@ class ELMoTrainer:
 ```{python}
 #| code-fold: true
 #| eval: false
+
+# Where to save model checkpoints
 ckpt_dir = "./checkpoints/elmo/state/"
 checkpointer = ocp.StandardCheckpointer()
 ```
+
+:::{.callout-caution}
+
+When creating your checkpoints, ensure you are checkpointing the state from the model that has the updated weights. In our case the one initialized in our trainer class tied to our optimizer and not the initialized `model` from above as those weights will not be updated. 
+
+:::
 
 ```{python}
 #| code-fold: true
@@ -1629,7 +1636,7 @@ for epoch in range(epochs):
         stop = trainer.validate_and_stop(val_loader)
 
     # Save checkpoint each epoch
-    _, state = nnx.split(trainer.optimizer.model)
+    _, state = nnx.split(trainer.optimizer.model) # Make sure you use the model with the updated weights not the initialized model from above
     checkpointer.save(
         os.path.abspath(
             os.path.join(ckpt_dir, f"epoch{ epoch + 1 }")
@@ -1644,7 +1651,11 @@ for epoch in range(epochs):
 
 ## Evaluate Learned Embeddings on Downstream Task
 
+Okay, now that we have a pre-trained ELMo model on hand we are going to fine-tune it for a text classification task. For this task, we are going to use the Stanford Sentiment Treebank v2 (SST‑2) dataset. 
+
 ### Compare Random Weights to Pretrained Model
+
+We are going to compare how a random weights initialized ELMo model performs in comparison to our breifly pre-trained ELMo model. Below we initialize a random model, very much the same way we initialized a model for pre-training. We also load our pre-trained weights from our saved checkpoint.
 
 ```{python}
 #| code-fold: true
@@ -1731,6 +1742,13 @@ restored_state = checkpointer.restore(
 model_trained = nnx.merge(graphdef, restored_state)
 ```
 
+
+:::{.callout-tip}
+
+If you used a GPU for pre-training and you decide that you want to load your pre-trained weights onto a different device. You will need to map the state onto the new device. Below is a code cell that shows you how to do that.
+
+:::
+
 ```{python}
 #| code-fold: true
 #| eval: false
@@ -1769,25 +1787,33 @@ abstract_state = jax.tree.map(
     abstract_state
 )
 
-# 2. Initialize and restore
+# Initialize and restore
 ckpt_dir = "./checkpoints/elmo/state/"
 epoch = 5
 checkpoint_path = os.path.abspath(os.path.join(ckpt_dir, f"epoch{epoch}"))
 
 checkpointer = ocp.StandardCheckpointer()
 
-# Pass abstract_state as the second positional argument ('target')
+# Pass abstract_state
 restored_state = checkpointer.restore(
     checkpoint_path,
     abstract_state 
 )
 
-# 3. Finalize the model
+# Load into the model
 model_trained = nnx.merge(graphdef, restored_state)
 
 ```
 
 ### Classifier Architecture
+
+Okey-dokes, let's put together a classifier head to leverage our ELMo embeddings on our downstream text classification task. The sub-components for our network will be:
+
+1. The ELMo model as the backbone
+2. An attention pooling layer with explicit padding masking to collapse our seqeunces into a single representation
+3. A two-layer multilayer perceptron with dropout and ReLU activation yeilding our logits
+
+It is worth noting that the attention pooling layer here is not the same as attention in transformer models. This layer simply learns a scalar scoring function over token embeddings.
 
 ```{python}
 class AttnPool(nnx.Module):
@@ -1795,52 +1821,30 @@ class AttnPool(nnx.Module):
     Attention‑based pooling layer that collapses a sequence of vectors into a
     single representation using a learnable attention weight.
 
-    The layer is equivalent to
-
-    .. math::   y = \sum_{t=1}^{T} \alpha_t \, x_t , \qquad
-                 \alpha_t = \\operatorname{softmax}(A\,x_t)_t
-
-    where ``A`` is a trainable linear mapping from the input dimension ``dim``
-    to a single scalar.  The attention scores are normalised along the
-    temporal (sequence) dimension, so the output has the same feature
-    dimensionality as each element in the input sequence.
-
     Parameters
     ----------
     dim : int
-        Dimensionality of each input vector (``x.shape[-1]``).  Must equal the
-        feature dimension of the last axis of the input tensor.
+        Dimensionality of each input vector (``x.shape[-1]``).
     rngs : jax.random.PRNGKey
-        PRNG key or collection of keys used to initialise the linear
-        projection.  The key is passed directly to :class:`nnx.Linear`.
+        Random number generator
 
-    Notes
-    -----
-    * **Input shape** – ``x`` must be a 3‑D tensor of shape
-      ``(B, T, D)``, where ``B`` is the batch size, ``T`` is the sequence
-      length, and ``D == dim`` is the feature dimension.
-    * **Output shape** – the module returns a tensor of shape
-      ``(B, D)``, i.e. one vector per batch element that summarises the
-      entire sequence.
-    * **Differentiability** – All operations are JAX‑compatible; gradients
-      flow through the linear projection, the softmax, and the weighted
-      sum.  Consequently the module can be inserted into any neural network
-      that is optimised with ``jax``/NNX.
-    * **Initialisation** – The linear projection is implemented with
-      default Xavier normal weights (as used by :class:`nnx.Linear`), which
-      results in zero‑mean attention scores at the start of training.
-      The ``rngs`` argument allows a user to seed this random initialisation
-      for reproducible experiments.
+    Returns
+    -------
+    jnp.ndarray
+        A tensor of shape ``(batch_size, dim)`` containing the weighted
+        sum of the input sequence.
 
     """
     def __init__(self, dim, *, rngs):
         self.proj = nnx.Linear(dim, 1, rngs=rngs)
 
-    def __call__(self, x):
-        # x: [B, T, D]
+    def __call__(self, x, mask=None):
         scores = self.proj(x).squeeze(-1)
+        if mask is not None:
+            scores = scores + (mask - 1) * 1e9
         weights = jax.nn.softmax(scores, axis=1)
         return jnp.sum(x * weights[..., None], axis=1)
+
 
 class ElmoClassifier(nnx.Module):
     """
@@ -1858,20 +1862,19 @@ class ElmoClassifier(nnx.Module):
     Parameters
     ----------
     elmo_model : ElmoModel
-        Pre‑trained or fine‑tuned ELMo backbone that exposes two forward
+        Pre‑trained ELMo backbone that exposes two forward
         stages:
           * ``forward_backbone(char_ids, deterministic, jax_rng)``
             returns word‑level embeddings and forward/backward LSTM states.
           * ``forward_embeddings(char_embs, fwd_states, bwd_states)``
-        The backbone must expose ``common_dim`` – the dimensionality of the ELMo
+        The backbone must expose ``common_dim`` - the dimensionality of the ELMo
         embeddings that the classifier consumes.
     num_classes : int
         Number of target classes for the downstream classification task.
     dropout_rate : float, default 0.1
         Dropout probability applied before and after the hidden MLP layer.
     rngs : nnx.Rngs
-        PRNG key(s) used for all random operations within the module
-        (e.g., dropout, linear weight initialisation).
+        Random number generators
 
     Attributes
     ----------
@@ -1892,13 +1895,12 @@ class ElmoClassifier(nnx.Module):
     The module expects a 3‑D integer array of character IDs
     ``char_ids`` with shape ``(B, T, C)`` where:
 
-    * **B** – batch size
-    * **T** – sequence length (token count for each example)
-    * **C** – number of character embeddings per token
+    * **B** - batch size
+    * **T** - sequence length (token count for each example)
+    * **C** - number of character embeddings per token
 
     **Deterministic flag** – When ``deterministic=True`` the dropout
-    layers are disabled (useful for evaluation).  When ``False`` and
-    ``jax_rng`` is provided, the RNG seed is used for stochasticity.
+    layers are disabled
 
     **Masking** – A binary mask is inferred by checking for rows of all
     zeros in ``char_ids`` (treated as padding).  The mask is added to the
@@ -1917,7 +1919,7 @@ class ElmoClassifier(nnx.Module):
     Notes
     -----
     * The attention pooling performs **softmax over the sequence dimension**
-      and uses a large positive constant to mask out padding after softmax
+      and uses a large negative constant to mask out padding before softmax
       (effectively treating those positions as having negligible weight),
       which is a stable and differentiable alternative to masking in the
       exponent step.
@@ -1937,10 +1939,7 @@ class ElmoClassifier(nnx.Module):
         elmo_embs = self.backbone.forward_embeddings(char_embs, fwd_states, bwd_states)
 
         mask = jnp.logical_not(jnp.all(char_ids == 0, axis=-1)).astype(jnp.float32)  # [B, T]
-        scores = self.attn_pool.proj(elmo_embs).squeeze(-1)  # Raw scores before softmax
-        scores = scores + (mask - 1) * 1e9  # Mask out pads by adding large positive (since softmax, but invert for min)
-        weights = jax.nn.softmax(scores, axis=1)
-        pooled = jnp.sum(elmo_embs * weights[..., None], axis=1)
+        pooled = self.attn_pool(elmo_embs, mask)
 
         x = self.dropout(pooled, deterministic=deterministic)
         x = jax.nn.relu(self.classifier_hidden(x))
@@ -1952,6 +1951,8 @@ class ElmoClassifier(nnx.Module):
 
 
 ### Prepare Dataset
+
+We need to build a new data loader. The current one was designed for language‑modeling pre‑training, but our goal is now text classification. Therefore, we must produce character and word indices that operate on whole sentences, not on a sliding window.
 
 ```{python}
 #| code-fold: true
@@ -1977,12 +1978,11 @@ def encode_batch(texts, vocab, char_to_id, seq_len, word_len):
     Parameters
     ----------
     texts : Iterable[str]
-        A sequence (list, tuple, generator, …) of raw text strings.  Each
+        A batch of raw text strings.  Each
         element is split on whitespace to produce a list of words.
     vocab : Mapping[str, int]
-        Word‑to‑ID dictionary.  Should contain the special tokens ``"<pad>"``
-        and ``"<unk>"``;  if absent, they are assigned indices 0 and 1
-        implicitly via the mapping fall‑backs used in the function.
+        Word‑to‑ID dictionary.  Must contain the special tokens ``"<pad>"``
+        and ``"<unk>"``;
     char_to_id : Mapping[str, int]
         Character‑to‑ID dictionary.  It must contain ``"<pad>"`` and
         ``"<unk>"`` for padding and unknown characters respectively.
@@ -2035,7 +2035,7 @@ def encode_batch(texts, vocab, char_to_id, seq_len, word_len):
 
 def sst2_loader(train_ds, vocab, char_to_id, seq_len, word_len, batch_size):
     """
-    Yield batched, encoded SST‑2 dataset suitable for JAX/Flax training.
+    Yield batched, encoded SST‑2 dataset.
 
     The function takes a HuggingFace ``datasets.Dataset`` containing the
     Stanford Sentiment Treebank v2 (SST‑2) data, encodes the textual
@@ -2074,7 +2074,7 @@ def sst2_loader(train_ds, vocab, char_to_id, seq_len, word_len, batch_size):
         ``"labels"``  : shape ``(batch_size,)``
 
     """
-    ds = train_ds.shuffle(seed=0)
+    ds = train_ds.shuffle()
     for i in range(0, len(ds), batch_size):
         batch = ds[i:i + batch_size]
 
@@ -2083,7 +2083,7 @@ def sst2_loader(train_ds, vocab, char_to_id, seq_len, word_len, batch_size):
         labels = batch["label"]
 
         # Encode text to char IDs
-        enc = encode_batch(texts, vocab, char_to_id, seq_len, word_len)
+        enc = encode_batch(texts, vocab, char_to_id, seq_len, word_len) # These are already batch sized
 
         yield {
             "char_ids": jnp.array(enc["char_ids"]),
@@ -2101,60 +2101,110 @@ train_loader = sst2_loader(
 )
 ```
 
+
+### Phased Fine-Tuning
+
+We fine‑tune the model in two distinct stages in order to avoid large gradients destroying the pre‑trained representation.
+
+Phase 1 as a “High‑level” adaptation:
+
+* All parameters of the ELMo encoder, the bi‑LSTM and its learned representations, are frozen.
+
+* The only trainable parameters are the scalar‑mix weights, which blend the encoder layers, and the classifier head.
+
+Phase 2 as a “Deep” adaptation:
+
+* The bi‑LSTM parameters are now unfrozen so that the encoder can adjust its internal representations to the target task. 
+
+* The scalar‑mix weights and the classifier head remain trainable. 
+
+* A very small learning rate is employed to limit catastrophic forgetting.
+
+The following code block explicitly lists the parameter groups updated in each phase.
+
+```{python}
+# Fine-tuning phase 1 updates the parameters of the classifier and the scalar mix parameters in the backbone
+trainable_phase1 = nnx.All(
+    nnx.Param,
+    nnx.Any(
+        nnx.PathContains("layer_projections"),
+        nnx.PathContains("scalar_weights"),
+        nnx.PathContains("gamma"),
+        nnx.PathContains("attn_pool"),
+        nnx.PathContains("classifier"),
+    )
+)
+
+# Fine-tuning phase 2 unfreezes the biltsm layers in the backbone
+trainable_phase2 = nnx.All(
+    nnx.Param,
+    nnx.Any(
+        nnx.PathContains("bilstm"),
+        nnx.PathContains("layer_projections"),
+        nnx.PathContains("scalar_weights"),
+        nnx.PathContains("gamma"),
+        nnx.PathContains("attn_pool"),
+        nnx.PathContains("classifier"),
+    )
+)
+
+```
+
 ### Define Training Loop
+
+Next, we set up the training step, initialize the classifier and optimizer, and run the training loop.
+To keep the gradient updates confined to the intended parameters, we pass our `trainable_phase` object to create a `DiffState`.
+
+In the first phase we instantiate two copies of the model:
+
+1. one with random‑initialized ELMo backbone weights, and
+2. one with pre‑trained ELMo weights.
+
+This dual run lets us directly compare performance and confirm that our pre‑training regime is effective. We run phase-1 for 10 epochs. 
+
+Below you will notice the large difference in performance between the random weights backbone and the pre-trained backbone; Suggesting that our pre-training regime was indeed effective.
 
 ```{python}
 #| code-fold: true
 
 @nnx.jit
-def train_step(model_opt, batch, rng):
+def train_step(model_opt, batch, rng, *, trainable_phase: nnx.Trainable | nnx.TrainableSpec):
     """
     Perform one training step for a JAX/NNX model using a custom optimizer.
 
     Parameters
     ----------
-    model_opt : OptimizerWrapper
+    model_opt: OptimizerWrapper
         A lightweight optimizer object that holds the current model
         parameters 
 
-    batch : dict[str, jnp.ndarray]
+    batch: dict[str, jnp.ndarray]
         A batch dictionary produced by :func:`sst2_loader`.
 
-    rng : jax.random.PRNGKey
-        Random key forwarded to the model to support stochastic
-        operations (dropout, random augmentation, etc.).
+    rng: jax.random.PRNGKey
+        Randon number generator
+
+    trainable_phase: nnx.Trainable
+        tells :class:`nnx.DiffState` which part of the model should
+        get gradients.
 
     Returns
     -------
     tuple
         ``(model_opt, loss, acc, grads)``
 
-        * ``model_opt`` – the :class:`OptimizerWrapper` after applying
+        * ``model_opt`` - the :class:`OptimizerWrapper` after applying
           the gradient update.
-        * ``loss`` (float)  – the mean soft‑max cross‑entropy
+        * ``loss`` (float)  - the mean soft‑max cross‑entropy
           computed on the current batch.
-        * ``acc`` (float)   – accuracy of the model on this batch.
-        * ``grads``         – a PyTree of gradients with the same
+        * ``acc`` (float)   - accuracy of the model on this batch.
+        * ``grads``         - a PyTree of gradients with the same
           structure as ``model_opt.model``.
-
-    Notes
-    -----
-    * **DiffState usage** – The function creates a
-      :class:`nnx.DiffState` object, ``diff_state``.  This token is
-      passed to ``nnx.value_and_grad`` through ``argnums`` to
-      ensure that only the part of the model wrapped by
-      ``DiffState`` receives gradients.  The model should be
-      built accordingly
-    * **Deterministic flag** – The call to
-      ``model(..., deterministic=False)`` turns off deterministic
-      behaviour (e.g. dropout) during the training step.  The
-      corresponding evaluation function should set
-      ``deterministic=True`` instead.
 
     """
 
     # DiffState must match optimizer wrt argument
-    diff_state = nnx.DiffState(0, trainable_phase1)
+    diff_state = nnx.DiffState(0, trainable_phase)
 
     def loss_fn(model):
         logits = model(batch["char_ids"], deterministic=False, jax_rng=rng)
@@ -2193,35 +2243,6 @@ classifier_trained = ElmoClassifier(
 
 ```
 
-### Phased Fine-Tuning
-
-```{python}
-# Fine-tuning phase 1 updates the parameters of the classifier and the scalar mix parameters in the backbone
-trainable_phase1 = nnx.All(
-    nnx.Param,
-    nnx.Any(
-        nnx.PathContains("layer_projections"),
-        nnx.PathContains("scalar_weights"),
-        nnx.PathContains("gamma"),
-        nnx.PathContains("attn_pool"),
-        nnx.PathContains("classifier"),
-    )
-)
-
-# Fine-tuning phase 2 unfreezes the biltsm layers in the backbone
-trainable_phase2 = nnx.All(
-    nnx.Param,
-    nnx.Any(
-        nnx.PathContains("bilstm"),
-        nnx.PathContains("layer_projections"),
-        nnx.PathContains("scalar_weights"),
-        nnx.PathContains("gamma"),
-        nnx.PathContains("attn_pool"),
-        nnx.PathContains("classifier"),
-    )
-)
-
-```
 
 ```{python}
 #| code-fold: true
@@ -2242,7 +2263,6 @@ model_opt_trained = nnx.ModelAndOptimizer(
 ```
 
 ```{python}
-#| code-fold: true
 
 num_epochs = 10
 train_rng = jax.random.PRNGKey(0)
@@ -2263,8 +2283,8 @@ for epoch in range(num_epochs):
     for batch in train_loader:
         
         train_rng, subkey = jax.random.split(train_rng)
-        model_opt_random, loss_random, acc_random, grads_random = train_step(model_opt_random, batch, rng=subkey)
-        model_opt_trained, loss_trained, acc_trained, grads_trained = train_step(model_opt_trained, batch, rng=subkey)
+        model_opt_random, loss_random, acc_random, grads_random = train_step(model_opt_random, batch, rng=subkey, trainable_phase=trainable_phase1)
+        model_opt_trained, loss_trained, acc_trained, grads_trained = train_step(model_opt_trained, batch, rng=subkey, trainable_phase=trainable_phase1)
         
         epoch_loss_random.append(float(loss_random))
         epoch_acc_random.append(float(acc_random))
@@ -2276,28 +2296,13 @@ for epoch in range(num_epochs):
     print(f"Epoch {epoch + 1} | loss={np.mean(epoch_loss_trained):.4f} | acc={np.mean(epoch_acc_trained):.4f}")
 ```
 
+
+Next, we extract the fine-tuned model from the optimizer and instantiate a new `model_opt` via `nnx.ModelAndOptimizer()`. Note that for phase two we reduce the learning rate to $5 \times 10^{-5}$. This lower rate helps preserve the pretrained bidirectional LSTM weights while allowing for small, corrective updates. We then train for five additional epochs in this phase.
+
 ```{python}
 #| code-fold: true
 
-@nnx.jit
-def train_step(model_opt, batch, rng):
-    # diff_state must match the 'wrt' you used for model_opt
-    diff_state = nnx.DiffState(0, trainable_phase2)
-
-    def loss_fn(model):
-        logits = model(batch["char_ids"], deterministic=False, jax_rng=rng)
-        loss = optax.softmax_cross_entropy_with_integer_labels(logits, batch["labels"]).mean()
-        return loss, logits
-
-    (loss, logits), grads = nnx.value_and_grad(loss_fn, has_aux=True, argnums=diff_state)(model_opt.model)
-
-    model_opt.update(grads)
-
-    preds = jnp.argmax(logits, axis=-1)
-    acc = jnp.mean(preds == batch["labels"])
-    return model_opt, loss, acc, grads
-
-tx = optax.adamw(1e-3, weight_decay=1e-2)
+tx = optax.adamw(5e-5, weight_decay=1e-2)
 
 model_opt = nnx.ModelAndOptimizer(
     model_opt_trained.model,
@@ -2325,15 +2330,16 @@ for epoch in range(num_epochs):
 
     for batch in train_loader:
         train_rng, subkey = jax.random.split(train_rng)
-        model_opt, loss, acc, grads = train_step(model_opt, batch, rng=subkey)
+        model_opt, loss, acc, grads = train_step(model_opt, batch, rng=subkey, trainable_phase=trainable_phase2)
         epoch_loss.append(float(loss))
         epoch_acc.append(float(acc))
 
     print(f"Epoch {epoch + 1} | loss={np.mean(epoch_loss):.4f} | acc={np.mean(epoch_acc):.4f}")
 ```
 
+Finally, lets check the performance on the validation data.
+
 ```{python}
-#| code-fold: true
 
 val_loader = sst2_loader(
     val_stream,
@@ -2350,15 +2356,24 @@ for batch in val_loader:
     preds = np.argmax(raw_preds, axis=1)
     batch_acc = np.sum(batch["labels"] == preds) / preds.shape[0]
     acc.append(batch_acc)
+
+print(f"Accuracy on validation: {np.mean(acc): .3f}")
     
 ```
 
 # Conclusion
 
-This was a long one! Good job making it all the way to the end. In this post we reviewed the differences beween static and contextual embeddings, we delved into the math and architecture of recurrent neural networks, and we implemented ELMo practically from scratch in JAX. In addition to all of that, we also then fine-tined ELMo to perform text classification and we showed the difference in having pre-trained embeddings versus random weights. 
+This was a long one. Good job making it all the way to the end!
+
+ In this post we reviewed the differences beween static and contextual embeddings, we delved into the math and architecture of recurrent neural networks, and we implemented ELMo practically from scratch in JAX. In addition to all of that, we also then fine-tined ELMo to perform text classification and we showed the difference in having pre-trained embeddings versus random weights. 
 
 # Coming Next
 
-In the next post of this series, we will go over the transformer architecture. I hope to see you there!
+In the next post of this series, we will go over the transformer architecture, take a look at how attention works and implement a transformer model from scratch. 
+
+I hope to see you there!
 
 # References
+
+::: {#refs}
+:::
