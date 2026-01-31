@@ -1,15 +1,14 @@
 ---
 title: "How Machines Comprehend Language<br><sub>Recurrent Neural Networks - Embeddings from Language Models (ELMo)</sub>"
 author: "Jonathan Dekermanjian"
-date: "2026-01-25"
+date: "2026-01-31"
 categories: [Natural Language Processing]
 code-annotations: below
 css: styles.css
 jupyter: jax_env
-draft: True
+image: "thumbnail.png"
 execute: 
   cache: true
-  eval: false
 bibliography: references.bib
 nocite: |
   @*
@@ -420,7 +419,7 @@ PAD_WORD, UNK_WORD = "<pad>", "<unk>"
 char_vocab = [PAD_CHAR, UNK_CHAR] + list(string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation)
 char_to_id = {ch: i for i, ch in enumerate(char_vocab)}
 
-def build_word_vocab(dataset, batch_size=32, min_freq=20, max_vocab=100_000) -> Tuple[Dict[str, int], Dict[int, str]]:
+def build_word_vocab(dataset, batch_size=32, min_freq=20, max_vocab=100_000) -> tuple[dict[str, int], dict[int, str]]:
     """
     Build a word–to–index mapping from a text dataset.
 
@@ -2167,8 +2166,8 @@ Below you will notice the large difference in performance between the random wei
 ```{python}
 #| code-fold: true
 
-@nnx.jit
-def train_step(model_opt, batch, rng, *, trainable_phase: nnx.Trainable | nnx.TrainableSpec):
+@nnx.jit(static_argnames=("trainable_phase",))
+def train_step(model_opt, batch, rng, *, trainable_phase):
     """
     Perform one training step for a JAX/NNX model using a custom optimizer.
 
@@ -2184,7 +2183,7 @@ def train_step(model_opt, batch, rng, *, trainable_phase: nnx.Trainable | nnx.Tr
     rng: jax.random.PRNGKey
         Randon number generator
 
-    trainable_phase: nnx.Trainable
+    trainable_phase
         tells :class:`nnx.DiffState` which part of the model should
         get gradients.
 
