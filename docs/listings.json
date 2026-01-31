@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/rnn_elmo/index.html",
       "/posts/glove_embeddings/index.html",
       "/posts/skipgram_embeddings/index.html",
       "/posts/text-classification-tfidf/index.html",
