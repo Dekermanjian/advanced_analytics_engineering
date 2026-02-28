@@ -1,0 +1,23 @@
+name: bym-covid19-spatial
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - 'pymc=5.27.1'
+  - 'python=3.12'
+  - pip:
+    - ipykernel
+    - ipywidgets
+    - plotly
+    - numba~=0.63.1
+    - pyarrow~=23.0.0
+    - polars~=1.37.1
+    - geopandas~=1.1.2
+    - branca~=0.8.2
+    - sodapy~=2.2.0
+    - libpysal~=4.14.1
+    - folium~=0.20.0
+    - mapclassify~=2.10.0
+    - matplotlib~=3.10.8
+    - nbformat>=4.2.0

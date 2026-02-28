@@ -10,6 +10,11 @@
 **/checkpoints/
 **/.vdoc.*.py
 **/*.json
+**/*.pq
+
+!**/*states.json
+!**/states_abbreviations_mapping.json
+!**/*state_populations_2024.parquet
 
 ##########################
 # Common files

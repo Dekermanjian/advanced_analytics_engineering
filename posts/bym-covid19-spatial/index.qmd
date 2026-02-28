@@ -1,0 +1,1030 @@
+---
+title: "Modeling the Relative Risk of COVID-19 Across the U.S."
+author: "Jonathan Dekermanjian"
+date: "2026-02-28"
+categories: [Analytics, Spatial]
+code-annotations: below
+css: styles.css
+image: "thumbnail.png"
+jupyter: bym-covid19-spatial
+execute: 
+  cache: true
+---
+
+# Overview
+
+We extend the Besag–York–Mollié (BYM2) model by combining its spatially structured and unstructured random effects with a dynamic temporal process within a Bayesian framework to perform spatio-temporal inference and forecasting of COVID-19 relative risk across the United States.
+
+# Introduction
+
+When tracking infectious diseases, public-health agencies and officials need to be able to identify high‑risk areas, anticipate outbreaks, and allocate resources appropriately. Unfortunately, data availability will be sparse, often missing. Nonetheless, if we data is absent in a geographical area we need to be able to estimate the progression of disease in that area regardless. 
+
+We are going to work through a case study, estimating the relative risk of COVID‑19 across United States, to illustrate how to:
+
+1. Assimilate areal spatial data using the reparameterized Besag–York–Mollié (BYM2) model, which decomposes structured spatial dependence with unstructured independent and identically distributed (i.i.d.) variability.
+
+2. Extend the BYM framework to include dynamic temporal components, thereby capturing evolution over time.
+
+3. Generate spatio‑temporal posterior predictions that forecast future relative risks and impute risks for unobserved or under‑reported areas.
+
+
+By the end, readers will understand how to build, fit, and interpret a fully spatio‑temporal Bayesian model that can inform public‑health decision‑making even when data are sparse.
+
+
+# Data Sources & Descriptions
+
+We will use publicly available data from the Centers for Disease Control and Prevention (CDC). The CDC offers a Socrata Open Data API (SODA) that gives access to a range of open‑data resources. 
+
+For this project we will draw on the <b>Weekly Hospital Respiratory Data (HRD) Metrics by Jurisdiction, National Healthcare Safety Network (NHSN) dataset</b>, which is updated weekly with counts of hospital admissions for various respiratory illnesses. Our primary interest lies in COVID‑19 admissions. 
+
+Learn more about the data source [here](https://data.cdc.gov/Public-Health-Surveillance/Weekly-Hospital-Respiratory-Data-HRD-Metrics-by-Ju/rhwp-grxi/about_data).
+
+# Model
+
+A scaled BYM (BYM2) model constructs a latent spatial field whose covariance structure is derived from a neighborhood graph. 
+
+The general idea is that when modeling the risk of a disease across states, such as COVID-19, we expect that a state's relative risk will be similar to the surrounding states; A concept that is referred to as spatial smoothing. This is exactly what an ICAR prior does by encoding that each state's latent values should be similar to the average latent value of the surrounding states. 
+
+More formally, for each spatial unit (states in our case) we define a random effect (latent) variable $\phi_{i}$ representing the unobserved log-risk deviation for region i. The vector of latent variables is 
+
+$$ 
+\mathbf{\phi} = (\phi_{1}, \phi_{2}, \dots , \phi_{n}) 
+$$ 
+
+we define a neighborhood graph (adjacency matrix) 
+
+$$ 
+W_{ij} = \begin{cases} 1 && \text{if i and j are neighbors} \\ 0 && \text{otherwise} \end{cases} 
+$$ 
+
+the number of neighbors for region i is defined as 
+
+$$
+d_{i} = \sum_{j}W_{ij} 
+$$
+
+The intrinsic conditional autoregressive (ICAR) model is defined through the conditional distributions
+
+$$
+\phi_{i}|\phi_{-i} \sim N(\frac{\sum_{j}W_{ij}\phi_{j}}{d_{i}}, \frac{\sigma^{2}}{d_{i}})
+$$
+
+Notice how the mean is the average of neighboring values and that the conditional variance decreases as the number of neighbors increases. 
+
+These conditionals correspond to the joint multivariate Gaussian distribution
+
+$$
+p(\phi) \propto \exp(-\frac{1}{2\sigma^{2}}\phi^{T}(D - W)\phi)
+$$
+
+where $(D - W)$ is the precision matrix $Q$, $W$ is the adjacency matrix and $D$ is the diagonal of number of neighbors of our spatial random effects variables. 
+
+The precision matrix plays a role in allowing the prior to penalize the difference between neighbors. Formally, you have 
+
+$$
+\phi^{T}Q\phi = \frac{1}{\sigma^{2}}\sum_{i \sim j}(\phi_{i} - \phi_{j})^{2}
+$$
+
+
+This precision matrix is singular, meaning the resulting distribution is improper: adding a constant to all $\phi_{i}$ leaves the density unchanged. Consequently, additional constraints are required for identifiability.
+
+Because the ICAR prior is improper, its marginal variance depends on the structure of the neighborhood graph and cannot be interpreted directly. In practice, we therefore work with a scaled ICAR field
+
+$$
+s \sim N(0, Q_{*}^{-})
+$$
+
+where $Q_{*}$ is a scaled precision matrix and $Q_{*}^{-}$ denotes its generalized inverse such that a typical marginal variance satisfies
+
+$$
+Var(s_{i}) \approx 1
+$$
+
+This normalization separates the spatial dependence structure from the overall variance magnitude, allowing variance parameters in the hierarchical model to have a consistent interpretation regardless of the underlying graph.
+
+The BYM2 model represents spatial effects as a mixture of spatially structured and unstructured variability:
+
+$$
+x_{i} = \frac{1}{\sqrt{\tau}}(\sqrt{\rho}s_{i} + \sqrt{1 - \rho}\epsilon_{i})
+$$
+
+where 
+
+- s is the scaled ICAR spatial field,
+- $\epsilon_{i} \sim N(0, 1)$ are independent effects,
+- $\tau$ controls the overall variability,
+- $\rho \in [0, 1]$ determines the proportion of spatially structured variation.
+
+When $\rho = 0$ we have purely unstructured noise. When $\rho = 1$ we have a fully spatially smoothed field, and when $\rho$ is between 0 and 1 we mix unstructured noise with spatially smoothed field.
+
+We augment the BYM2 model with a dynamic temporal process in which the spatial field is allowed to evolve over time through a first‑order autoregressive AR(1) transition. Where the evolutions are defined by 
+
+$$
+x_{t} = \alpha x_{t-1} + w_{t}
+$$
+
+where $x_{t}$ is the latent log-intensity at time $t$ for all states, and $w_{t}$ are the spatially correlated innovations defined as
+
+$$
+w_{t} = \sigma L z_{t}
+$$
+
+where $z_{t} \sim N(0, I_{n})$ is a standard normal and $L$ is the lower triangular cholesky factor. Multiplying by $L$ imposes the spatial covariance $LL^{T} = \Sigma^{BYM}$ on the innovations and $\sigma$ scaling controls the overall magnitude of temporal changes in the latent field.
+
+:::{.callout-important}
+
+Instead of multiplying by the full covariance we multiply by $L$ this is numerically much more stable because we avoid explicit inversion or decomposition of a large dense matrix in every likelihood evaluation.
+
+:::
+
+Let's talk about the observation model. This is where we convert our latent processes to counts. 
+
+First, we define the relative mean intensity multiplier as
+
+$$
+\theta_{it} = \exp(\beta_{0} + x_{it})
+$$
+
+then define the expected counts as 
+
+$$
+\mu_{it} = \theta_{it} E_{it}
+$$
+
+where $E$ is the expected count of disease in each (time x area) and is computed as
+
+$$
+\mathbf{E} = \text{population}_{it} \times \frac{\text{total cases}_{it}}{\text{total population}_{it}}
+$$
+
+finally, we model our observed counts as
+
+$$
+y \sim Poisson(\mu)
+$$
+
+Below is a diagram of our full model.
+
+::: {style="background-color:#dcdce0; padding:1em; border-radius:6px;"}
+
+```{mermaid}
+%%| label: fig-dynamic_BYM2
+%%| fig-cap: "Dynamic BYM2 Model Architecture"
+
+
+flowchart TD
+    %% Hyper priors
+    H_beta0["$$\beta_{0} \sim \operatorname{Normal}(0,1)$$"]
+    H_sigma["$$\sigma \sim \operatorname{HalfNormal}(0.3)$$"]
+    H_rho["$$\rho \sim \operatorname{Beta}(2,2)$$"]
+    H_alpha["$$\alpha \sim \operatorname{TruncatedNormal}(0.5,\,0.3,\,|\alpha|\lt0.99)$$"]
+
+    %% Spatial covariance
+    Sigma_byM["$$\Sigma_{\text{BYM}} = (1-\rho)I + \rho\,\Sigma_{\text{icar\_scaled}}$$"]
+    L["$$L = \operatorname{chol}(\Sigma_{\text{BYM}})$$"]
+
+    %% Innovations
+    z["$$z_{t} \sim \operatorname{Normal}(0,1)$$"]
+    w["$$w_{t} = \sigma L z_{t}$$"]
+
+    %% Initial state
+    x0["$$x_{0} \sim \operatorname{Normal}(0,1)$$"]
+
+    %% Temporal dynamics
+    transition["$$x_{t} = \alpha\,x_{t-1} + w_{t}$$"]
+    x_seq["$$x_{1} \ldots x_{T}$$"]
+
+    %% Latent field
+    x["$$x = \operatorname{concat}(x_{0},\;x_{\text{seq}})$$"]
+
+    %% Observation model
+    th["$$\theta = \exp(\beta_{0} + x)$$"]
+    mu["$$\mu = \theta\,E$$"]
+    y_i["$$y \sim \operatorname{Poisson}(\mu)$$"]
+
+    %% Layout
+    subgraph Hyperpriors ["Hyper‑priors"]
+        H_beta0
+        H_sigma
+        H_rho
+        H_alpha
+    end
+
+    subgraph Spatial ["Spatial BYM structure"]
+        H_rho
+        Sigma_byM
+        L
+    end
+
+    subgraph Innovations ["Spatial innovations"]
+        z
+        w
+    end
+
+    subgraph Dynamics ["Temporal dynamics"]
+        x0
+        transition
+        x_seq
+        x
+    end
+
+    subgraph Observations ["Observation model"]
+        th
+        mu
+        y_i
+    end
+
+    %% Connections
+    H_beta0 --> th
+    H_alpha --> transition
+    H_sigma --> w
+    H_rho --> Sigma_byM
+
+    Sigma_byM --> L
+    L --> w
+    z --> w
+
+    x0 --> transition
+    w --> transition
+    transition --> x_seq
+    x_seq --> x
+
+    x --> th
+    th --> mu
+    mu --> y_i
+    
+```
+
+:::
+
+# Data Processing
+
+We will need to pre-process the data before we are ready to fit our model. The pre-processing steps are as follows:
+
+1. Clean-up dates and create weekly numerical indexes
+2. Join in states population census data
+3. Compute the expected weekly counts 
+4. Compute the Standardized Incidence Ratio (SIR)
+5. Join in geographical geometries and express our dataframe as a geo-dataframe
+
+## Imports and Configurations
+
+```{python}
+#| code-fold: true
+#| output: false
+
+import json
+import pytensor
+
+import polars as pl
+from sodapy import Socrata
+import geopandas as gpd
+import pandas as pd
+import libpysal as lp
+
+import branca.colormap as cm
+
+import scipy.sparse as sparse
+from scipy.sparse.csgraph import connected_components
+from scipy.sparse.linalg import spsolve
+import numpy as np
+
+import pymc as pm
+import pytensor.tensor as pt
+import arviz as az
+
+import plotly.express as px
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+```
+
+```{python}
+#| code-fold: true
+
+def create_cmap(df, column, text_color, caption = "Relative Risk"):
+    colors = [
+        (59/255, 76/255, 192/255),   # cool blue
+        (1.0, 1.0, 1.0),             # white
+        (180/255, 4/255, 38/255)     # warm red
+    ]
+    return cm.LinearColormap(
+        colors=colors, 
+        index=[df[column].min(), 1, df[column].max()], vmin=df[column].min(), vmax=df[column].max(), 
+        caption=caption, 
+        text_color=text_color
+    )
+```
+
+```{python}
+#| code-fold: true
+
+pytensor.config.mode="NUMBA"
+seed = sum(map(ord, "cov_disease"))
+rng = np.random.default_rng(seed)
+```
+
+```{python}
+# I will make sure these files are available in the github repository
+
+# population data downloaded from US census
+pop_df = pl.read_parquet("./state_populations_2024.parquet")
+
+# Geometry data downloaded from 
+states_gdf = gpd.read_file("./states.json")
+
+# Maps State Abbreviations to State Names
+with open('./states_abbreviations_mapping.json') as file:
+    states_abbr_map = json.load(file)
+
+```
+
+## Setting up and Using the CDC API
+
+To pull the appropriate dataset from the CDC API you need the appropriate handle corresponding to the dataset. The API also throttles you if you do not have a free API key. In our case the dataset is not large, so it downloads almost instantly.
+
+```{python}
+#| output: false
+#| eval: false
+client = Socrata("data.cdc.gov", None)
+HRD = "rhwp-grxi"
+results = client.get(HRD, where="weekendingdate>='2025-01-01'", limit=100_000)
+```
+
+```{python}
+#| eval: false
+# Create a polars dataframe from the API response results
+df = pl.from_records(results)
+```
+
+```{python}
+#| echo: false
+df = pl.read_parquet("./cdc_hrd_data_20260222.pq")
+```
+
+:::{.callout-important}
+
+We will introduce missingness into our dataset to demonstrate how spatial posterior predictions can estimate relative risk for regions where data were not actually collected.
+
+:::
+
+```{python}
+impose_missingness_idx = rng.choice(np.arange(len(states_abbr_map)), size=(3,))
+drop_state_data = np.array(list(states_abbr_map.keys()))[impose_missingness_idx]
+
+df = (
+    df
+    .filter(
+        ~pl.col("jurisdiction").is_in(drop_state_data)
+    )
+)
+```
+
+## Computing the SIR
+
+The SIR is a simple measure of disease risk. It is the ratio of observed number of cases in a geographical unit to the expected number of cases if that geographical unit had the same week-specific incidence rate as the reference population; national population in our case. We compute the $SIR$ for each week $t$ as
+
+$$
+SIR_{it} = \frac{Y_{it}}{E_{it}}
+$$
+
+where 
+
+$$
+E_{it} = r_{t}n_{i}
+$$
+
+where 
+
+$$
+r_{t} = \frac{\text{total cases}_{t}}{\text{total population}_{t}}
+$$
+
+is the rate in stratum $t$ of the reference population and $n_{i}$ is the population of area $i$.
+
+The SIR serves as a crude proxy for relative risk. It is often used as a descriptive map or as a starting point for model diagnostics. The SIR tells you if area $i$ has more incidence $SIR \gt 1$, lesser incidence $SIR \lt 1$, or equal incidence $SIR = 1$ to the reference population.
+
+
+```{python}
+
+cleaned_df = (
+    df
+    .with_columns(
+        pl.col("weekendingdate").str.strptime(dtype=pl.Date, format="%Y-%m-%dT00:00:00.000"),
+        states = pl.col("jurisdiction").replace_strict(states_abbr_map, default=None)
+    )
+)
+
+ordered_week = (
+    cleaned_df
+    .select("weekendingdate")
+    .unique()
+    .sort("weekendingdate")
+    .with_row_index(name="week", offset=1)
+)
+
+counts_df = (
+    cleaned_df
+    .join(
+        ordered_week,
+        on="weekendingdate"
+    )
+    .drop_nulls(subset=["states"])
+    .select(
+        "weekendingdate",
+        pl.col("week"),
+        "states",
+        pl.col("totalconfc19newadmadult").cast(pl.Float32).alias("COVID_Admissions"),
+    )
+    .sort(["states", "week"])
+    .join(pop_df, how="full", on="states")
+    .with_columns(
+        (pl.col("population") / 1e6).alias("population"),
+    )
+    .group_by("week")
+    .agg(
+        pl.col("COVID_Admissions").cast(pl.Float32).sum().alias("total_cases"), 
+        pl.col("population").sum().alias("total_pop")
+    )
+    .drop_nulls()
+)
+
+```
+
+```{python}
+cov_df = (
+    cleaned_df
+    .join(
+        ordered_week,
+        on="weekendingdate"
+    )
+    .drop_nulls(subset=["states"])
+    .select(
+        "weekendingdate",
+        pl.col("week").cast(pl.Int16),
+        "states",
+        pl.col("totalconfc19newadmadult").cast(pl.Float32).alias("COVID_Admissions"),
+    )
+    .sort(["states", "week"])
+    .join(pop_df, how="full", on="states")
+    .join(counts_df, on="week")
+    .with_columns(
+        (pl.col("population") / 1e6).alias("population"),
+    )
+    .with_columns(
+        (pl.col("population") * pl.col("total_cases") / pl.col("total_pop")).alias("E")
+    )
+    .with_columns(
+        (pl.col("COVID_Admissions").cast(pl.Float32) / pl.col("E")).alias("SIR")
+    )
+)
+```
+
+## Convert to GeoPandas
+
+```{python}
+cov_gdf = gpd.GeoDataFrame(data = cov_df.to_pandas())
+cov_gdf = cov_gdf.merge(
+    states_gdf, 
+    how="outer", 
+    left_on="states_right", 
+    right_on="name"
+).set_geometry("geometry")
+
+cov_gdf = cov_gdf.to_crs(epsg='4326')
+cov_gdf = cov_gdf[~cov_gdf["geometry"].isnull()].sort_values(["states", "week"])
+cov_gdf_obs = cov_gdf[~cov_gdf["COVID_Admissions"].isnull()]
+adj_inputs = cov_gdf_obs.loc[:, ["states", "geometry"]].drop_duplicates().reset_index(drop=True)
+```
+
+## Inspect SIRs
+
+Let's plot the SIR for the last week we have in our dataset to get an idea of the disease incidence rate across the nation.
+
+```{python}
+#| classes: light-mode
+
+cmap = create_cmap(cov_gdf_obs, "SIR", text_color="black", caption="Standardized Incidence Ratio")
+cov_gdf_obs[["states", "SIR", "geometry"]].rename(columns={"SIR": "Standardized Incidence Ratio"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Positron",
+    column="Standardized Incidence Ratio",
+    tooltip=["states", "Standardized Incidence Ratio"],
+    style_kwds=dict(color="black"),
+)
+
+```
+
+```{python}
+#| classes: dark-mode
+
+cmap = create_cmap(cov_gdf_obs, "SIR", text_color="white", caption="Standardized Incidence Ratio")
+cov_gdf_obs[["states", "SIR", "geometry"]].rename(columns={"SIR": "Standardized Incidence Ratio"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Dark_Matter",
+    column="Standardized Incidence Ratio",
+    tooltip=["states", "Standardized Incidence Ratio"],
+    style_kwds=dict(color="black"),
+)
+
+```
+
+# Spatial Representation
+
+We construct an adjacency matrix $W$ that encodes spatial relationships between neighboring states. Each state is represented as a node in a graph, and adjacency is defined using Queen contiguity: two states are considered neighbors if they share either a boundary or a vertex. Equivalently, if a chess queen could move from one state to another in a single move, the corresponding entry in the adjacency matrix is set to 1; otherwise it is 0.
+
+To model spatial dependence, we use an intrinsic conditional autoregressive (ICAR) prior. 
+
+As a reminder, the ICAR precision matrix is given by
+
+$$
+Q = D - W
+$$ 
+
+where $W$ is the adjacency matrix and $D$ is a diagonal matrix whose entries are the number of neighbors (degrees) of each node.
+
+The ICAR precision matrix $Q$ is singular, which leads to two important issues:
+
+1. The prior is improper: the variance is undefined up to an additive constant.
+
+2. The implied marginal variance depends on the topology and size of the underlying graph.
+
+As a consequence, regions with different adjacency structures can have substantially different prior variances, even when the same ICAR prior is used. This makes the strength of spatial smoothing difficult to compare across graphs.
+
+To address this issue, we compute a scaling factor for each connected component of the adjacency graph. The scaling factor standardizes the ICAR prior so that the marginal variance of the spatial random effect is well-defined and comparable across components.
+
+The following code computes these scaling factors. For each connected component, it constructs the ICAR precision matrix, computes its generalized inverse under a sum-to-zero constraint, and uses the geometric mean of the resulting marginal variances as the scaling factor. Isolated nodes (components of size one) are assigned a scaling factor of 1.
+
+
+```{python}
+def scaling_factor_component(A_sub):
+    """
+    Compute scaling factor for a connected component adjacency submatrix.
+    If the component contains only 1 node, return 1.0.
+    """
+    A_sub = sparse.csc_matrix(A_sub)
+    n = A_sub.shape[0]
+
+    # Isolated node implies no ICAR field thus scaling = 1
+    if n == 1:
+        return 1.0
+
+    num_neighbors = np.asarray(A_sub.sum(axis=1)).ravel()
+    D = sparse.diags(num_neighbors, format="csc")
+    Q = D - A_sub
+
+    jitter = max(Q.diagonal()) * np.sqrt(np.finfo(np.float64).eps)
+    Q_perturbed = Q + sparse.diags(np.ones(n) * jitter)
+
+    I = sparse.identity(n, format="csc")
+    Sigma = spsolve(Q_perturbed, I)
+
+    ones = np.ones(n)
+    W = Sigma @ ones
+    Q_inv = Sigma - np.outer(W * (1.0 / (ones @ W)), W)
+
+    return np.exp(np.mean(np.log(np.diag(Q_inv))))
+
+
+def scaling_factor_sp_disconnected(A):
+    """
+    Compute scaling factors for adjacency matrix A that may contain
+    multiple connected components.
+    
+    Returns:
+        scale_vec: array of length N, each entry is the scaling factor
+                   for the node's connected component.
+    """
+    A = sparse.csr_matrix(A)
+    n_components, labels = connected_components(A)
+
+    scale_vec = np.zeros(A.shape[0])
+
+    for comp in range(n_components):
+        idx = np.where(labels == comp)[0]
+        A_sub = A[idx][:, idx]
+        scale_val = scaling_factor_component(A_sub)
+        scale_vec[idx] = scale_val
+
+    return scale_vec
+```
+
+```{python}
+#| output: false
+gdf_neighbors = lp.weights.Queen.from_dataframe(adj_inputs, use_index=True)
+```
+
+```{python}
+gdf_adj_mtx, gdf_adj_mtx_indices = gdf_neighbors.full()
+scale_vector = scaling_factor_sp_disconnected(gdf_adj_mtx)
+```
+
+
+# Model Fitting
+
+We are now ready to fit our model. Afterwards we will inspect:
+
+1. In-sample posterior: to gauge how well the model fits the data we used for fitting.
+2. Out-of-sample posterior predictions: to explore the temporal evolution of the spatial field and to assess the spatial structure the model has learned.
+
+## Setup Variables & Coordinates
+
+```{python}
+time_idx = np.arange(
+    cov_gdf_obs["week"].min(),
+    cov_gdf_obs["week"].max() + 1
+)
+
+area_idx = cov_gdf_obs['name'].astype(str).unique()
+
+coords = {"area_idx": area_idx, "time": time_idx}
+
+T = len(coords["time"])
+N = len(coords["area_idx"])
+
+E_wide = (
+    cov_gdf_obs
+    .pivot(index="week", columns="name", values="E")
+    .reindex(index=time_idx, columns=area_idx)
+)
+
+y_wide = (
+    cov_gdf_obs
+    .pivot(index="week", columns="name", values="COVID_Admissions")
+    .reindex(index=time_idx, columns=area_idx)
+)
+
+E = E_wide.to_numpy(dtype=float, copy=True)
+E[np.isnan(E)] = 1.0
+
+y = y_wide.to_numpy(dtype=float)
+```
+
+```{python}
+# ICAR precision
+Q = np.diag(gdf_adj_mtx.sum(axis=1)) - gdf_adj_mtx
+
+# Moore-Penrose inverse (ICAR is singular)
+Q_inv = np.linalg.pinv(Q)
+
+D_inv_sqrt = np.diag(1 / np.sqrt(scale_vector))
+
+Sigma_icar_scaled = D_inv_sqrt @ Q_inv @ D_inv_sqrt
+```
+
+## Model Construction
+
+```{python}
+with pm.Model(coords=coords) as dyn_BYM_marginal:
+
+    # Hyperpriors
+    beta0 = pm.Normal("beta0", 0.0, 1.0)
+
+    sigma = pm.HalfNormal("sigma", 0.3)
+    rho   = pm.Beta("rho", 2.0, 2.0)
+
+    alpha = pm.TruncatedNormal(
+        "alpha", mu=0.5, sigma=0.3, lower=-0.99, upper=0.99
+    )
+
+   
+    # BYM covariance (fixed, but rho scales it)
+    Sigma_BYM = (
+        (1.0 - rho) * np.eye(N)
+        + rho * Sigma_icar_scaled
+    )
+
+    # Cholesky for stable sampling
+    L = pm.Deterministic(
+        "L",
+        pt.linalg.cholesky(Sigma_BYM)
+    )
+
+
+    # Innovations (T x N)
+    z = pm.Normal(
+        "z", 0.0, 1.0,
+        dims=("time", "area_idx")
+    )
+
+    w = pm.Deterministic(
+        "w",
+        sigma * pt.matmul(z, L.T),
+        dims=("time", "area_idx")
+    )
+
+    # State equation via SCAN
+    def transition(w_t, x_prev, alpha):
+        return alpha * x_prev + w_t
+
+    x0 = pm.Normal("x0", 0.0, 1.0, dims=("area_idx",))
+
+    x_seq = pytensor.scan(
+        fn=transition,
+        sequences=[w[1:]],
+        outputs_info=x0,
+        non_sequences=[alpha],
+        return_updates=False
+    )
+
+    x = pt.concatenate([x0[None, :], x_seq], axis=0)
+
+    x = pm.Deterministic("x", x, dims=("time", "area_idx"))
+
+    
+    # Observation model
+    th = pm.Deterministic(
+        "th", pt.exp(beta0 + x),
+        dims=("time", "area_idx")
+    )
+
+    mu = pm.Deterministic(
+        "mu", th * E,
+        dims=("time", "area_idx")
+    )
+
+    y_i = pm.Poisson(
+        "y_i",
+        mu=mu,
+        observed=y,
+        dims=("time", "area_idx")
+    )
+
+```
+
+```{python}
+with dyn_BYM_marginal:
+    idata = pm.sample(tune=4000, draws=4000, target_accept=0.95, cores=10)
+```
+
+The posterior mean of $\rho$ is approximately 0.2, indicating that about 20% of the residual variation in relative risk is attributable to spatially structured effects, while the remaining variation is primarily unstructured. The relatively low value of $\rho$ suggests that spatial correlation explains only a modest portion of the remaining heterogeneity in COVID-19 relative risk.
+
+```{python}
+az.summary(idata, var_names=['beta0', 'sigma', 'alpha', 'rho'])
+```
+
+# In-Sample Posterior Predictions
+
+Let's extract the posterior mean of the relative risk $\theta$ for each state and week, and visualize the temporal evolution of the risk across states. These posterior estimates represent what the model learned from our sampled data.
+
+```{python}
+relative_risks = az.summary(idata, var_names=['th'])
+relative_risks["states"] = relative_risks.index.str.extract(r",\s(.*)\]").iloc[:, 0].values
+relative_risks["week"] = relative_risks.index.str.extract(r"\[(.*),").iloc[:, 0].values
+rr_df = relative_risks.pivot(columns="week", index="states", values="mean").reset_index()
+rr_df = rr_df.merge(adj_inputs, on='states')
+rr_gdf = gpd.GeoDataFrame(rr_df, geometry="geometry")
+```
+
+```{python}
+#| classes: light-mode
+tmp_plot = (
+    rr_gdf[["states"] + 
+    [f"{i}.0" for i in range(1, T+1)]].melt(id_vars="states", value_vars=[f"{i}.0" for i in range(1, T+1)])
+)
+tmp_plot = tmp_plot.merge(cov_gdf_obs[['weekendingdate', 'week']].astype(str).drop_duplicates(), left_on="variable", right_on="week")
+fig = px.line(tmp_plot, x="weekendingdate", y="value", color="states")
+fig.update_layout(template="plotly_white", xaxis=dict(title="Week of Year"), yaxis=dict(title="Relative Risk"))
+```
+
+```{python}
+#| classes: dark-mode
+tmp_plot = (
+    rr_gdf[["states"] + 
+    [f"{i}.0" for i in range(1, T+1)]].melt(id_vars="states", value_vars=[f"{i}.0" for i in range(1, T+1)])
+)
+tmp_plot = tmp_plot.merge(cov_gdf_obs[['weekendingdate', 'week']].astype(str).drop_duplicates(), left_on="variable", right_on="week")
+fig = px.line(tmp_plot, x="weekendingdate", y="value", color="states")
+fig.update_layout(template="plotly_dark", xaxis=dict(title="Week of Year"), yaxis=dict(title="Relative Risk"))
+```
+
+We will also inspect the posterior mean of the relative risk for the last week in our dataset to see how the model has smoothed the risk across states. If you compare the following map to the one we created earlier with the SIR you should see that the model has smoothed the risk across states, borrowing strength from neighboring states to inform estimates for each state.
+
+```{python}
+#| classes: light-mode
+week = f"{time_idx[-1].item()}" # In sample last week
+cmap = create_cmap(rr_gdf, week, text_color="black")
+rr_gdf.rename(columns={week: "Relative Risk"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Positron",
+    column="Relative Risk",
+    tooltip=["states", "Relative Risk"],
+    style_kwds=dict(color="black"),
+)
+```
+
+```{python}
+#| classes: dark-mode
+week = f"{time_idx[-1].item()}" # In sample last week
+cmap = create_cmap(rr_gdf, week, text_color="white")
+rr_gdf.rename(columns={week: "Relative Risk"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Dark_Matter",
+    column="Relative Risk",
+    tooltip=["states", "Relative Risk"],
+    style_kwds=dict(color="black"),
+)
+```
+
+# Out of Sample Posterior Predictions
+
+Next, we will use the posterior samples to forecast the relative risk for the week following our last observed week. This will allow us to see how the model extrapolates the temporal evolution of the spatial field and how it estimates risk for the next time point.
+
+## Temporal Posterior Predictions
+
+```{python}
+# Inputs from your inference data
+x_samples = idata.posterior["x"].stack(sample=("chain","draw")).values
+w_samples = idata.posterior["w"].stack(sample=("chain","draw")).values
+alpha_samples = idata.posterior["alpha"].stack(sample=("chain","draw")).values
+sigma_samples = idata.posterior["sigma"].stack(sample=("chain","draw")).values
+rho_samples = idata.posterior["rho"].stack(sample=("chain","draw")).values
+beta0_samples = idata.posterior["beta0"].stack(sample=("chain","draw")).values
+
+N_obs = x_samples.shape[1]
+S = alpha_samples.shape[0]
+
+# Choose the time you want to forecast
+t = -1  # last example
+x_t = x_samples[t, :, :]
+
+eps = np.random.normal(
+    0.0,
+    sigma_samples[None, :],
+    size=x_t.shape
+)
+
+# Prepare output
+x_new_samples = np.zeros((S, N_obs))
+        
+# AR(1) propagation
+x_new_samples = alpha_samples[None, :] * x_t + eps
+
+# Combine with observed x
+x_fut = np.zeros((S, N_obs))
+x_fut[:, :N_obs] = x_new_samples.T
+
+# Compute th
+th_fut = np.exp(beta0_samples[:, None] + x_fut)
+
+```
+
+```{python}
+rr_gdf[f'{time_idx[-1] + 1}'] = th_fut.mean(axis=0)
+```
+
+```{python}
+#| classes: light-mode
+week = f'{time_idx[-1] + 1}'
+cmap = create_cmap(rr_gdf, week, text_color="black")
+rr_gdf.rename(columns={week: "Relative Risk"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Positron",
+    column="Relative Risk",
+    tooltip=["states", "Relative Risk"],
+    style_kwds=dict(color="black"),
+)
+```
+
+```{python}
+#| classes: dark-mode
+week = f'{time_idx[-1] + 1}'
+cmap = create_cmap(rr_gdf, week, text_color="white")
+rr_gdf.rename(columns={week: "Relative Risk"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Dark_Matter",
+    column="Relative Risk",
+    tooltip=["states", "Relative Risk"],
+    style_kwds=dict(color="black"),
+)
+```
+
+## Spatio-Temporal Posterior Predictions
+
+Finally, we will forecast the relative risk for the next week for all states, even the ones that did not have observed data. This will allow us to see how the model extrapolates both the temporal evolution and the spatial structure of the field, and how it estimates risk for unsampled regions.
+
+```{python}
+#| output: false
+
+full_adj_inputs = pd.concat(
+    (
+        adj_inputs, 
+        (
+            cov_gdf[cov_gdf["COVID_Admissions"].isnull()][['name', "geometry"]]
+            .rename(columns={"name": "states"})
+        )
+    )
+).reset_index(drop=True)
+
+full_gdf_neighbors = lp.weights.Queen.from_dataframe(full_adj_inputs, use_index=True)
+full_gdf_adj_mtx, full_gdf_adj_mtx_indices = full_gdf_neighbors.full()
+full_scale_vector = scaling_factor_sp_disconnected(full_gdf_adj_mtx)
+```
+
+```{python}
+N_full = full_scale_vector.shape[0]
+# Inputs from your inference data
+x_samples = idata.posterior["x"].stack(sample=("chain","draw")).values
+w_samples = idata.posterior["w"].stack(sample=("chain","draw")).values
+alpha_samples = idata.posterior["alpha"].stack(sample=("chain","draw")).values
+sigma_samples = idata.posterior["sigma"].stack(sample=("chain","draw")).values
+rho_samples = idata.posterior["rho"].stack(sample=("chain","draw")).values
+beta0_samples = idata.posterior["beta0"].stack(sample=("chain","draw")).values
+
+N_obs = x_samples.shape[1]
+S = alpha_samples.shape[0]
+
+# Observed and new indices
+idx_obs = np.arange(N_obs)
+idx_new = np.arange(N_obs, N_full)
+N_new = len(idx_new)
+
+# Neighbor list: list of arrays of observed neighbors for each new area
+neighbors_new = []
+for j in idx_new:
+    nb = np.where(full_gdf_adj_mtx[j, :N_obs] > 0)[0]  # indices of observed neighbors
+    if len(nb) == 0:
+        nb = np.array([], dtype=int)
+    neighbors_new.append(nb)
+
+# Choose the time you want to forecast
+t = -1  # last example
+x_t = x_samples[t, :, :]
+w_t = w_samples[t, :, :]
+
+eps = np.random.normal(
+    0.0,
+    sigma_samples[None, :],
+    size=x_t.shape
+)
+        
+# AR(1) future propagation
+x_fut_samples = alpha_samples[None, :] * x_t + eps
+
+# Prepare output
+x_new_samples = np.zeros((S, N_new))
+
+for s in range(S):
+    alpha_s = alpha_samples[s]
+    sigma_s = sigma_samples[s]
+    rho_s = rho_samples[s]
+    
+    for j_idx, nb in enumerate(neighbors_new):
+        # No neighbors marginal innovation else Use AR1 propagated mean from neighbors
+        x_prev = 0.0 if len(nb) == 0 else np.mean(x_t[nb, s])
+        
+        # Innovation contribution
+        if len(nb) == 0:
+            w_new = np.random.normal(scale=sigma_s)
+        else:
+            w_new = np.mean(w_t[nb, s]) + np.random.normal(scale=sigma_s * np.sqrt(1 - rho_s))
+        
+        # AR(1) propagation
+        x_new_samples[s, j_idx] = alpha_s * x_prev + w_new
+
+# Combine with observed x
+x_full = np.zeros((S, N_full))
+x_full[:, :N_obs] = x_fut_samples.T
+x_full[:, N_obs:] = x_new_samples
+
+# Compute th
+th_full = np.exp(beta0_samples[:, None] + x_full)
+
+```
+
+```{python}
+full_rr_posterior = full_adj_inputs.copy()
+full_rr_posterior['RR'] = th_full.mean(axis=0)
+```
+
+```{python}
+#| classes: light-mode
+cmap = create_cmap(full_rr_posterior, "RR", text_color="black")
+full_rr_posterior.rename(columns={"RR": "Relative Risk"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Positron",
+    column="Relative Risk",
+    tooltip=["states", "Relative Risk"],
+    style_kwds=dict(color="black"),
+)
+```
+
+```{python}
+#| classes: dark-mode
+cmap = create_cmap(full_rr_posterior, "RR", text_color="white")
+full_rr_posterior.rename(columns={"RR": "Relative Risk"}).round(2).explore(
+    cmap=cmap,
+    tiles="CartoDB Dark_Matter",
+    column="Relative Risk",
+    tooltip=["states", "Relative Risk"],
+    style_kwds=dict(color="black"),
+)
+```
+
+# Conclusion
+
+In this post we explored how to estimate relative risk while explicitly accounting for spatial and temporal structure. 
+
+We unpacked the mechanics of both the BYM2 model and state‑space approaches, then put theory into practice by modeling COVID‑19 risk across the United States. The result was a tool that can predict risk in unsampled regions and project future hotspots. 
+
+This is exactly what public health agencies need to target high‑risk areas, anticipate outbreaks, and allocate resources more efficiently.
