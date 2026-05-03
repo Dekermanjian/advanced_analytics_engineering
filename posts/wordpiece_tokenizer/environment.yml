@@ -1,0 +1,16 @@
+name: nnx_env
+channels:
+  - conda-forge
+
+dependencies:
+  - 'python=3.12'
+  - pip
+  - pip:
+    - ipykernel
+    - ipywidgets
+    - plotly
+    - pyarrow
+    - polars~=1.37.1
+    - nbformat>=4.2.0
+    - jax-ai-stack==v2025.10.28
+    - maturin~=1.13.1
