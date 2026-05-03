@@ -6,8 +6,6 @@ categories: [Natural Language Processing]
 code-annotations: below
 jupyter: nnx_env
 image: "thumbnail.png"
-draft: true
-draft-mode: visible
 execute: 
   cache: true
 ---
