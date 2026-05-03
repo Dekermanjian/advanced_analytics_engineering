@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/wordpiece_tokenizer/index.html",
       "/posts/bym-covid19-spatial/index.html",
       "/posts/rnn_elmo/index.html",
       "/posts/glove_embeddings/index.html",
