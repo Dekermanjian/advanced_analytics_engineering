@@ -1,7 +1,7 @@
 ---
 title: "How Machines Comprehend Language<br><sub>Bidirectional Encoder Representations from Transformers (BERT)</sub>"
 author: "Jonathan Dekermanjian"
-date: "2026-06-08"
+date: "2026-06-05"
 categories: [Natural Language Processing]
 code-annotations: below
 css: styles.css
