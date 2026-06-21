@@ -13,6 +13,7 @@
 **/.vdoc.*.py
 **/*.json
 **/*.pq
+**/model_checkpoint/
 
 !**/*states.json
 !**/states_abbreviations_mapping.json

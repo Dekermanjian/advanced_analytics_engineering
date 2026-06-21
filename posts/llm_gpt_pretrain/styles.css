@@ -1,0 +1,17 @@
+.panel-tabset .nav-item {
+    font-size: 10.5px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+  }
+
+.panel-tabset .nav-link {
+    padding: 0.5rem 1rem !important;
+}
+
+code.sourceCode .code-annotation-anchor {
+  z-index: 100;
+  position: absolute;
+  float: right;
+  background-color: rgba(0,0,0,0);
+}
