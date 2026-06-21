@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/llm_gpt_pretrain/index.html",
       "/posts/transformers_bert/index.html",
       "/posts/wordpiece_tokenizer/index.html",
       "/posts/bym-covid19-spatial/index.html",
