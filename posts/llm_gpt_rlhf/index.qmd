@@ -1,0 +1,1184 @@
+---
+title: "Building a Large Language Model<br><sub>Part 3: GPT RLHF</sub>"
+author: "Jonathan Dekermanjian"
+date: "2026-09-07"
+categories: [Natural Language Processing]
+code-annotations: below
+css: styles.css
+jupyter: nnx_env
+execute:
+  cache: true
+bibliography: references.bib
+nocite: |
+  @*
+---
+
+```{python}
+#| echo: false
+import itertools
+import json
+import os
+import urllib
+
+from dataclasses import dataclass
+from pathlib import Path
+
+import flax.nnx as nnx
+import grain.python as pygrain
+import jax
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import numpy as np
+import optax
+import orbax.checkpoint as orbax
+import tiktoken
+from tqdm.auto import tqdm
+```
+
+# Overview
+
+This is the final post in a three-part series on building a large language model from scratch.
+
+In the previous post we covered the second stage, instruction fine-tuning our pre-trained decoder-only GPT on instruction-response mappings. In this post we tackle the third stage: preference fine-tuning using Reinforcement Learning from Human Feedback.
+
+# Introduction
+
+Training large language models (LLMs) happens in phases whose objectives differ quite a bit. During the first phase, commonly known as pre-training, the objective is to instill the LLM with vast amounts of general knowledge. The second phase, commonly called instruction tuning, molds that knowledge-rich model into one that follows instructions, so that we can leverage what it knows as an assistant on specialized tasks. This brings us to the main event of this post: preference fine-tuning, which nudges the LLM to produce responses aligned with some particular preference — for example, being polite.
+
+Preference training is typically achieved using reinforcement learning and the data typically consist of sets of prompts with multiple responses that are ranked by human labellers, hence the term Reinforcement Learning from Human Feedback (RLHF) [@christiano2017preferences; @stiennon2020summarize]. In this post we will preference tune our instruction fine-tuned model from the previous post.
+
+We will be implementing the Proximal Policy Optimization (PPO) algorithm [@schulman2017ppo], which will require us to set up the following objects:
+
+1. A **reward model**: Stands in for our human judge and lets us score responses beyond the labelled data we've collected
+2. A **policy**: The instruction-tuned LLM whose weights we are updating
+3. A **reference model**: The same instruction-tuned LLM, frozen, to keep the policy from drifting away from what it already knows
+4. A **critic model**: Initialized from our reward model, and updated alongside the policy to predict the value of partial responses
+
+# Data Processing & Formatting
+
+As we mentioned above, instead of one "correct" response per prompt, each entry contains **two candidate responses and a judgment**: a `chosen` (preferred) response and a `rejected` one.
+
+Typically that preference comes from people: sampling a few responses from the SFT model, showing them to an annotator, and recording the ranking. OpenAI's InstructGPT data [@ouyang2022instructgpt] and Anthropic's HH-RLHF dataset [@bai2022hhrlhf] were both built this way.
+
+We will use the preference version of the same 1,100-example instruction dataset from the last post, published in Sebastian Raschka's [LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) repository [@raschka2024build]. Its `chosen`/`rejected` fields were generated synthetically, by prompting a larger model to produce a *polite* and an *impolite* paraphrase of each reference answer.
+
+```{python}
+def download_and_load_file(file_path, url):
+    if not os.path.exists(file_path):
+        with urllib.request.urlopen(url) as response:
+            text_data = response.read().decode("utf-8")
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(text_data)
+    else:
+        with open(file_path, "r", encoding="utf-8") as file:
+            text_data = file.read()
+
+    with open(file_path, "r") as file:
+        data = json.load(file)
+    return data
+
+
+file_path = "instruction-data-with-preference.json"
+
+url = (
+    "https://raw.githubusercontent.com/rasbt/LLMs-from-scratch"
+    "/main/ch07/04_preference-tuning-with-dpo/instruction-data-with-preference.json"
+)
+
+data = download_and_load_file(file_path, url)
+print("Number of entries:", len(data))
+```
+
+Let's look at an entry in our dataset
+
+```{python}
+entry = data[3]
+print("Instruction:", entry["instruction"])
+print("\nChosen response:\n ", entry["chosen"])
+print("\nRejected response:\n ", entry["rejected"])
+```
+
+## Splitting
+
+With the data in memory, we split it into three sets: 85% for training, 10% for testing, and the remaining 5% for validation. The training set drives the weight updates, the validation set lets us monitor generalization during fine-tuning, and the held-out test set is reserved for the final qualitative evaluation.
+
+```{python}
+train_portion = int(len(data) * 0.85) # 85% for training
+test_portion = int(len(data) * 0.1) # 10% for testing
+val_portion = len(data) - train_portion - test_portion # 5% for validation
+train_data = data[:train_portion]
+test_data = data[train_portion:train_portion + test_portion]
+val_data = data[train_portion + test_portion:]
+
+print("Training set length:", len(train_data))
+print("Validation set length:", len(val_data))
+print("Test set length:", len(test_data))
+```
+
+
+## Formatting
+
+We reuse the same formatting as we did during instruction fine-tuning.
+
+```{python}
+def format_input(entry):
+
+    instruction_text = (
+        f"Below is an instruction that describes a task. "
+        f"Write a response that appropriately completes the request."
+        f"\n\n### Instruction:\n{entry['instruction']}"
+        )
+
+    input_text = (
+        f"\n\n### Input:\n{entry['input']}" if entry["input"] else ""
+        )
+    return instruction_text + input_text
+```
+
+
+## Loading
+
+Again we load in the same tokenizer as before.
+
+```{python}
+tokenizer = tiktoken.get_encoding("gpt2")
+```
+
+Each dataset entry becomes **two token sequences**, built exactly like our SFT sequences, one for the `chosen` response and one for the `rejected`.
+
+Two details worth mentioning:
+
+1. **We append `<|endoftext|>` to every sequence.** The reward model will read its score at the *final* token, the only position where causal attention has seen the whole response. This has to hold for *every* sequence the RM ever sees, so when a pair is too long for `allowed_max_length` we truncate one token short and put the `<|endoftext|>` back — otherwise the score would be read at whatever token the cut happened to land on.
+
+2. **We keep a mask of real tokens** instead of the `-100` label trick we used during instruction fine-tuning. We only need to know where each sequence ends so we can read the score there.
+
+As before we right-pad with `<|endoftext|>` (id 50256) to the longest sequence in the batch. Right-padding is harmless for a causal model as attention only flows left, so pad positions cannot contaminate real positions. Notice in the `collate_fn` that we pad the batch to the longest sequence across both the `chosen` and `rejected` responses.
+
+```{python}
+PAD_ID = EOS_ID = 50256  # <|endoftext|> plays both roles, as in the previous posts
+
+@dataclass
+class PreferenceDataset:
+    """Pre-encodes every preference pair; each item holds a chosen and a rejected token sequence."""
+    data: list
+
+    def __post_init__(self):
+        self.encoded = []
+        for entry in self.data:
+            prompt = format_input(entry) + "\n\n### Response:\n"
+            self.encoded.append({
+                "chosen": tokenizer.encode(prompt + entry["chosen"]) + [EOS_ID],
+                "rejected": tokenizer.encode(prompt + entry["rejected"]) + [EOS_ID],
+            })
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx: int):
+        return self.encoded[idx]
+
+
+def preference_collate_fn(batch, pad_token_id=PAD_ID, allowed_max_length=256):
+    longest_seq = max(max(len(item["chosen"]), len(item["rejected"])) for item in batch)
+    batch_max_length = min(
+        longest_seq,
+        allowed_max_length,
+    )
+
+    def pad_and_stack(key):
+        ids, mask = [], []
+        for item in batch:
+            seq = item[key]
+            if len(seq) > allowed_max_length:
+                # A simple truncation would drop the <|endoftext|>
+                seq = seq[:allowed_max_length - 1] + [EOS_ID]
+            ids.append(np.array(seq + [pad_token_id] * (batch_max_length - len(seq))))
+            mask.append(np.array([1.0] * len(seq) + [0.0] * (batch_max_length - len(seq)), dtype=np.float32))
+        return np.stack(ids), np.stack(mask)
+
+    chosen_ids, chosen_mask = pad_and_stack("chosen")
+    rejected_ids, rejected_mask = pad_and_stack("rejected")
+    return chosen_ids, chosen_mask, rejected_ids, rejected_mask
+```
+
+With a dataset and a collate function, we wrap everything in a `grain` data loader.
+
+```{python}
+def load_and_preprocess_data(data: list, batch_size: int, shuffle=False):
+
+    dataset = PreferenceDataset(data)
+
+    print(f"Loaded {len(dataset)} samples")
+
+    sampler = pygrain.IndexSampler(
+        len(dataset),
+        shuffle=shuffle,
+        seed=42,
+        shard_options=pygrain.NoSharding(),
+        num_epochs=1,
+    )
+
+    dl = pygrain.DataLoader(
+        data_source=dataset,
+        sampler=sampler,
+        operations=[
+            pygrain.Batch(batch_size=batch_size, drop_remainder=True, batch_fn=preference_collate_fn)
+        ],
+    )
+
+    return dl
+
+
+train_dl = load_and_preprocess_data(data=train_data, batch_size=8, shuffle=True)
+val_dl = load_and_preprocess_data(data=val_data, batch_size=8, shuffle=False)
+
+chosen_ids, chosen_mask, rejected_ids, rejected_mask = next(iter(train_dl))
+print("chosen_ids:", chosen_ids.shape, " rejected_ids:", rejected_ids.shape)
+```
+
+
+# Load Pretrained GPT
+
+We start preference tuning from the instruction fine-tuned model, so we need to reconstruct the architecture and load in the saved weights. The architecture is unchanged from the previous posts, with two small but important adjustments:
+
+1. **The forward pass is split in two**: `hidden_states()` runs everything except the output head, and `__call__` puts the language-model head on top. The reward model and the value function ("critic") will reuse the same backbone with a *different* head.
+
+2. **Dropout is off**: This matters more than it looks as PPO compares the probability the *current* policy assigns to a token against the probability recorded when that token was *sampled*. With dropout active, those two numbers differ by random noise even before any parameter update, corrupting the importance ratios at the heart of the algorithm.
+
+```{python}
+#| code-fold: true
+
+@dataclass
+class GPTConfig:
+    vocab_size: int = 50_257
+    context_length: int = 256
+    d_model: int = 768
+    num_heads: int = 12
+    num_layers: int = 12
+    d_ff: int = 0
+    dropout_rate: float = 0.1
+    mha_dropout_rate: float = 0.1
+
+    def __post_init__(self):
+        if self.d_ff == 0:
+            self.d_ff = 4 * self.d_model
+
+    def __getitem__(self, key: str):
+        return getattr(self, key)
+
+
+class MultiHeadAttention(nnx.Module):
+    """Multi-head self-attention module"""
+    def __init__(self, d_model, num_heads, dropout_rate, *, rngs: nnx.Rngs):
+        assert d_model % num_heads == 0, f"d_model ({d_model}) must be divisible by num_heads ({num_heads})"
+        self.num_heads = num_heads
+        self.d_model = d_model
+        self.head_dim = d_model // num_heads
+        self.q_proj = nnx.Linear(d_model, d_model, rngs=rngs)
+        self.k_proj = nnx.Linear(d_model, d_model, rngs=rngs)
+        self.v_proj = nnx.Linear(d_model, d_model, rngs=rngs)
+        self.out_proj = nnx.Linear(d_model, d_model, rngs=rngs)
+
+        self.dropout = nnx.Dropout(rate=dropout_rate, rngs=rngs)
+
+    def _split_heads(self, x, batch, seq_len):
+        return x.reshape(batch, seq_len, self.num_heads, self.head_dim).transpose(0, 2, 1, 3)
+
+    def __call__(self, x):
+        batch, seq_len, _ = x.shape
+        mask = jnp.triu(jnp.ones((seq_len, seq_len), dtype=bool), 1)
+
+        q = self._split_heads(self.q_proj(x), batch, seq_len)
+        k = self._split_heads(self.k_proj(x), batch, seq_len)
+        v = self._split_heads(self.v_proj(x), batch, seq_len)
+
+        attn_logits = jnp.matmul(q, k.transpose(0, 1, 3, 2)) / jnp.sqrt(self.head_dim)
+        attn_logits = jnp.where(mask, -jnp.inf, attn_logits)
+
+        attn_weights = jax.nn.softmax(attn_logits, axis=-1)
+        attn_weights = self.dropout(attn_weights)
+        out = jnp.matmul(attn_weights, v).transpose(0, 2, 1, 3).reshape(batch, seq_len, self.d_model)
+        return self.out_proj(out)
+
+
+class FeedForward(nnx.Module):
+    """Position-wise feedforward network as used in the Transformer"""
+    def __init__(self, d_model, d_ff, *, rngs: nnx.Rngs):
+        self.linear1 = nnx.Linear(d_model, d_ff, rngs=rngs)
+        self.linear2 = nnx.Linear(d_ff, d_model, rngs=rngs)
+
+    def __call__(self, x):
+        x = self.linear1(x)
+        x = jax.nn.gelu(x)
+        return self.linear2(x)
+
+
+class TransformerBlock(nnx.Module):
+    """Single Transformer block: multi-head self-attention followed by a feedforward network, with residual connections and layer normalization."""
+    def __init__(self, d_model, num_heads, d_ff, mha_dropout_rate, dropout_rate, *, rngs: nnx.Rngs):
+        self.attention = MultiHeadAttention(d_model, num_heads, mha_dropout_rate, rngs=rngs)
+        self.norm1 = nnx.LayerNorm(d_model, rngs=rngs)
+        self.ffn = FeedForward(d_model, d_ff, rngs=rngs)
+        self.norm2 = nnx.LayerNorm(d_model, rngs=rngs)
+
+        self.dropout = nnx.Dropout(rate=dropout_rate, rngs=rngs)
+
+    def __call__(self, x):
+        shortcut = x
+        x = self.norm1(x)
+        x = self.attention(x)
+        x = self.dropout(x)
+        x = x + shortcut
+
+        shortcut = x
+        x = self.norm2(x)
+        x = self.ffn(x)
+        x = self.dropout(x)
+        x = x + shortcut
+        return x
+
+
+class GPT(nnx.Module):
+    def __init__(self, config: GPTConfig, *, rngs: nnx.Rngs):
+        # Token and Position Embeddings
+        self.token_emb = nnx.Embed(config["vocab_size"], config["d_model"], rngs=rngs)
+        self.pos_emb = nnx.Param(jax.random.normal(rngs.params(), (1, config["context_length"], config["d_model"])) * 0.02)
+        self.drop_emb = nnx.Dropout(rate=config["dropout_rate"], rngs=rngs)
+
+        # Transformer Blocks
+        self.blocks = nnx.List([TransformerBlock(config["d_model"], config["num_heads"], config["d_ff"], config["mha_dropout_rate"], config["dropout_rate"], rngs=rngs) for _ in range(config["num_layers"])])
+        self.norm_final = nnx.LayerNorm(config["d_model"], rngs=rngs)
+
+        # Logits
+        self.out_head = nnx.Linear(config["d_model"], config["vocab_size"], rngs=rngs)
+
+    def hidden_states(self, input_ids):
+        """Everything except the output head -- the seam where other heads plug in."""
+        _, seq_len = input_ids.shape
+
+        # Combine embeddings: Token + Position
+        x = self.token_emb(input_ids)
+        x = x + self.pos_emb[:, :seq_len, :]
+
+        x = self.drop_emb(x)
+        for block in self.blocks:
+            x = block(x)
+        return self.norm_final(x)
+
+    def __call__(self, input_ids):
+        return self.out_head(self.hidden_states(input_ids))
+```
+
+# Reward Model
+
+The reward model (RM) is our stand-in for the human judge. It maps any (prompt, response) pair to a single scalar $r_\phi(x, y)$ that answers *how much would a human like this response?* Once the model is trained, the RL stage can get feedback on **any** sample the policy produces, not just the finite set of responses humans happened to label. That is the whole point of learning a reward model rather than using the preference data directly.
+
+## Architecture
+
+The architecture of the RM is the same as our instruction-tuned GPT, which already understands the distribution of prompts and responses it will be judging, with one adjustment. We swap the vocabulary head for a **scalar head**, applied at every position so that it emits one score per token. The position we actually train on is the final `<|endoftext|>` token, where the model has seen the entire response.
+
+## Loss Function
+
+Our labels are comparisons, not target scores, so we need a model of how latent scores generate observed preferences. The classic answer is the **Bradley–Terry model** [@bradley1952rank], which states that if the preferred response $y_w$ has latent quality $r_w$ and the rejected one $y_l$ has quality $r_l$, then
+
+$$P(y_w \succ y_l) = \sigma(r_w - r_l) = \frac{1}{1 + e^{-(r_w - r_l)}}$$
+
+Maximizing the likelihood of the observed preferences under this model gives our training loss:
+
+$$\mathcal{L}(\phi) = -\,\mathbb{E}_{(x,\, y_w,\, y_l)}\Big[\log \sigma\big(r_\phi(x, y_w) - r_\phi(x, y_l)\big)\Big]$$
+
+Two properties worth noticing:
+
+- **Only the difference of scores matters.** Adding a constant to every score leaves the loss unchanged, so the RM's absolute scale is arbitrary. This is why, during RL, we will normalize advantages rather than trust raw score magnitudes.
+
+- **We initialize the scalar head to zeros**, so every margin starts at exactly 0 and the initial loss must be exactly $\ln 2 \approx 0.6931$ (the model is saying "50/50" about every pair).
+
+```{python}
+class RewardModel(nnx.Module):
+    """A GPT backbone with a scalar head instead of a vocabulary head.
+
+    Returns one score per position.
+    """
+    def __init__(self, backbone: GPT, d_model: int, *, rngs: nnx.Rngs):
+        self.backbone = backbone
+        self.reward_head = nnx.Linear(d_model, 1, kernel_init=nnx.initializers.zeros_init(), rngs=rngs)
+
+    def __call__(self, input_ids):
+        h = self.backbone.hidden_states(input_ids)
+        return self.reward_head(h).squeeze(-1)  # (batch, seq_len)
+```
+
+## Loading the Instruction-Tuned Model
+
+We restore the GPT-2 medium [@radford2019language] checkpoint saved at the end of the instruction-tuning post.
+
+We will need fresh copies of these weights multiple times in this post, so we wrap the restore in a helper.
+
+:::{.callout-important}
+Notice that `dropout_rate=0.0` which is essential for RLHF
+:::
+
+```{python}
+#| output: false
+config = GPTConfig(
+    vocab_size=tokenizer.n_vocab,
+    context_length=256,
+    d_model=1024,
+    num_heads=16,
+    num_layers=24,
+    dropout_rate=0.0, # no dropout anywhere in the RLHF stage
+    mha_dropout_rate=0.0,
+)
+
+SFT_CHECKPOINT = Path("./model_checkpoint/GPT2_jax_sft")
+
+def load_sft_model():
+    """A fresh GPT with the instruction-tuned weights restored into it."""
+    model = GPT(config=config, rngs=nnx.Rngs(0))
+    checkpointer = orbax.PyTreeCheckpointer()
+    restored_state = checkpointer.restore(
+        SFT_CHECKPOINT.absolute(),
+        args=orbax.args.PyTreeRestore(nnx.state(model)),
+    )
+    nnx.update(model, restored_state)
+    return model
+
+
+reward_model = RewardModel(load_sft_model(), config["d_model"], rngs=nnx.Rngs(1))
+```
+
+## Training the Reward Model
+
+Each step pushes both members of a preference pair through the model, reads the two scores at their final tokens, and applies the Bradley–Terry loss. The margin also gives us a free metric: the fraction of pairs where the chosen response scores higher, the RM's **accuracy**, which starts at chance (50%) and should climb well above it.
+
+```{python}
+def reward_at_last_token(rewards, mask):
+    """Pick out each sequence's score at its final real token (the <|endoftext|> we appended)."""
+    last_idx = jnp.sum(mask, axis=-1).astype(jnp.int32) - 1
+    return jnp.take_along_axis(rewards, last_idx[:, None], axis=1).squeeze(-1)
+
+
+def rm_loss_fn(model, chosen_ids, chosen_mask, rejected_ids, rejected_mask):
+    r_chosen = reward_at_last_token(model(chosen_ids), chosen_mask)
+    r_rejected = reward_at_last_token(model(rejected_ids), rejected_mask)
+    margin = r_chosen - r_rejected
+    loss = -jnp.mean(jax.nn.log_sigmoid(margin)) # Bradley-Terry negative log-likelihood
+    accuracy = jnp.mean((margin > 0).astype(jnp.float32))
+    return loss, accuracy
+
+
+rm_optimizer = nnx.Optimizer(
+    reward_model,
+    optax.adamw(learning_rate=1e-5, weight_decay=1e-1),
+    wrt=nnx.Param,
+)
+
+
+@nnx.jit
+def rm_train_step(model, optimizer, chosen_ids, chosen_mask, rejected_ids, rejected_mask):
+    (loss, accuracy), grads = nnx.value_and_grad(rm_loss_fn, has_aux=True)(
+        model, chosen_ids, chosen_mask, rejected_ids, rejected_mask
+    )
+    optimizer.update(model, grads)
+    return loss, accuracy
+
+
+@nnx.jit
+def rm_eval_step(model, chosen_ids, chosen_mask, rejected_ids, rejected_mask):
+    return rm_loss_fn(model, chosen_ids, chosen_mask, rejected_ids, rejected_mask)
+```
+
+One epoch is enough. Reward models overfit quickly, they can start memorizing which surface features separated chosen from rejected in the training set rather than learning the underlying preference, and an overfit RM is dangerous downstream, because PPO will exploit anything it can to maximize the return.
+
+```{python}
+num_epochs = 1
+batch_size = 8
+num_examples = len(train_data)
+
+eval_freq = 10
+eval_iter = 6
+
+rm_loss_history = []
+rm_val_loss_history = []
+rm_accuracy_history = []
+pairs_seen_history = []
+pairs_seen = 0
+ema_loss = None
+val_ema_loss = None
+alpha = 0.3
+
+for epoch in range(num_epochs):
+    train_batch_iter = iter(train_dl)
+
+    for step, batch in tqdm(enumerate(train_batch_iter), total=num_examples // batch_size):
+        loss, accuracy = rm_train_step(reward_model, rm_optimizer, *batch)
+        pairs_seen += batch[0].shape[0]
+
+        if step > 0 and step % eval_freq == 0:
+            loss_val = float(loss)
+            ema_loss = loss_val if ema_loss is None else alpha * loss_val + (1 - alpha) * ema_loss
+            rm_loss_history.append(ema_loss)
+            rm_accuracy_history.append(float(accuracy))
+            pairs_seen_history.append(pairs_seen)
+
+            val_losses = [
+                float(rm_eval_step(reward_model, *val_batch)[0])
+                for val_batch in itertools.islice(iter(val_dl), eval_iter)
+            ]
+            if val_losses:
+                val_ema_loss = (
+                    alpha * np.mean(val_losses) + (1 - alpha) * val_ema_loss
+                    if val_ema_loss is not None else np.mean(val_losses)
+                )
+                rm_val_loss_history.append(float(val_ema_loss))
+```
+
+
+```{python}
+#| classes: light-mode
+#| layout-ncol: 2
+#| fig-cap: Reward Model Training Metrics
+#| fig-subcap:
+#|   - "Reward Model Loss"
+#|   - "Reward Model Accuracy"
+
+fig, ax = plt.subplots(figsize=(5, 3.5))
+ax.plot(pairs_seen_history, rm_loss_history, color="steelblue", linewidth=1.5, label="train loss")
+ax.plot(pairs_seen_history, rm_val_loss_history, color="orange", linewidth=2, label="validation loss")
+ax.axhline(np.log(2), color="gray", linewidth=1, linestyle="--", label="chance (ln 2)")
+ax.set_xlabel("Preference pairs seen")
+ax.set_ylabel("Bradley–Terry loss")
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+fig, ax = plt.subplots(figsize=(5, 3.5))
+ax.plot(pairs_seen_history, rm_accuracy_history, color="steelblue", linewidth=1.5)
+ax.axhline(0.5, color="gray", linewidth=1, linestyle="--")
+ax.set_xlabel("Preference pairs seen")
+ax.set_ylabel("Train batch accuracy")
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+#| classes: dark-mode
+#| layout-ncol: 2
+#| fig-cap: Reward Model Training Metrics
+#| fig-subcap:
+#|   - "Reward Model Loss"
+#|   - "Reward Model Accuracy"
+
+plt.style.use("dark_background")
+fig, ax = plt.subplots(figsize=(5, 3.5))
+ax.plot(pairs_seen_history, rm_loss_history, color="steelblue", linewidth=1.5, label="train loss")
+ax.plot(pairs_seen_history, rm_val_loss_history, color="orange", linewidth=2, label="validation loss")
+ax.axhline(np.log(2), color="gray", linewidth=1, linestyle="--", label="chance (ln 2)")
+ax.set_xlabel("Preference pairs seen")
+ax.set_ylabel("Bradley–Terry loss")
+ax.legend()
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+fig, ax = plt.subplots(figsize=(5, 3.5))
+ax.plot(pairs_seen_history, rm_accuracy_history, color="steelblue", linewidth=1.5)
+ax.axhline(0.5, color="gray", linewidth=1, linestyle="--")
+ax.set_xlabel("Preference pairs seen")
+ax.set_ylabel("Train batch accuracy")
+ax.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+val_metrics = [rm_eval_step(reward_model, *batch) for batch in iter(val_dl)]
+val_accuracy = float(np.mean([float(accuracy) for _, accuracy in val_metrics]))
+print(f"Reward model validation accuracy: {val_accuracy:.1%}")
+```
+
+Let's look at an example as a qualitative check, using an entry from our validation set. Remember the absolute values have no meaning; only the gap matters.
+
+```{python}
+entry = val_data[20]
+prompt = format_input(entry) + "\n\n### Response:\n"
+
+print(format_input(entry), "\n")
+for label in ["chosen", "rejected"]:
+    ids = jnp.asarray(tokenizer.encode(prompt + entry[label]) + [EOS_ID])[None, :]
+    score = float(reward_model(ids)[0, -1])
+    print(f"{label:>8} ({score:+.2f}): {entry[label]}")
+```
+
+Let's save the weights of our trained RM
+
+```{python}
+#| output: false
+save_directory = Path("./model_checkpoint/GPT2_jax_rm")
+checkpointer = orbax.PyTreeCheckpointer()
+checkpointer.save(
+    save_directory.absolute(),
+    args=orbax.args.PyTreeSave(nnx.state(reward_model)),
+    force=True,
+)
+
+del rm_optimizer  # frees the Adam moments (2x model size) because we are about to load three more models
+```
+
+# Reinforcement Learning with PPO
+
+Now that we have a trained RM, generating more polite responses becomes an optimization problem. From a reinforcement learning perspective we just need to find the policy whose samples score highly. But *pure* reward maximization can produce catastrophically bad results. The RM is only a proxy for human judgment, trustworthy near the distribution it was trained on, and an unconstrained optimizer will wander off that distribution, find inputs where the proxy is wrong, and exploit them (**reward hacking**). So RLHF actually optimizes a *regularized* objective:
+
+$$
+\max_{\pi}\;\; \mathbb{E}_{x \sim \mathcal{D},\; y \sim \pi(\cdot \mid x)}\big[\, r_\phi(x, y) \,\big] \;-\; \beta\; \mathbb{D}_{\mathrm{KL}}\big(\, \pi(\cdot \mid x) \,\Vert\, \pi_{\mathrm{ref}}(\cdot \mid x) \,\big)
+$$
+
+where $\pi_{\mathrm{ref}}$ is a **frozen copy of the SFT (instruction tuned) model**. The Kullback-Leibler (KL) term is a constraint that says: earn as much reward as you can *without becoming a different model*. The coefficient $\beta$ sets the strength of the constraint.
+
+## Language Modeling as a Reinforcement Learning Problem
+
+To apply an RL algorithm we need to phrase generation as a Markov Decision Process (MDP) with the following properties:
+
+- **State** $s_t$ = the prompt plus the tokens generated so far.
+- **Action** $a_t$ = the next token pulled from a 50,257 (vocabulary size) action space.
+- **Episode** = one complete response, ending at `<|endoftext|>` or a length cap.
+- **Reward**: the RM speaks only once, at the end of the episode. The KL constraint is applied *per token*, giving each action the reward
+
+$$r_t = -\beta \big( \log \pi(a_t \mid s_t) - \log \pi_{\mathrm{ref}}(a_t \mid s_t) \big) \;+\; \mathbb{1}[t = T] \; r_\phi(x, y)$$
+
+Where the per-token $\log \pi - \log \pi_{\mathrm{ref}}$ is an unbiased single-sample estimate of the KL divergence.
+
+## The Components of RLHF Using PPO
+
+RLHF with PPO famously requires four copies of the network in memory at once. These models share identical architectures but their tasks are different.
+
+| model | role | trained? |
+|---|---|---|
+| **policy** | generates responses; the model we are improving | yes |
+| **reference** | frozen SFT (instruction tuned) snapshot; anchors the KL penalty | no |
+| **reward model** | the judge; scores finished responses | no |
+| **critic** | predicts the expected future reward from each prefix | yes |
+
+The critic is initialized from the trained reward model, which already knows how to read response quality. However, now it needs to learn to predict it from *partial* responses.
+
+:::{.callout-note}
+
+With GPT-2 medium this is roughly 1.4B parameters loaded in memory, before optimizer state. This is why RLHF has a reputation for being infrastructure-hungry.
+
+:::
+
+We load the required networks and define the necessary hyperparameters.
+
+```{python}
+policy_model = load_sft_model() # the model we will train
+reference_model = nnx.clone(policy_model) # frozen SFT snapshot
+critic_model = nnx.clone(reward_model)  # value function, initialized from the trained RM
+```
+
+```{python}
+PROMPTS_PER_ITERATION = 8 # fresh prompts sampled per PPO iteration
+GROUP_SIZE = 4 # completions sampled per prompt
+MAX_NEW_TOKENS = 35 # response length cap
+NUM_ITERATIONS = 20 # 8 * 4 = 32 episodes per iteration, 640 episodes total
+
+KL_COEF = 0.1 # beta: strength of the per-token KL constraint
+MISSING_EOS_PENALTY = -1.0 # terminal reward for a response that never finished
+CLIP_EPS = 0.2 # PPO clipping radius
+VF_COEF = 0.1 # weight of the critic's loss
+GAMMA = 1.0 # no discounting within a response
+LAM = 0.95 # GAE lambda
+PPO_EPOCHS = 2 # optimization passes over each rollout buffer
+MINIBATCH_SIZE = 8 # sequences per gradient step
+POLICY_LR = 1e-5
+CRITIC_LR = 1e-5
+
+# keeps every minibatch the same shape, so jit compiles the update exactly once
+assert (PROMPTS_PER_ITERATION * GROUP_SIZE) % MINIBATCH_SIZE == 0
+```
+
+## Phase 1: Collecting Experience
+
+PPO is (mostly) **on-policy**, which means that the experience it learns from must come from the current policy. Each iteration starts by *sampling* responses. Two details are easy to get wrong:
+
+- **Sample at temperature 1 with no top-k or nucleus truncation.** The math assumes the distribution we sampled from *is* the policy. Truncated sampling would make the recorded log-probabilities wrong, silently biasing every update.
+
+- **Exploration comes from sampling itself.** Greedy decoding would collect the same response every time and learn nothing new.
+
+We sample `GROUP_SIZE` completions of the **same prompt** as one batch. This is a deliberate trick because a batch of identical prompts needs no padding during generation, so our padding-mask-free model can generate correctly.
+
+:::{.callout-note}
+Production systems batch *different* prompts using left-padding, attention masks, and KV caches — machinery our small model doesn't need.
+:::
+
+After generation, every rollout is right-padded to one fixed length `LMAX` so that all downstream jitted computations compile exactly once.
+
+```{python}
+train_prompts = [
+    np.array(tokenizer.encode(format_input(entry) + "\n\n### Response:\n"))
+    for entry in train_data
+]
+
+max_prompt_len = max(len(p) for p in train_prompts)
+LMAX = max_prompt_len + MAX_NEW_TOKENS
+assert LMAX + 1 <= config["context_length"]  # +1: the reward model gets a column for a trailing <|endoftext|>
+print(f"Longest prompt: {max_prompt_len} tokens -> every rollout padded to {LMAX} tokens")
+
+
+def sample_group(policy, prompt_ids, group_size, max_new_tokens, rng_key, temperature=1.0):
+    """Sample `group_size` completions of the same prompt in one batch."""
+    idx = jnp.tile(jnp.asarray(prompt_ids)[None, :], (group_size, 1))
+    for _ in range(max_new_tokens):
+        logits = policy(idx)[:, -1, :] / temperature
+        rng_key, subkey = jax.random.split(rng_key)
+        next_token = jax.random.categorical(subkey, logits, axis=-1)
+        idx = jnp.concatenate([idx, next_token[:, None]], axis=1)
+    return idx
+```
+
+### Scoring a Rollout
+
+For every sampled sequence, PPO needs four quantities:
+
+1. $\log \pi(a_t \mid s_t)$: the policy's log-probability of each response token,
+2. $\log \pi_{\mathrm{ref}}(a_t \mid s_t)$: the same, under the frozen reference,
+3. $V(s_t)$: the critic's value estimate at each prefix,
+4. $r_\phi(x, y)$: the reward model's score for the finished response.
+
+A convenient property of causal transformers is that we don't need to record probabilities *during* the sampling loop. One forward pass over the finished sequence produces the logits at every position simultaneously, the output at position $t$ is the distribution over token $t{+}1$, so a single pass recovers every per-token log-probability. All four quantities come from one jitted function.
+
+The **response mask** marks which of the $T{-}1$ next-token positions are actions we are training. This includes the response tokens, up to and *including* the first `<|endoftext|>` (choosing to stop is an action too), and nothing after it. Positions outside the mask, such as the prompt, and padding, are excluded from every loss and every mean.
+
+The reward model needs a different treatment, and we need to be careful here. During training we appended `<|endoftext|>` to every pair and read the score there, so that is the *only* kind of position the RM has ever learned to score. A sampled rollout that spends its entire `MAX_NEW_TOKENS` budget without emitting `<|endoftext|>` ends mid-sentence, and scoring it where it happens to stop asks the RM a question it was never trained to answer. So the RM reads one position further on those rollouts, landing on the trailing `<|endoftext|>`. Note that this is a different index from the last *action*, but the terminal reward still attaches to the final real response token, since a padding position is not something the policy chose.
+
+That fixes the *position* the score is read at, but not the deeper problem that the text is still a fragment, and the RM cannot grade half a sentence or a mid-word token. So instead when a rollout never terminates we apply a fixed `MISSING_EOS_PENALTY` as its terminal reward.
+
+It is worth being clear about why we penalize these rather than simply dropping them, which is the tempting alternative. PPO estimates an expectation over the policy's *own* output distribution, and discarding the rollouts that ran long makes length a hidden selection criterion, and we would end up optimizing the policy conditioned on having stopped early. Moreover, the deleted rollouts are precisely the rambling ones, so never finishing would become the one behavior that escapes criticism entirely. Keeping the sample and scoring it badly is what teaches the policy to stop.
+
+```{python}
+def token_logprobs(model, sequences):
+    """Log-probability the model assigns to each next token: output[:, t] scores sequences[:, t+1]."""
+    logits = model(sequences[:, :-1])
+    logps = jax.nn.log_softmax(logits, axis=-1)
+    return jnp.take_along_axis(logps, sequences[:, 1:, None], axis=-1).squeeze(-1)
+
+
+def build_response_mask(sequences, prompt_len, eos_id=EOS_ID):
+    """1.0 at response-token positions (in the T-1 next-token grid), up to and including the first <|endoftext|>.
+
+    Must be called on the raw (unpadded) rollouts, so that padding cannot be mistaken for a generated end-of-text.
+    """
+    sequences = np.asarray(sequences)
+    responses = sequences[:, prompt_len:]
+    is_eos = (responses == eos_id).astype(np.int64)
+    after_first_eos = np.cumsum(is_eos, axis=1) - is_eos # > 0 strictly after the first eos
+    response_mask = (after_first_eos == 0).astype(np.float32)
+    mask = np.zeros((sequences.shape[0], sequences.shape[1] - 1), dtype=np.float32)
+    mask[:, prompt_len - 1:] = response_mask
+    return mask
+
+
+def pad_to_lmax(sequences, pad_id=PAD_ID):
+    sequences = np.asarray(sequences)
+    return np.pad(sequences, ((0, 0), (0, LMAX - sequences.shape[1])), constant_values=pad_id)
+
+
+def rm_view(sequences, prompt_len, response_lengths, has_eos):
+    """The reward model's own copy of the rollouts, always read at an <|endoftext|>.
+
+    A rollout that doesn't emit one ends on an ordinary token, which the RM never learned to score.
+    Reading one position further lands on the trailing <|endoftext|>. This ensures our RM doesn't
+    score mid-sentence tokens.
+    """
+    last_token_idx = prompt_len - 1 + response_lengths
+    rm_idx = np.where(has_eos, last_token_idx, last_token_idx + 1).astype(np.int32)
+    rm_sequences = np.pad(sequences, ((0, 0), (0, 1)), constant_values=EOS_ID)
+    return rm_sequences, rm_idx
+
+
+@nnx.jit
+def score_rollouts(policy, reference, reward_model, critic, sequences, rm_sequences, rm_idx):
+    """Everything PPO needs to know about a batch of finished rollouts, in one jitted pass."""
+    logprobs = token_logprobs(policy, sequences)        # (batch, LMAX-1)
+    ref_logprobs = token_logprobs(reference, sequences) # (batch, LMAX-1)
+    values = critic(sequences[:, :-1])                  # (batch, LMAX-1): V(s_t) at every prefix
+    rm_scores = jnp.take_along_axis(reward_model(rm_sequences), rm_idx[:, None], axis=1).squeeze(-1)
+    return logprobs, ref_logprobs, values, rm_scores
+```
+
+### From Rewards to Advantages
+
+A policy-gradient method increases the log-probability of each action in proportion to how good its outcome was. Using the raw return as "how good" is statistically terrible because almost every completion earns *some* reward, so every sampled token gets pushed up, just by different amounts resulting in a very noisy signal. What we actually want to know is whether an action made things **better than expected**.
+
+"Expected" is exactly what the **critic** provides, $V(s_t)$, an estimate of the reward that will eventually arrive if we continue from prefix $s_t$. Subtracting it centers the learning signal, where the **advantage** $\hat{A}_t > 0$ implies the action worked out better than the critic predicted, whereas advantages $< 0$ are worse than expected. This is also why a terminal-only reward still teaches *every* token because the critic redistributes the end-of-episode signal across the response, and each token is credited with how much it changed the outlook.
+
+We estimate advantages with **Generalized Advantage Estimation (GAE)** [@schulman2015gae]. Define the one-step surprise (Temporal-Difference error):
+
+$$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
+
+and accumulate it backwards over the episode with a decay $\lambda$:
+
+$$\hat{A}_t = \sum_{k \ge 0} (\gamma \lambda)^k \, \delta_{t+k}$$
+
+$\lambda$ interpolates between trusting the critic completely ($\lambda{=}0$: low variance, biased by critic errors) and trusting only observed rewards ($\lambda{=}1$: unbiased, high variance). We use the customary $\lambda{=}0.95$, and discount factor of $\gamma{=}1$ because a 35-token response is a short episode and there is no reason to value late reward less. The critic itself is trained toward the **returns** $\hat{A}_t + V(s_t)$.
+
+Finally we **whiten**/**standardize** advantages (zero mean, unit variance) across each rollout buffer. This is a standard variance-reduction trick that also makes the model robust to the RM's arbitrary scale.
+
+```{python}
+def masked_mean(x, mask, axis=None):
+    return jnp.sum(x * mask, axis=axis) / jnp.maximum(jnp.sum(mask, axis=axis), 1e-8)
+
+
+def masked_whiten(x, mask):
+    mean = masked_mean(x, mask)
+    var = masked_mean((x - mean) ** 2, mask)
+    return (x - mean) * jax.lax.rsqrt(var + 1e-8) * mask
+
+
+def compute_gae(rewards, values, mask, gamma=GAMMA, lam=LAM):
+    """Generalized Advantage Estimation"""
+    batch, horizon = rewards.shape
+    advantages = np.zeros_like(rewards)
+    last_gae = np.zeros(batch)
+    for t in reversed(range(horizon)):
+        next_values = values[:, t + 1] if t < horizon - 1 else 0.0
+        next_mask = mask[:, t + 1] if t < horizon - 1 else 0.0   # 0 past the episode boundary
+        delta = rewards[:, t] + gamma * next_values * next_mask - values[:, t]
+        last_gae = delta + gamma * lam * next_mask * last_gae
+        advantages[:, t] = last_gae
+    advantages = advantages * mask
+    returns = advantages + values * mask
+    return advantages, returns
+```
+
+## Phase 2: The PPO Objective
+
+Rollouts are expensive, so we want **several gradient steps per batch** of experience. But after the first step the policy no longer matches the policy that generated the data. PPO applies two fixes to get around this issue.
+
+First, an importance ratio per token corrects for the mismatch:
+
+$$\rho_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\theta_{\mathrm{old}}}(a_t \mid s_t)}$$
+
+Second, the ratio is **clipped**, so the objective stops rewarding movement beyond a trust region of the sampling policy:
+
+$$\mathcal{L}^{\mathrm{clip}}(\theta) = -\,\mathbb{E}_t\Big[ \min\big( \rho_t \hat{A}_t,\;\; \mathrm{clip}(\rho_t,\, 1{-}\epsilon,\, 1{+}\epsilon)\, \hat{A}_t \big) \Big]$$
+
+As long as $\rho_t$ stays inside $[1{-}\epsilon,\, 1{+}\epsilon]$ this is the ordinary policy gradient. Once the policy has already moved a token's probability by more than $\epsilon$ *in the direction its advantage points*, the `min` selects the clipped branch, the objective goes flat, and that token contributes **zero gradient**. Stale data can never push the policy too far.
+
+On our very first minibatch $\pi_\theta = \pi_{\theta_{\mathrm{old}}}$, so every $\rho_t = 1$ (this is why dropout had to go). The **clip fraction** which represents the share of tokens whose ratio has left the trust region is a good metric to monitor because near 0 means we are barely using the trust region, while a large fraction means the policy is moving fast and the clip is preventing large policy changes.
+
+The critic is trained alongside the policy with a mean-squared error toward the returns, and both models get global-norm gradient clipping which is standard PPO hygiene.
+
+```{python}
+def ppo_loss_fn(policy, critic, sequences, mask, old_logprobs, advantages, returns):
+    logprobs = token_logprobs(policy, sequences)
+    ratio = jnp.exp(logprobs - old_logprobs)
+
+    pg_loss_unclipped = -advantages * ratio
+    pg_loss_clipped = -advantages * jnp.clip(ratio, 1.0 - CLIP_EPS, 1.0 + CLIP_EPS)
+    pg_loss = masked_mean(jnp.maximum(pg_loss_unclipped, pg_loss_clipped), mask)
+
+    values = critic(sequences[:, :-1])
+    vf_loss = 0.5 * masked_mean((values - returns) ** 2, mask)
+
+    loss = pg_loss + VF_COEF * vf_loss
+    clip_fraction = masked_mean((jnp.abs(ratio - 1.0) > CLIP_EPS).astype(jnp.float32), mask)
+    return loss, {"pg_loss": pg_loss, "vf_loss": vf_loss, "clip_fraction": clip_fraction}
+
+
+policy_optimizer = nnx.Optimizer(
+    policy_model,
+    optax.chain(optax.clip_by_global_norm(1.0), optax.adamw(POLICY_LR, weight_decay=0.0)),
+    wrt=nnx.Param,
+)
+critic_optimizer = nnx.Optimizer(
+    critic_model,
+    optax.chain(optax.clip_by_global_norm(1.0), optax.adamw(CRITIC_LR, weight_decay=0.0)),
+    wrt=nnx.Param,
+)
+
+
+@nnx.jit
+def ppo_train_step(
+    policy,
+    critic,
+    policy_optimizer,
+    critic_optimizer,
+    sequences,
+    mask,
+    old_logprobs,
+    advantages,
+    returns
+):
+    grad_fn = nnx.value_and_grad(ppo_loss_fn, argnums=(0, 1), has_aux=True)
+    (loss, stats), (policy_grads, critic_grads) = grad_fn(
+        policy, critic, sequences, mask, old_logprobs, advantages, returns
+    )
+    policy_optimizer.update(policy, policy_grads)
+    critic_optimizer.update(critic, critic_grads)
+    return loss, stats
+```
+
+## The RLHF Training Loop
+
+Each iteration has the two phases we built above:
+
+- **Phase 1 (collect).** With parameters frozen, sample a group of completions for each of `PROMPTS_PER_ITERATION` prompts then score everything (log-probs, reference log-probs, values, RM scores) and assemble per-token rewards + run GAE.
+- **Phase 2 (optimize).** Make `PPO_EPOCHS` shuffled minibatch passes over the buffer with the clipped objective.
+
+What to watch while it runs:
+
+- The **reward**: the mean RM score of fresh samples. This is *the* number RLHF exists to increase.
+
+- **KL/token**: the drift from the SFT model. It should grow slowly; if it explodes, the constraint ($\beta$) is too loose or the learning rate is too high.
+
+- **unfinished**: the share of rollouts that hit the token cap without emitting `<|endoftext|>`, and therefore collected `MISSING_EOS_PENALTY` instead of a real score. It should fall as training proceeds. If it stays high, the reward signal is mostly this penalty rather than anything about politeness, and either the cap or the penalty needs revisiting.
+
+- **clip fraction**: It is exactly 0 on the first minibatch of each iteration and grows across the `PPO_EPOCHS` passes. A per-iteration average that settles above ~0.3 is a sign the policy is moving too far per batch, and calls for a lower learning rate or fewer epochs.
+
+:::{.callout-warning}
+A practical note on runtime: sampling token-by-token without a KV cache dominates the cost, so expect a few minutes per iteration on CPU.
+:::
+
+```{python}
+sample_rng = jax.random.PRNGKey(42)
+shuffle_rng = np.random.default_rng(0)
+prompt_queue = []
+
+reward_history = []
+kl_history = []
+length_history = []
+clip_history = []
+unfinished_history = []
+
+for iteration in range(NUM_ITERATIONS):
+    # Phase 1: collect experience with the current policy (our trained language model)
+    buffer = {"sequences": [], "masks": [], "logprobs": [], "advantages": [], "returns": []}
+    iter_scores, iter_kls, iter_lengths, iter_unfinished = [], [], [], []
+    sample_completion = None
+
+    for _ in tqdm(range(PROMPTS_PER_ITERATION), desc=f"iter {iteration}: rollouts", leave=False):
+        if not prompt_queue:
+            prompt_queue = list(shuffle_rng.permutation(len(train_prompts)))
+        prompt_ids = train_prompts[prompt_queue.pop()]
+        prompt_len = len(prompt_ids)
+
+        sample_rng, sample_key = jax.random.split(sample_rng)
+        rollouts = sample_group(policy_model, prompt_ids, GROUP_SIZE, MAX_NEW_TOKENS, sample_key)
+
+        mask = build_response_mask(rollouts, prompt_len)   # before padding: pads must not look like actions
+        sequences = pad_to_lmax(rollouts)
+        full_mask = np.zeros((GROUP_SIZE, LMAX - 1), dtype=np.float32)
+        full_mask[:, :mask.shape[1]] = mask
+
+        response_lengths = full_mask.sum(axis=1)
+        last_token_idx = (prompt_len - 1 + response_lengths).astype(np.int32)  # last response token of each rollout
+        has_eos = (np.asarray(rollouts)[:, prompt_len:] == EOS_ID).any(axis=1)
+        rm_sequences, rm_idx = rm_view(sequences, prompt_len, response_lengths, has_eos)
+
+        logprobs, ref_logprobs, values, rm_scores = score_rollouts(
+            policy_model, reference_model, reward_model, critic_model,
+            jnp.asarray(sequences), jnp.asarray(rm_sequences), jnp.asarray(rm_idx),
+        )
+        logprobs, ref_logprobs, values, rm_scores = map(
+            np.asarray, (logprobs, ref_logprobs, values, rm_scores)
+        )
+        # Penalize a response that didn't emit an end token
+        rm_scores = np.where(has_eos, rm_scores, MISSING_EOS_PENALTY)
+
+        kl = (logprobs - ref_logprobs) * full_mask
+        rewards = -KL_COEF * kl
+        rewards[np.arange(GROUP_SIZE), last_token_idx - 1] += rm_scores  # the RM applied at the EOS position
+
+        advantages, returns = compute_gae(rewards, values, full_mask)
+
+        buffer["sequences"].append(sequences)
+        buffer["masks"].append(full_mask)
+        buffer["logprobs"].append(logprobs)
+        buffer["advantages"].append(advantages)
+        buffer["returns"].append(returns)
+
+        iter_scores.append(rm_scores.mean())
+        iter_kls.append(kl.sum() / full_mask.sum())
+        iter_lengths.append(response_lengths.mean())
+        iter_unfinished.append(1.0 - has_eos.mean())
+        if sample_completion is None:
+            sample_completion = tokenizer.decode(sequences[0, prompt_len:last_token_idx[0] + 1].tolist())
+
+    # Phase 2: several PPO passes over the buffer
+    sequences = jnp.asarray(np.concatenate(buffer["sequences"]))
+    masks = jnp.asarray(np.concatenate(buffer["masks"]))
+    old_logprobs = jnp.asarray(np.concatenate(buffer["logprobs"]))
+    returns = jnp.asarray(np.concatenate(buffer["returns"]))
+    advantages = masked_whiten(jnp.asarray(np.concatenate(buffer["advantages"])), masks)
+
+    num_sequences = sequences.shape[0]
+    iter_clip_fractions = []
+    for _ in range(PPO_EPOCHS):
+        permutation = shuffle_rng.permutation(num_sequences)
+        for start in range(0, num_sequences, MINIBATCH_SIZE):
+            minibatch = permutation[start:start + MINIBATCH_SIZE]
+            loss, stats = ppo_train_step(
+                policy_model, critic_model, policy_optimizer, critic_optimizer,
+                sequences[minibatch], masks[minibatch], old_logprobs[minibatch],
+                advantages[minibatch], returns[minibatch],
+            )
+            iter_clip_fractions.append(float(stats["clip_fraction"]))
+
+    reward_history.append(float(np.mean(iter_scores)))
+    kl_history.append(float(np.mean(iter_kls)))
+    length_history.append(float(np.mean(iter_lengths)))
+    clip_history.append(float(np.mean(iter_clip_fractions)))
+    unfinished_history.append(float(np.mean(iter_unfinished)))
+
+    print(
+        f"iter {iteration:>3} | reward {reward_history[-1]:+.3f} | KL/token {kl_history[-1]:+.4f} "
+        f"| resp len {length_history[-1]:4.1f} | unfinished {unfinished_history[-1]:.0%} "
+        f"| clip frac {clip_history[-1]:.2f}"
+    )
+    if iteration % 5 == 0:
+        print(f"          sample: {sample_completion!r}")
+```
+
+```{python}
+#| classes: light-mode
+#| layout-ncol: 2
+#| layout-nrow: 2
+#| fig-cap: PPO Training Metrics
+#| fig-subcap:
+#|   - "Reward on Fresh Samples"
+#|   - "Drift from the SFT Model"
+#|   - "Response Length"
+#|   - "Fraction Outside the Trusted Region"
+
+plt.style.use("default")
+for history, ylabel in [
+    (reward_history, "Mean reward-model score"),
+    (kl_history, "Mean KL per token"),
+    (length_history, "Token Lengths"),
+    (clip_history, "Clip Fraction"),
+]:
+    fig, ax = plt.subplots(figsize=(5, 3.5))
+    ax.plot(history, color="steelblue", linewidth=2)
+    ax.set_xlabel("PPO iteration")
+    ax.set_ylabel(ylabel)
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+```
+
+```{python}
+#| classes: dark-mode
+#| layout-ncol: 2
+#| layout-nrow: 2
+#| fig-cap: PPO Training Metrics
+#| fig-subcap:
+#|   - "Reward on Fresh Samples"
+#|   - "Drift from the SFT Model"
+#|   - "Response Length"
+#|   - "Fraction Outside the Trusted Region"
+
+plt.style.use("dark_background")
+for history, ylabel in [
+    (reward_history, "Mean reward-model score"),
+    (kl_history, "Mean KL per token"),
+    (length_history, "Token Lengths"),
+    (clip_history, "Clip Fraction"),
+]:
+    fig, ax = plt.subplots(figsize=(5, 3.5))
+    ax.plot(history, color="steelblue", linewidth=2)
+    ax.set_xlabel("PPO iteration")
+    ax.set_ylabel(ylabel)
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+```
+
+# Evaluations
+
+We compare the frozen reference model against the RLHF-trained policy on **test prompts neither model has seen**, decoding greedily from both and scoring each response with the reward model.
+
+A real caveat is that we are grading the student with the same rubric it studied, evaluating with the very reward model we optimized against inflates the result by construction. Proper evaluations use held-out reward models and human raters. In this particular case you can be the held-out judge and score which model adheres to the politeness preference.
+
+```{python}
+def generate_greedy(model, prompt_ids, max_new_tokens=MAX_NEW_TOKENS, eos_id=EOS_ID):
+    idx = jnp.asarray(np.asarray(prompt_ids))[None, :]
+    for _ in range(max_new_tokens):
+        logits = model(idx)[:, -1, :]
+        next_token = jnp.argmax(logits, axis=-1, keepdims=True)
+        if int(next_token[0, 0]) == eos_id:
+            break
+        idx = jnp.concatenate([idx, next_token], axis=1)
+    return np.asarray(idx)[0]
+
+
+def rm_score(sequence_ids):
+    """Score a full prompt+response at an appended <|endoftext|>"""
+    ids = np.concatenate([sequence_ids, [EOS_ID]])
+    return float(reward_model(jnp.asarray(ids)[None, :])[0, -1])
+```
+
+```{python}
+for entry in test_data[:3]:
+    prompt_ids = np.array(tokenizer.encode(format_input(entry) + "\n\n### Response:\n"))
+    sft_ids = generate_greedy(reference_model, prompt_ids)
+    rlhf_ids = generate_greedy(policy_model, prompt_ids)
+
+    print("### Instruction:", entry["instruction"])
+    if entry["input"]:
+        print("### Input:", entry["input"])
+    print(f"  SFT  ({rm_score(sft_ids):+.2f}):", tokenizer.decode(sft_ids[len(prompt_ids):].tolist()).strip())
+    print(f"  RLHF ({rm_score(rlhf_ids):+.2f}):", tokenizer.decode(rlhf_ids[len(prompt_ids):].tolist()).strip())
+    print()
+```
+
+```{python}
+num_eval_prompts = 30
+
+sft_scores, rlhf_scores = [], []
+for entry in tqdm(test_data[:num_eval_prompts]):
+    prompt_ids = np.array(tokenizer.encode(format_input(entry) + "\n\n### Response:\n"))
+    sft_scores.append(rm_score(generate_greedy(reference_model, prompt_ids)))
+    rlhf_scores.append(rm_score(generate_greedy(policy_model, prompt_ids)))
+
+sft_scores, rlhf_scores = np.array(sft_scores), np.array(rlhf_scores)
+print(f"Mean reward-model score   SFT: {sft_scores.mean():+.3f}   RLHF: {rlhf_scores.mean():+.3f}")
+print(f"RLHF scores higher on {np.mean(rlhf_scores > sft_scores):.0%} of test prompts")
+```
+
+```{python}
+#| output: false
+save_directory = Path("./model_checkpoint/GPT2_jax_rlhf")
+checkpointer = orbax.PyTreeCheckpointer()
+checkpointer.save(
+    save_directory.absolute(),
+    args=orbax.args.PyTreeSave(nnx.state(policy_model)),
+    force=True,
+)
+```
+
+# Conclusion
+
+In this post we took the instruction-tuned model from Part 2 and taught it which of two responses a human would actually prefer. We started from the observation that preference is far easier to *compare* than to *score*, and used the **Bradley–Terry** model to turn pairwise comparisons into a scalar reward model. We then framed generation as an MDP and optimized it with **PPO**. Finally, we compared the RLHF policy against instruction tuned SFT model and saw the reward-model scores move in the right direction on a majority of held-out prompts.
+
+That brings this series to a close. We built a GPT from scratch in JAX and pretrained it to predict the next token. We then reused that same objective on a curated instruction dataset to turn our pretrained model into an assistant. Finally, in this post we closed the last gap by aligning the assistant's behavior with human preference. The models we trained are small and the datasets are tiny, so the outputs are far from what you get from a frontier model. However, the machinery, the three phases, the same losses, and the same failure modes scale up more or less unchanged.
+
+Thank you for reading! This series follows the approach laid out in Sebastian Raschka's *Build a Large Language Model (From Scratch)* [@raschka2024build]. I hope walking through pretraining, instruction tuning, and RLHF built from scratch using JAX was useful, and that the next time you read an RLHF paper the pieces fall into place a little faster.
+
+## Alternative Approaches to PPO
+
+Classic RLHF is no longer the only game in town, and knowing it makes the alternatives easy to read:
+
+- **Direct Preference Optimization (DPO)** [@rafailov2023dpo] collapses the reward model *and* the RL loop into a single supervised loss applied directly to preference pairs — a closed-form shortcut through everything we built in this post. No rollouts, no critic, one model plus a frozen reference.
+
+- **Group Relative Policy Optimization (GRPO)** [@shao2024grpo] keeps the RL loop but drops the critic. Sample a *group* of responses per prompt and use each sample's z-score within its group as the advantage. Our rollout code already samples in groups. Try replacing GAE with a group baseline as an exercise.
+
+- **REINFORCE Leave-One-Out (RLOO)** and related REINFORCE variants [@ahmadian2024rloo] make a similar critic-free trade as GRPO, with a leave-one-out baseline instead of the group baseline.
+
+- **Reinforcement Learning with Verifiable Rewards (RLVR)** replaces the learned reward model with *verifiable* rewards such as unit tests and math checkers, and powers the current generation of reasoning models [@lambert2024rlvr].
+
+# References
+
+::: {#refs}
+:::
