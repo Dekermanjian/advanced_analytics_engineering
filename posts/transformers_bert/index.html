@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -95,14 +98,14 @@ div.csl-indent {
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-35673c1328022ec05f8a1bab69fe76b7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-1c1815d0886522b660dbd358737c537f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-f81b8a2cc0190c5d11b1b9c1543c8d16.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-ec7c29a2585db08ed0545a64f4b5cb13.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -144,7 +147,7 @@ gtag('config', 'G-36QNMRMV1B', { 'anonymize_ip': true});
 </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -482,7 +485,7 @@ window.Quarto = {
 <li><b>post-processor</b>: A post-processing step applied to the encoded tokens before they are returned.</li>
 </ol>
 <p>We define these components within a Hugging Face <code>tokenizer</code> and then train it.</p>
-<div id="f495c032" class="cell" data-execution_count="3">
+<div id="d59e1f6c" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> Tokenizer(WordPiece())</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>tokenizer.normalizer <span class="op">=</span> Sequence([</span>
@@ -501,7 +504,7 @@ window.Quarto = {
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>tokenizer.decoder <span class="op">=</span> WordPieceDecoder(prefix<span class="op">=</span><span class="st">"##"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="1dbea636" class="cell" data-execution_count="4">
+<div id="49d8828d" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load the training and validation datasets from HF Arrow format</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> read_hf_arrow(path):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(path, <span class="st">"rb"</span>) <span class="im">as</span> f:</span>
@@ -517,7 +520,7 @@ window.Quarto = {
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>val_files <span class="op">=</span> [<span class="bu">str</span>(p.resolve()) <span class="cf">for</span> p <span class="kw">in</span> val_dir.iterdir() <span class="cf">if</span> p.is_file()]</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>val_df <span class="op">=</span> pl.concat([read_hf_arrow(path) <span class="cf">for</span> path <span class="kw">in</span> val_files])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="63653845" class="cell" data-execution_count="5">
+<div id="6118a3f4" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>texts <span class="op">=</span> train_df[<span class="st">'text'</span>].drop_nulls().to_list()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>tokenizer.train_from_iterator(texts, trainer)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -537,12 +540,12 @@ window.Quarto = {
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Iterate through the list in chunks of 'batch_size'</span></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(texts), batch_size):</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        batch_chunk <span class="op">=</span> texts[i : i <span class="op">+</span> batch_size]</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        encodings <span class="op">=</span> tokenizer.encode_batch(batch_chunk)</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        batch_ids <span class="op">=</span> [e.ids <span class="cf">for</span> e <span class="kw">in</span> encodings]</span>
 <span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        batch_masks <span class="op">=</span> [e.attention_mask <span class="cf">for</span> e <span class="kw">in</span> encodings]</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        all_inputs.extend(batch_ids)</span>
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        all_attention_masks.extend(batch_masks)</span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
@@ -559,11 +562,11 @@ window.Quarto = {
 <p>There are two primary approaches to data loading: tokenizing data on the fly or pre-tokenizing it. While on-the-fly tokenization saves storage, pre-tokenization significantly accelerates training by removing the encoding overhead from the training loop. We will use the pre-tokenized approach here.</p>
 <p>We consider two padding strategies: fixed-length and dynamic padding. Fixed padding uses a constant length (usually the maximum sequence length in the dataset), whereas dynamic padding adjusts each batch to its longest sequence. The latter is more computationally efficient because it minimizes redundant computations on padding tokens. To implement this, we use a custom collate function.</p>
 <p>When we pre-train the model, we are going to be using a <code>batch_size</code> of 128 and a maximum sequence length of 512. The maximum sequence length of a model determines how many tokens the model can process at once, we will talk more about this later.</p>
-<div id="da4b7a94" class="cell" data-execution_count="6">
+<div id="ec2b94d4" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">128</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>num_epochs <span class="op">=</span> <span class="dv">1</span> <span class="co"># We will handle epochs manually in the training loop.</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>maxlen <span class="op">=</span> <span class="dv">512</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EncodedDataset:</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Pre-encoded dataset. Faster but requires more memory."""</span></span>
@@ -577,21 +580,21 @@ window.Quarto = {
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx: <span class="bu">int</span>):</span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> <span class="va">self</span>.input_ids[idx][:<span class="va">self</span>.maxlen] <span class="co"># Truncate</span></span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        attention_mask <span class="op">=</span> <span class="va">self</span>.attention_masks[idx][:<span class="va">self</span>.maxlen] <span class="co"># Truncate</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> inputs, attention_mask</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_fn(batch):</span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Dynamic padding data collator"""</span></span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    inputs, masks <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>batch)</span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    batch_max_len <span class="op">=</span> np.<span class="bu">max</span>([<span class="bu">len</span>(l) <span class="cf">for</span> l <span class="kw">in</span> inputs])</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Dynamic batching</span></span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    padded_inputs <span class="op">=</span> [x <span class="op">+</span> [<span class="dv">0</span>] <span class="op">*</span> (batch_max_len <span class="op">-</span> <span class="bu">len</span>(x)) <span class="cf">for</span> x <span class="kw">in</span> inputs]</span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    padded_masks <span class="op">=</span> [x <span class="op">+</span> [<span class="dv">0</span>] <span class="op">*</span> (batch_max_len <span class="op">-</span> <span class="bu">len</span>(x)) <span class="cf">for</span> x <span class="kw">in</span> masks]</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    inputs <span class="op">=</span> np.stack(padded_inputs, axis<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    masks <span class="op">=</span> np.stack(padded_masks, axis<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (inputs, masks) </span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (inputs, masks)</span>
 <span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_and_preprocess_data(input_ids, attention_masks, batch_size, maxlen):</span>
 <span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
@@ -844,7 +847,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 </ul>
 <p>Additionally, self-attention is applied multiple times in parallel through Multi-Head Attention. The input is split into multiple “heads”, each of which performs the attention mechanism in a different subspace. This allows the model to simultaneously attend to different types of relationships (e.g., one head focusing on syntactic dependencies while another focuses on semantic content). The outputs from all heads are concatenated and then passed through a final linear projection to return the tensor to the model’s original dimensionality.</p>
 <p>Note that in our implementation, we omit padding tokens from the computation by passing an <code>attention_mask</code>. The mask is used to set the attention scores of padding tokens to <span class="math inline">\(-\infty\)</span> before the softmax operation. This ensures that the model assigns zero probability to these tokens, preventing them from influencing the representation of actual content. Also note that we apply dropout on the attention weights before projecting the output back to the model dimension.</p>
-<div id="b742763b" class="cell" data-execution_count="8">
+<div id="caebcffb" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MultiHeadAttention(nnx.Module):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Multi-head self-attention module as used in the Transformer / BERT encoder.</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Splits the input into multiple attention heads, computes scaled dot-product</span></span>
@@ -872,7 +875,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 <span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> attention_mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            <span class="co"># BERT Mask: mask 0s are padding, mask 1s are real tokens</span></span>
 <span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>            attn_logits <span class="op">=</span> jnp.where(attention_mask <span class="op">==</span> <span class="dv">0</span>, <span class="op">-</span><span class="fl">1e9</span>, attn_logits)</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        attn_weights <span class="op">=</span> jax.nn.softmax(attn_logits, axis<span class="op">=-</span><span class="dv">1</span>)</span>
 <span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        attn_weights <span class="op">=</span> <span class="va">self</span>.dropout(attn_weights)</span>
 <span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> jnp.matmul(attn_weights, v).transpose(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>).reshape(batch, seq_len, <span class="va">self</span>.d_model)</span>
@@ -883,7 +886,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 <h2 class="anchored" data-anchor-id="feed-forward-network">Feed Forward Network</h2>
 <p>The feed forward MLP is quite simple. We have two linear layers with a Gaussian Error Linear Unit (GELU) activation in between.</p>
 <p>Notice that the dropout is applied to the output of the first linear layer. This is a common practice in Transformer models.</p>
-<div id="be448486" class="cell" data-execution_count="9">
+<div id="a85283e4" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeedForward(nnx.Module):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Position-wise feedforward network"""</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, d_ff, dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -902,7 +905,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 <h2 class="anchored" data-anchor-id="transformer-block">Transformer Block</h2>
 <p>We can now assemble these components into a single, reusable Transformer block. This block follows the architecture described in the original Transformer paper. It begins by applying layer normalization to the input embeddings. Next, we apply multi-head attention, followed by a residual connection that adds the original input back to the attention output. We then apply a second layer of normalization before passing the result through a feedforward network, followed by a final residual connection.</p>
 <p>The primary goal of layer normalization is to stabilize the training process. By ensuring that each layer receives inputs with a consistent distribution, we mitigate issues like vanishing or exploding gradients, allowing the model to learn more effectively and converge faster.</p>
-<div id="ba313d05" class="cell" data-execution_count="10">
+<div id="64026947" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerBlock(nnx.Module):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single Transformer block consisting of multi-head self-attention followed by a feedforward network, with residual connections and layer normalization."""</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, num_heads, d_ff, mha_dropout_rate, ff_dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -933,18 +936,18 @@ Note
 <section id="bert-encoder" class="level2">
 <h2 class="anchored" data-anchor-id="bert-encoder">BERT Encoder</h2>
 <p>Now we are ready to build the encoder. We initialize token and position embeddings and stack a series of Transformer blocks. First, we pass the token IDs through the embedding layer and add the resulting embeddings to the positional embeddings. The output is then passed through a layer normalization step before entering the Transformer blocks. After the final Transformer block, we apply another layer normalization to produce the sequence output. Finally, we extract the first token ([CLS]), pass it through a linear layer with a tanh activation function, and return it as the pooled output, which can be used for classification tasks.</p>
-<div id="df92200e" class="cell" data-execution_count="11">
+<div id="e3e4ff00" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BERTEncoder(nnx.Module):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""BERT Encoder consisting of token, and position embeddings followed by a stack of Transformer blocks."""</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab_size, d_model, num_heads, num_layers, d_ff, max_seq_len, mha_dropout_rate<span class="op">=</span><span class="fl">0.1</span>, ff_dropout_rate<span class="op">=</span><span class="fl">0.1</span>, <span class="op">*</span>, rngs: nnx.Rngs):</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Token and Position Embeddings</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.token_emb <span class="op">=</span> nnx.Embed(vocab_size, d_model, rngs<span class="op">=</span>rngs)</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pos_emb <span class="op">=</span> nnx.Param(jax.random.normal(rngs.params(), (<span class="dv">1</span>, max_seq_len, d_model)) <span class="op">*</span> <span class="fl">0.02</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Encoder Stack</span></span>
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.blocks <span class="op">=</span> nnx.List([TransformerBlock(d_model, num_heads, d_ff, mha_dropout_rate, ff_dropout_rate, rngs<span class="op">=</span>rngs) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_layers)])</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm_final <span class="op">=</span> nnx.LayerNorm(d_model, rngs<span class="op">=</span>rngs)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Linear layer used for classification downstream tasks</span></span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pooler_dense <span class="op">=</span> nnx.Linear(d_model, d_model, rngs<span class="op">=</span>rngs)</span>
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pooler_act <span class="op">=</span> jax.nn.tanh</span>
@@ -955,14 +958,14 @@ Note
 <span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, input_ids, attention_mask<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># input_ids: (batch, seq_len)</span></span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># mask: (batch, seq_len): 1 for real and 0 for padding</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        b, s <span class="op">=</span> input_ids.shape</span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Combine embeddings: Token + Position</span></span>
 <span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.token_emb(input_ids)</span>
 <span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.pos_emb[:, :s, :]</span>
 <span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.embedding_norm(x)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Transform the mask for the attention mechanism (this is due to multiple heads)</span></span>
 <span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (batch, seq_len) -&gt; (batch, 1, 1, seq_len)</span></span>
 <span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> attention_mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
@@ -972,17 +975,17 @@ Note
 <span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> block <span class="kw">in</span> <span class="va">self</span>.blocks:</span>
 <span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> block(x, attention_mask<span class="op">=</span>attn_mask)</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm_final(x)</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># BERT returns the full sequence of hidden states for NER/QA</span></span>
 <span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>        <span class="co"># and a "pooled" output for classification</span></span>
 <span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        sequence_output <span class="op">=</span> x</span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pooled output</span></span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>        cls_token <span class="op">=</span> x[:, <span class="dv">0</span>, :] </span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>        cls_token <span class="op">=</span> x[:, <span class="dv">0</span>, :]</span>
 <span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>        pooled_output <span class="op">=</span> <span class="va">self</span>.pooler_act(<span class="va">self</span>.pooler_dense(cls_token))</span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> sequence_output, pooled_output</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
@@ -990,7 +993,7 @@ Note
 <h2 class="anchored" data-anchor-id="masked-language-modeling">Masked Language Modeling</h2>
 <p>During pre-training, our objective is to predict the masked tokens in our input sequence. To achieve this, we implement an MLM head that processes the normalized sequence output from the BERT encoder.</p>
 <p>The MLM head operates by passing the hidden states through a feed-forward network comprising of linear layers and GELU activation, followed by a dropout layer. To produce the final logits, the output is projected back to the vocabulary size using the weights from the input embedding layer. This technique, known as weight tying, reduces the total parameter count and improves regularization by sharing representations between the input and output layers.</p>
-<div id="7bf6fa87" class="cell" data-execution_count="12">
+<div id="f231e57d" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MLMHead(nnx.Module):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, vocab_size, embedding_layer, dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear1 <span class="op">=</span> nnx.Linear(d_model, d_model, rngs<span class="op">=</span>rngs)</span>
@@ -1067,7 +1070,7 @@ Figure&nbsp;2: MLM Algorithm
 </figcaption>
 </figure>
 </div>
-<div id="633149de" class="cell" data-execution_count="13">
+<div id="487f8568" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_mlm_masking(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    rng,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    input_ids,</span>
@@ -1146,7 +1149,7 @@ Figure&nbsp;2: MLM Algorithm
 <li><span class="math inline">\(y_i\)</span> is the ground truth token ID for position <span class="math inline">\(i\)</span>.</li>
 <li><span class="math inline">\(p(y_i \mid x)\)</span> is the predicted probability of the correct token.</li>
 </ul>
-<div id="10f1191d" class="cell" data-execution_count="14">
+<div id="92d4bc21" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mlm_loss_fn(logits, labels, mask):</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co">    logits: (batch, seq_len, vocab_size)</span></span>
@@ -1157,10 +1160,10 @@ Figure&nbsp;2: MLM Algorithm
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    one_hot_labels <span class="op">=</span> jax.nn.one_hot(labels, logits.shape[<span class="op">-</span><span class="dv">1</span>])</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    log_probs <span class="op">=</span> jax.nn.log_softmax(logits, axis<span class="op">=-</span><span class="dv">1</span>)</span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> <span class="op">-</span>jnp.<span class="bu">sum</span>(one_hot_labels <span class="op">*</span> log_probs, axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Apply the mask so we only penalize predictions on masked tokens</span></span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    masked_loss <span class="op">=</span> loss <span class="op">*</span> mask</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Average loss over the number of masked tokens</span></span>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> jnp.<span class="bu">sum</span>(masked_loss) <span class="op">/</span> (jnp.<span class="bu">sum</span>(mask) <span class="op">+</span> <span class="fl">1e-8</span>)</span>
 <span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
@@ -1175,7 +1178,7 @@ Figure&nbsp;2: MLM Algorithm
 <section id="pretraining" class="level1">
 <h1>Pretraining</h1>
 <p>Before we begin training, we must define the architecture of our BERT model and the parameters of our training loop. We specify the model’s capacity through dimensions like <code>d_model</code> and the number of layers/attention heads, while also setting the computational constraints via <code>max_seq_len</code> and <code>batch_size</code>. These hyperparameters will dictate both the model’s representational power and its memory footprint during training.</p>
-<div id="14ebcc54" class="cell" data-execution_count="15">
+<div id="b228b4dc" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hyperparameters</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="op">=</span> <span class="fl">1e-3</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>vocab_size <span class="op">=</span> <span class="dv">30_000</span></span>
@@ -1266,13 +1269,13 @@ Figure&nbsp;2: MLM Algorithm
 <span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To perform training and evaluation, we create two “views” of our model. The <code>train_model</code> view allows for stochastic operations (like dropout) during training, while the <code>eval_model</code> view uses a deterministic mode suitable for validation</p>
-<div id="7836acb2" class="cell" data-execution_count="16">
+<div id="b8829efa" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># nnx.view was added in flax 0.12.4</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>train_model <span class="op">=</span> nnx.view(model, deterministic<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>eval_model <span class="op">=</span> nnx.view(model, deterministic<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>With the model and optimizer prepared, we begin the training loop. We iterate through the epochs and batches, calculating the loss and updating the model weights using the AdamW optimizer. Periodically, we run a validation pass to monitor the model’s performance on unseen data.</p>
-<div id="bd48200d" class="cell" data-execution_count="17">
+<div id="e18499b5" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>train_loss_history <span class="op">=</span> []</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>validation_loss_history <span class="op">=</span> []</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1303,10 +1306,10 @@ Figure&nbsp;2: MLM Algorithm
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> n_train_batches <span class="op">&gt;</span> <span class="dv">0</span>:</span>
 <span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>                train_loss_history.append(total_train_loss <span class="op">/</span> n_train_batches)</span>
 <span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            total_val_loss <span class="op">=</span> <span class="fl">0.0</span> </span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            total_val_loss <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>            n_validation_batches <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>            validation_batch_iter <span class="op">=</span> <span class="bu">iter</span>(val_dl) <span class="co"># Initialize the validation batch iterator</span></span>
-<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> val_batch <span class="kw">in</span> validation_batch_iter:</span>
 <span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>                val_input_ids, val_attention_mask <span class="op">=</span> val_batch</span>
 <span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a></span>
@@ -1317,7 +1320,7 @@ Figure&nbsp;2: MLM Algorithm
 <span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>                        mask_token_id,</span>
 <span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>                        vocab_ids,</span>
 <span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>                )</span>
-<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>                total_val_loss <span class="op">+=</span> <span class="bu">float</span>(val_loss_val)</span>
 <span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>                n_validation_batches <span class="op">+=</span> <span class="dv">1</span></span>
 <span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a></span>
@@ -1325,7 +1328,7 @@ Figure&nbsp;2: MLM Algorithm
 <span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>                validation_loss_history.append(total_val_loss <span class="op">/</span> n_validation_batches)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The plot below shows the training and validation losses, both of which decrease as training progresses. While we only ran the model for 5 epochs, further training can be used to evaluate long-term performance. On an A100 80GB GPU, each epoch took approximately 40 minutes.</p>
-<div id="cf1b37c4" class="cell light-mode" data-fig-dpi="300" data-execution_count="19">
+<div id="1e28fb52" class="cell light-mode" data-fig-dpi="300" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">300</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1358,7 +1361,7 @@ Figure&nbsp;2: MLM Algorithm
 </div>
 </div>
 </div>
-<div id="ebbf28de" class="cell dark-mode" data-fig-dpi="300" data-execution_count="20">
+<div id="3b5d9420" class="cell dark-mode" data-fig-dpi="300" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">300</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1398,7 +1401,7 @@ Figure&nbsp;2: MLM Algorithm
 <section id="save-checkpoint" class="level2">
 <h2 class="anchored" data-anchor-id="save-checkpoint">Save Checkpoint</h2>
 <p>The model is saved using <code>orbax</code>. Because the training environment was a GPU-enabled Docker container on the cloud, the model was transferred to the CPU prior to serialization.</p>
-<div id="cc4b3b41" class="cell" data-execution_count="21">
+<div id="8e4d9318" class="cell" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>save_directory <span class="op">=</span> Path(<span class="st">"./model_checkpoint/bert_jax"</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>state <span class="op">=</span> nnx.state(model)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>

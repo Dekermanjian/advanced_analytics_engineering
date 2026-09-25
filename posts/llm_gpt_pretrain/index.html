@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -95,14 +98,14 @@ div.csl-indent {
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-35673c1328022ec05f8a1bab69fe76b7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-1c1815d0886522b660dbd358737c537f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-f81b8a2cc0190c5d11b1b9c1543c8d16.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-ec7c29a2585db08ed0545a64f4b5cb13.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -144,7 +147,7 @@ gtag('config', 'G-36QNMRMV1B', { 'anonymize_ip': true});
 </script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -480,10 +483,10 @@ window.Quarto = {
 <h1>Tokenization</h1>
 <p>In a previous <a href="../../posts/wordpiece_tokenizer/index.html">post</a>, we explored subword tokenization in depth and implemented the WordPiece algorithm from scratch. GPT-2 instead uses Byte-Pair Encoding (BPE), which iteratively merges the most frequent pairs of bytes (or symbols) into new tokens. Rather than training a tokenizer ourselves, we will use the <a href="https://github.com/openai/tiktoken"><code>tiktoken</code></a> library to load GPT-2’s pretrained BPE vocabulary directly, letting us focus on the more interesting parts of the pipeline.</p>
 <p>We load our training and validation splits and concatenate the documents into a single long string. Each document is separated by the special <code>&lt;|endoftext|&gt;</code> token, which signals a document boundary to the model.</p>
-<div id="cf0efd71" class="cell" data-execution_count="3">
+<div id="2620d61e" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> tiktoken.get_encoding(<span class="st">"gpt2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="19f7821c" class="cell" data-execution_count="4">
+<div id="daf90734" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>train_df <span class="op">=</span> pl.read_parquet(<span class="st">"data/train.parquet"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>val_df <span class="op">=</span> pl.read_parquet(<span class="st">"data/validation.parquet"</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -505,7 +508,7 @@ Figure&nbsp;1: Data loader for Next Token Prediction
 </figcaption>
 </figure>
 </div>
-<div id="de5b99c3" class="cell" data-execution_count="5">
+<div id="05bd00c5" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EncodedDataset:</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Pre-encoded dataset. Faster but requires more memory."""</span></span>
@@ -521,7 +524,7 @@ Figure&nbsp;1: Data loader for Next Token Prediction
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        inputs  <span class="op">=</span> <span class="va">self</span>.input_ids[start : start <span class="op">+</span> <span class="va">self</span>.maxlen]</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        targets <span class="op">=</span> <span class="va">self</span>.input_ids[start <span class="op">+</span> <span class="dv">1</span> : start <span class="op">+</span> <span class="va">self</span>.maxlen <span class="op">+</span> <span class="dv">1</span>]  <span class="co"># shift by 1, not stride</span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> inputs, targets</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_fn(batch):</span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    inputs, targets <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>batch)</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.stack(inputs), np.stack(targets)</span>
@@ -551,7 +554,7 @@ Figure&nbsp;1: Data loader for Next Token Prediction
 <span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We use a <code>batch_size</code> of 128 and a context length of 256 tokens. The context length, also called the context window, determines how many tokens the model can attend to at once. We encode the training and validation text, then build a data loader for each, shuffling only the training data.</p>
-<div id="02e9f4fa" class="cell" data-execution_count="6">
+<div id="8a40443e" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>batch_size <span class="op">=</span> <span class="dv">128</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>context_length <span class="op">=</span> <span class="dv">256</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -571,7 +574,7 @@ Figure&nbsp;1: Data loader for Next Token Prediction
 <li>How these are combined into a block and stacked into multiple layers</li>
 </ol>
 <p>We collect the model’s hyperparameters into a <code>GPTConfig</code> dataclass. By default we use a vocabulary of 50,257 tokens (the size of GPT-2’s BPE vocabulary), a model dimension of 768, 12 attention heads, and 12 stacked Transformer layers. The feed-forward dimension <code>d_ff</code> defaults to four times the model dimension, following the original Transformer design.</p>
-<div id="7a3d1662" class="cell" data-execution_count="7">
+<div id="bd5215fa" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GPTConfig:</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    vocab_size: <span class="bu">int</span> <span class="op">=</span> <span class="dv">50_257</span></span>
@@ -617,7 +620,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 </ul>
 <p>As in BERT, attention is applied multiple times in parallel through Multi-Head Attention, with each head operating in a different subspace so the model can attend to different types of relationships simultaneously. The outputs from all heads are concatenated and projected back to the model dimension.</p>
 <p>The critical difference from the encoder is the mask. Because GPT generates text autoregressively, a token must never attend to tokens that come after it, otherwise the model could trivially “cheat” by peeking at the very answer it is supposed to predict. We enforce this with a <em>causal mask</em>: an upper-triangular matrix that sets the attention scores for all future positions to <span class="math inline">\(-\infty\)</span> before the softmax, driving their attention weights to zero. As with BERT, we apply dropout to the attention weights before the output projection.</p>
-<div id="eda84a88" class="cell" data-execution_count="8">
+<div id="1267bd42" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MultiHeadAttention(nnx.Module):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Multi-head self-attention module"""</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, num_heads, dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -645,7 +648,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 <span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        attn_logits <span class="op">=</span> jnp.matmul(q, k.transpose(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>)) <span class="op">/</span> jnp.sqrt(<span class="va">self</span>.head_dim)</span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        attn_logits <span class="op">=</span> jnp.where(mask, <span class="op">-</span>jnp.inf, attn_logits)</span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        attn_weights <span class="op">=</span> jax.nn.softmax(attn_logits, axis<span class="op">=-</span><span class="dv">1</span>)</span>
 <span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        attn_weights <span class="op">=</span> <span class="va">self</span>.dropout(attn_weights)</span>
 <span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> jnp.matmul(attn_weights, v).transpose(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>).reshape(batch, seq_len, <span class="va">self</span>.d_model)</span>
@@ -655,7 +658,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 <section id="feed-forward-network" class="level2">
 <h2 class="anchored" data-anchor-id="feed-forward-network">Feed Forward Network</h2>
 <p>The feed-forward network is straightforward: two linear layers with a Gaussian Error Linear Unit (GELU) activation in between. The first layer expands the representation to <code>d_ff</code> (four times the model dimension) and the second projects it back down. Here we keep the network itself free of dropout, applying it instead at the block level, as we will see next.</p>
-<div id="58c79ee2" class="cell" data-execution_count="9">
+<div id="10d719c7" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeedForward(nnx.Module):</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Position-wise feedforward network as used in Transformers"""</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, d_ff, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -672,7 +675,7 @@ Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 <h2 class="anchored" data-anchor-id="transformer-block">Transformer Block</h2>
 <p>We now assemble these components into a single, reusable Transformer block. We use the Pre-LayerNorm architecture: layer normalization is applied <em>before</em> each sublayer rather than after. The input is normalized, passed through multi-head attention, regularized with dropout, and then added back to the original input through a residual connection. The same pattern repeats for the feed-forward network.</p>
 <p>Layer normalization stabilizes training by ensuring each sublayer receives inputs with a consistent distribution, mitigating vanishing and exploding gradients, while the residual connections provide a clean gradient path through the depth of the network.</p>
-<div id="51d8b569" class="cell" data-execution_count="10">
+<div id="233e5948" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerBlock(nnx.Module):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Single Transformer block consisting of multi-head self-attention followed by a feedforward network, with residual connections and layer normalization."""</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, num_heads, d_ff, mha_dropout_rate, dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -714,7 +717,7 @@ Note
 <section id="gpt-model" class="level2">
 <h2 class="anchored" data-anchor-id="gpt-model">GPT Model</h2>
 <p>With the Transformer block in hand, we can assemble the full GPT model. We begin with token and learned positional embeddings: the token embedding maps each token ID to a vector, while the positional embedding gives the model a sense of where each token sits in the sequence. The two are summed and passed through dropout before entering the stack of Transformer blocks. After the final block, we apply one last layer normalization and project the result to the vocabulary size with a linear output head, producing a logit for every possible next token at each position.</p>
-<div id="c63523ae" class="cell" data-execution_count="11">
+<div id="170ad7f4" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GPT(nnx.Module):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: GPTConfig, <span class="op">*</span>, rngs: nnx.Rngs):</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Token and Position Embeddings</span></span>
@@ -748,7 +751,7 @@ Note
 <section id="loss-function" class="level1">
 <h1>Loss Function</h1>
 <p>The pretraining objective is next-token prediction, so the loss is simply the cross-entropy between the model’s predicted distribution and the true next token at each position. Unlike BERT’s masked language modeling, where the loss was computed only on the masked positions, here <em>every</em> position contributes: each token in the sequence serves as the prediction target for the position before it. We average the per-token cross-entropy across the batch.</p>
-<div id="b7de3edb" class="cell" data-execution_count="12">
+<div id="e28547e2" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> loss_fn(model, inputs, targets):</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"Cross entropy loss for each token"</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> model(inputs)</span>
@@ -758,16 +761,16 @@ Note
 <section id="trainingevaluation-steps" class="level1">
 <h1>Training/Evaluation Steps</h1>
 <p>We define separate <code>train_step</code> and <code>eval_step</code> functions, both decorated with <code>@nnx.jit</code> so that JAX compiles them for fast execution. The training step computes the loss and its gradients, then applies a parameter update through the optimizer. The evaluation step simply computes the loss without updating any weights, allowing us to monitor performance on held-out data.</p>
-<div id="8c3b6c54" class="cell" data-execution_count="13">
+<div id="9b2b881a" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="at">@nnx.jit</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_step(model, optimizer, inputs, targets):</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute gradients</span></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    grad_fn <span class="op">=</span> nnx.value_and_grad(loss_fn)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    loss, grads <span class="op">=</span> grad_fn(model, inputs, targets)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update parameters</span></span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    optimizer.update(model, grads)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss</span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="at">@nnx.jit</span></span>
@@ -778,7 +781,7 @@ Note
 <section id="pretraining" class="level1">
 <h1>Pretraining</h1>
 <p>Before training, we define the optimizer and model configurations along with the parameters of our training loop. We use AdamW with a learning rate of 4e-4 and a weight decay of 0.1, and we set the model’s vocabulary size to match our tokenizer.</p>
-<div id="2e23b514" class="cell" data-execution_count="14">
+<div id="9c7839a4" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OptimizerConfig:</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    learning_rate: <span class="bu">float</span> <span class="op">=</span> <span class="fl">4e-4</span></span>
@@ -787,12 +790,12 @@ Note
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, key: <span class="bu">str</span>):</span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">getattr</span>(<span class="va">self</span>, key)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="af3eaa68" class="cell" data-execution_count="15">
+<div id="6278a743" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>optim_config <span class="op">=</span> OptimizerConfig()</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> GPTConfig(vocab_size<span class="op">=</span>tokenizer.n_vocab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We train for 3 epochs over roughly 1.85 million examples. Every 500 steps we run a short evaluation pass over 20 validation batches to track generalization.</p>
-<div id="012fd87c" class="cell" data-execution_count="16">
+<div id="2fcc7711" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>num_epochs <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>num_examples <span class="op">=</span> <span class="dv">1_851_532</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -800,7 +803,7 @@ Note
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>eval_iter<span class="op">=</span><span class="dv">20</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We instantiate the model and wrap it in an optimizer. In addition to AdamW, we chain in global gradient-norm clipping at 1.0, which guards against the occasional large gradient destabilizing training.</p>
-<div id="e868cc81" class="cell" data-execution_count="17">
+<div id="eca4dc14" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rngs <span class="op">=</span> nnx.Rngs(<span class="dv">0</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate Model</span></span>
@@ -816,13 +819,13 @@ Note
 <span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>As with BERT, we create two “views” of the model. The <code>train_model</code> view enables stochastic operations like dropout, while the <code>eval_model</code> view runs deterministically for validation.</p>
-<div id="ceeb43f7" class="cell" data-execution_count="18">
+<div id="9b5af727" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># nnx.view was added in flax 0.12.4</span></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>train_model <span class="op">=</span> nnx.view(model, deterministic<span class="op">=</span><span class="va">False</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>eval_model <span class="op">=</span> nnx.view(model, deterministic<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Finally, we run the training loop. We iterate over epochs and batches, updating the model at each step and tracking the number of tokens seen. To reduce noise in our curves, we smooth both the training and validation losses with an exponential moving average (EMA), and periodically record them for later visualization.</p>
-<div id="e346a877" class="cell" data-execution_count="19">
+<div id="ddc0dc88" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>train_loss_history <span class="op">=</span> []</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>validation_loss_history <span class="op">=</span> []</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>tokens_seen_history <span class="op">=</span> []</span>
@@ -855,7 +858,7 @@ Note
 <span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>                )</span>
 <span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>                validation_loss_history.append(<span class="bu">float</span>(val_ema_loss))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="4151ba55" class="cell light-mode" data-fig-dpi="300" data-execution_count="21">
+<div id="59d318d5" class="cell light-mode" data-fig-dpi="300" data-execution_count="21">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">300</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ax.plot(tokens_seen_history, train_loss_history, color<span class="op">=</span><span class="st">"steelblue"</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>, label<span class="op">=</span><span class="st">"train loss"</span>)</span>
@@ -876,7 +879,7 @@ Note
 </div>
 </div>
 </div>
-<div id="a02716e8" class="cell dark-mode" data-fig-dpi="300" data-execution_count="22">
+<div id="1206fea3" class="cell dark-mode" data-fig-dpi="300" data-execution_count="22">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">"dark_background"</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">300</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">4</span>))</span>
@@ -901,7 +904,7 @@ Note
 <section id="save-checkpoint" class="level2">
 <h2 class="anchored" data-anchor-id="save-checkpoint">Save Checkpoint</h2>
 <p>Once training is complete, we persist the model’s parameters with <code>orbax</code> so they can be reloaded later for inference or fine-tuning. Because the model was trained in a GPU-enabled cloud environment, its state is transferred to the CPU before serialization.</p>
-<div id="4a0de31b" class="cell" data-execution_count="23">
+<div id="4d973054" class="cell" data-execution_count="23">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Move to CPU before saving</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>save_directory <span class="op">=</span> Path(<span class="st">"./model_checkpoint/GPT_jax"</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -931,7 +934,7 @@ Note
 <p>With a trained model in hand, we can finally generate text. Our model takes a sequence of token IDs and outputs logits over the vocabulary for each position, so to turn it into a text generator we need two things: a way to move between text and token IDs, and a decoding strategy that chooses the next token from the logits.</p>
 <p>We start with two small helpers. <code>text_to_token_ids</code> encodes a string into token IDs and adds a leading batch dimension with <code>[None, :]</code>, since the model expects batched input. <code>token_ids_to_text</code> reverses this, squeezing out the batch dimension before decoding back to a string.</p>
 <p>The decoding strategy itself lives in <code>generate_text_simple</code>. This is <em>greedy</em> decoding: at every step we pick the single most probable next token. We generate one token at a time for <code>max_new_tokens</code> steps. On each iteration we crop the running sequence to the last <code>context_size</code> tokens with <code>idx_cond</code> so we never exceed the model’s context window, then pass it through the model to obtain logits. We only care about the prediction for the final position, so we slice out <code>logits[:, -1, :]</code>, and <code>jnp.argmax</code> selects the highest-scoring token in the vocabulary. We append that token to the sequence with <code>jnp.concatenate</code> and feed the extended sequence back in on the next step. Because we always take the <code>argmax</code>, this procedure is deterministic: the same prompt will always produce the same continuation.</p>
-<div id="bb40e20a" class="cell" data-execution_count="24">
+<div id="a3ede4ef" class="cell" data-execution_count="24">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> text_to_token_ids(text: <span class="bu">str</span>, tokenizer) <span class="op">-&gt;</span> np.ndarray:</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(tokenizer.encode(text, allowed_special<span class="op">=</span>{<span class="st">"&lt;|endoftext|&gt;"</span>}))[<span class="va">None</span>, :]</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -944,19 +947,19 @@ Note
 <span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> model(idx_cond)</span>
 <span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> logits[:, <span class="op">-</span><span class="dv">1</span>, :]</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        idx_next <span class="op">=</span> jnp.argmax(logits, axis<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        idx_next <span class="op">=</span> jnp.argmax(logits, axis<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">=</span> jnp.concatenate((idx, idx_next), axis<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> idx</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Before we can generate, we need to reload the weights we saved earlier. We first construct a fresh <code>GPT</code> model with the same configuration, then restore the checkpoint with <code>orbax</code> and write the restored parameters into the model with <code>nnx.update</code>. Finally, we create an evaluation view of the model with <code>deterministic=True</code> so that dropout is disabled during inference.</p>
-<div id="df23ab9f" class="cell" data-execution_count="25">
+<div id="8cf4bdc5" class="cell" data-execution_count="25">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rngs <span class="op">=</span> nnx.Rngs(<span class="dv">0</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> GPT(config<span class="op">=</span>config, rngs<span class="op">=</span>rngs)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>save_directory <span class="op">=</span> Path(<span class="st">"./model_checkpoint/GPT_jax"</span>)</span>
 <span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>checkpointer <span class="op">=</span> orbax.PyTreeCheckpointer()</span>
 <span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>restored_state <span class="op">=</span> checkpointer.restore(</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    save_directory.absolute(), </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    save_directory.absolute(),</span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    args<span class="op">=</span>orbax.args.PyTreeRestore(nnx.state(model))</span>
 <span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>nnx.update(model, restored_state)</span>
@@ -965,7 +968,7 @@ Note
 </div>
 <p>Now we put it all together. We give the model a prompt, encode it to token IDs, and ask it to generate up to 200 new tokens, decoding the full sequence back to text at the end.</p>
 <p>As you can see in the generated text below, while the output is coherent and grammatical, it is very repetitive. This is a common artifact of greedy decoding: because we always pick the single most probable next token, the model can fall into loops. It can be mitigated with sampling-based strategies such as temperature or nucleus (top-p) sampling, or with an explicit repetition penalty. Furthermore, for the prompt “The capital of France is” we might have expected a city name, but the model instead generated a short story about the inhabitants of France. This is because our training corpus was composed of synthetic short stories.</p>
-<div id="a78a2045" class="cell" data-execution_count="26">
+<div id="8618f5da" class="cell" data-execution_count="26">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>start_context <span class="op">=</span> <span class="st">"The capital of France is"</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>token_ids <span class="op">=</span> generate_text_simple(</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>eval_model,</span>
@@ -1009,7 +1012,7 @@ Anna and Ben shake their heads. They do not know.
 <p>The <em>KV cache</em> removes this redundancy. Instead of recomputing the keys and values for the whole sequence on every step, we compute them once for each token and store them. Generation then splits into two phases. In the <strong>prefill</strong> phase we run the full prompt through the model a single time, populating the cache with the keys and values for every prompt token. In the <strong>decode</strong> phase we feed in only the <em>one</em> newly generated token: we compute its query, key, and value, append the new <span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> to the cache, and let the single query attend over the entire cached history. Each decode step is now <span class="math inline">\(O(1)\)</span> in the number of new tokens we process per step, rather than <span class="math inline">\(O(t)\)</span>.</p>
 <p>We start with a cache-aware version of the attention module. It is identical to the <code>MultiHeadAttention</code> we built earlier, with two additions. First, two buffers, <code>cache_k</code> and <code>cache_v</code>, hold the accumulated keys and values; they are <code>None</code> during training and only populated when we generate. We wrap them in <code>nnx.data</code> so that <code>nnx</code> treats them as data rather than learnable parameters. Second, a <code>use_cache</code> flag controls the new behavior: when set, we concatenate the freshly computed keys and values onto whatever is already in the cache (along the sequence axis) and write the result back, so the next call sees the full history.</p>
 <p>The causal mask also needs a small generalization. During training, queries and keys have the same length and the mask is the familiar upper-triangular matrix. During cached decoding, however, we pass in a single query (<code>q_len == 1</code>) but attend over many cached keys (<code>k_len == history</code>). We handle both cases with a single expression by tracking the <code>offset = k_len - q_len</code>: query <span class="math inline">\(i\)</span>, whose absolute position is <code>offset + i</code>, may attend to key <span class="math inline">\(j\)</span> only when <span class="math inline">\(j \leq \text{offset} + i\)</span>. In the prefill case <code>offset</code> is zero and this reduces to the standard mask; in the decode case the lone query is allowed to see every key in the cache.</p>
-<div id="625a1eeb" class="cell" data-execution_count="27">
+<div id="96a83861" class="cell" data-execution_count="27">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CachedMultiHeadAttention(nnx.Module):</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Multi-head self-attention with an optional KV cache for fast generation."""</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, num_heads, dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -1068,7 +1071,7 @@ Anna and Ben shake their heads. They do not know.
 <span id="cb25-56"><a href="#cb25-56" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.out_proj(out)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The Transformer block and the full model only need to thread the <code>use_cache</code> flag through to the attention layer; their structure is otherwise unchanged. Here is the cache-aware block, which simply forwards <code>use_cache</code> into <code>CachedMultiHeadAttention</code>.</p>
-<div id="84972785" class="cell" data-execution_count="28">
+<div id="b9e57f31" class="cell" data-execution_count="28">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CachedTransformerBlock(nnx.Module):</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Transformer block whose attention supports a KV cache (use_cache flag)."""</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, num_heads, d_ff, mha_dropout_rate, dropout_rate, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -1094,7 +1097,7 @@ Anna and Ben shake their heads. They do not know.
 <span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The model itself needs one more piece. Recall that GPT uses <em>learned absolute</em> position embeddings, which it adds to the token embeddings based on each token’s position in the sequence. When we decode with a cache we only pass in a single token at a time, so the model has no way of knowing <em>where</em> in the sequence that token sits. We solve this by passing an explicit <code>start_pos</code> and slicing the position embedding table at <code>pos_emb[:, start_pos:start_pos + seq_len, :]</code>, so each cached step is given the correct positional slot. We also add a <code>reset_cache</code> method to clear the buffers in every attention layer, which we must call before each generation so that a previous run’s keys and values do not leak into the next.</p>
-<div id="8af69d5f" class="cell" data-execution_count="29">
+<div id="d09a0c64" class="cell" data-execution_count="29">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CachedGPT(nnx.Module):</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Same architecture as GPT, with start_pos + KV-cache support for fast decoding."""</span></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config: GPTConfig, <span class="op">*</span>, rngs: nnx.Rngs):</span>
@@ -1113,7 +1116,7 @@ Anna and Ben shake their heads. They do not know.
 <span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, input_ids, start_pos<span class="op">=</span><span class="dv">0</span>, use_cache<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>        _, seq_len <span class="op">=</span> input_ids.shape</span>
 <span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Combine embeddings: Token + Position </span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Combine embeddings: Token + Position</span></span>
 <span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (start_pos offsets the position embedding so cached decode steps get the right slot).</span></span>
 <span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.token_emb(input_ids)</span>
 <span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.pos_emb[:, start_pos:start_pos <span class="op">+</span> seq_len, :]</span>
@@ -1132,7 +1135,7 @@ Anna and Ben shake their heads. They do not know.
 <span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>            block.attention.cache_v <span class="op">=</span> nnx.data(<span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>With the cache-aware model in place, the generation loop mirrors the two phases described above. We first clear the cache, then run the entire prompt through the model once with <code>start_pos=0</code> to prefill the cache and obtain the first generated token. From there the decode loop feeds in only the most recent token, <code>next_tok</code>, advancing <code>start_pos</code> by one each step so the position embeddings stay aligned. Because the cache already holds the keys and values for everything that came before, each iteration does a constant amount of attention work regardless of how long the sequence has grown. As before, we take the <code>argmax</code> of the final-position logits, so this remains greedy decoding and will produce the same continuation as <code>generate_text_simple</code>, only faster. Note that because we rely on absolute position embeddings, an <code>assert</code> guards against generating past <code>context_size</code>.</p>
-<div id="f07c1162" class="cell" data-execution_count="30">
+<div id="d1b6a766" class="cell" data-execution_count="30">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_with_cache(model, idx, max_new_tokens, context_size):</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Greedy generation using a KV cache."""</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    model.reset_cache()</span>
@@ -1153,20 +1156,20 @@ Anna and Ben shake their heads. They do not know.
 <span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> idx</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>CachedGPT</code> shares the exact same architecture and parameters as the <code>GPT</code> we trained, so we can reuse the checkpoint we saved earlier. We build a fresh <code>CachedGPT</code>, restore the weights into it with <code>orbax</code>, and create a <code>deterministic=True</code> evaluation view to disable dropout.</p>
-<div id="c054d8ed" class="cell" data-execution_count="31">
+<div id="9abd73ff" class="cell" data-execution_count="31">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>rngs <span class="op">=</span> nnx.Rngs(<span class="dv">0</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>cached_model <span class="op">=</span> CachedGPT(config<span class="op">=</span>config, rngs<span class="op">=</span>rngs)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>save_directory <span class="op">=</span> Path(<span class="st">"./model_checkpoint/GPT_jax"</span>)</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>checkpointer <span class="op">=</span> orbax.PyTreeCheckpointer()</span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>restored_state <span class="op">=</span> checkpointer.restore(</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    save_directory.absolute(), </span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    save_directory.absolute(),</span>
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    args<span class="op">=</span>orbax.args.PyTreeRestore(nnx.state(cached_model))</span>
 <span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>nnx.update(cached_model, restored_state)</span>
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>cached_eval_model <span class="op">=</span> nnx.view(cached_model, deterministic<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Finally, we measure the payoff. The <code>benchmark</code> helper warms each function up once (so we do not time JAX’s tracing and compilation) and then averages the wall-clock time over a few runs. We generate 200 tokens from the same prompt with both the naive <code>generate_text_simple</code> and the cached <code>generate_with_cache</code>, and report the speedup. Since both use greedy decoding, the two should produce identical text; the only difference is how much redundant computation each performs. The gap widens as the number of generated tokens grows, since the cost of the naive approach scales with the square of the sequence length while the cached version scales linearly.</p>
-<div id="2b2c7f0d" class="cell" data-execution_count="32">
+<div id="5f21a50a" class="cell" data-execution_count="32">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> benchmark(fn, <span class="op">*</span>args, repeats<span class="op">=</span><span class="dv">3</span>, <span class="op">**</span>kwargs):</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Warm up once, then average wall-clock over repeat runs."""</span></span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    jax.block_until_ready(fn(<span class="op">*</span>args, <span class="op">**</span>kwargs))</span>
@@ -1197,9 +1200,9 @@ Anna and Ben shake their heads. They do not know.
 <span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"generate w/ cache: </span><span class="sc">{</span>cached_time<span class="sc">:.1f}</span><span class="ss">s"</span>)</span>
 <span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"speedup: </span><span class="sc">{</span>simple_time <span class="op">/</span> cached_time<span class="sc">:.2f}</span><span class="ss">x"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>simple generate: 174.3s
-generate w/ cache: 8.6s
-speedup: 20.15x</code></pre>
+<pre><code>simple generate: 189.8s
+generate w/ cache: 9.5s
+speedup: 20.03x</code></pre>
 </div>
 </div>
 </section>

@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/llm_gpt_dpo/index.html",
       "/posts/llm_gpt_rlhf/index.html",
       "/posts/llm_gpt_instruct/index.html",
       "/posts/llm_gpt_pretrain/index.html",

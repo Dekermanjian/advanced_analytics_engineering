@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -76,14 +79,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-35673c1328022ec05f8a1bab69fe76b7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-1c1815d0886522b660dbd358737c537f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-f81b8a2cc0190c5d11b1b9c1543c8d16.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-ec7c29a2585db08ed0545a64f4b5cb13.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -417,7 +420,7 @@ gtag('config', 'G-36QNMRMV1B', { 'anonymize_ip': true});
 </section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>In the previous <a href="../../posts/kedro-pymc-modelbuilder/index.html">post</a> of this series, we configured the <code>ModelBuilder</code> class to add structure to our custom time-series model which in turn enhanced both reproducibility and scalability. In this post, we are going to transition from running our project on our local environment to running inside a containerized environment. In addition, we are going to walkthough setting up <code>MLFlow</code> and its necessary components as containerized services. Finally, we are going to levarge <code>Kedro</code> hooks to track our machine learning experiments with <code>MLFlow</code>.</p>
+<p>In the previous <a href="../../posts/kedro-pymc-modelbuilder/index.html">post</a> of this series, we configured the <code>ModelBuilder</code> class to add structure to our custom time-series model which in turn enhanced both reproducibility and scalability. In this post, we are going to transition from running our project on our local environment to running inside a containerized environment. In addition, we are going to walkthrough setting up <code>MLFlow</code> and its necessary components as containerized services. Finally, we are going to levarge <code>Kedro</code> hooks to track our machine learning experiments with <code>MLFlow</code>.</p>
 </section>
 <section id="getting-started" class="level1">
 <h1>Getting Started</h1>
@@ -432,7 +435,7 @@ Caution
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Depending on what opperating system you are using you may need to install <code>psycopg2-binary</code> intead of <code>psycopg2</code>. In this post we are going to be running everything from inside containers that are running <code>Linux</code>. So we will be using <code>psycopg2-binary</code>.</p>
+<p>Depending on what opperating system you are using you may need to install <code>psycopg2-binary</code> instead of <code>psycopg2</code>. In this post we are going to be running everything from inside containers that are running <code>Linux</code>. So we will be using <code>psycopg2-binary</code>.</p>
 </div>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> my_environment_name</span></span>
@@ -561,7 +564,7 @@ Caution
 </section>
 <section id="artifact-store" class="level2">
 <h2 class="anchored" data-anchor-id="artifact-store">Artifact Store</h2>
-<p>We need a place to store larger file objects like our models, figures, or artifacts. For that, we are going to define another service in our <code>docker-compose.yml</code> that will host a <code>MinIO</code> S3-compatible object store. Again, we define a username and password like we did before. Let’s also define a default bucket that will be created on creation of the service where we will store our artifacts. Again, like we did for our backend store our artifact store needs a persistant volume. So far we have:</p>
+<p>We need a place to store larger file objects like our models, figures, or artifacts. For that, we are going to define another service in our <code>docker-compose.yml</code> that will host a <code>MinIO</code> S3-compatible object store. Again, we define a username and password like we did before. Let’s also define a default bucket that will be created on creation of the service where we will store our artifacts. Again, like we did for our backend store our artifact store needs a persistent volume. So far we have:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode yml code-with-copy"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#./docker-compose.yml</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">mlflow-logs</span><span class="kw">:</span></span>
@@ -845,7 +848,7 @@ Note
 </section>
 <section id="initialize-mlflow" class="level2">
 <h2 class="anchored" data-anchor-id="initialize-mlflow">Initialize MLFlow</h2>
-<p>Now we need to initialze <code>MLFlow</code> whenever we start a run of our pipeline. As a reminder we are going to do that using the <code>Kedro</code> hook we defined scaffolding for earlier.</p>
+<p>Now we need to initialize <code>MLFlow</code> whenever we start a run of our pipeline. As a reminder we are going to do that using the <code>Kedro</code> hook we defined scaffolding for earlier.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="annotated-cell-11"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-11-1"><a href="#annotated-cell-11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /src/climate_brazil/hooks.py</span></span>
 <span id="annotated-cell-11-2"><a href="#annotated-cell-11-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="annotated-cell-11-3"><a href="#annotated-cell-11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -954,7 +957,7 @@ Tip
 <span id="annotated-cell-13-5"><a href="#annotated-cell-13-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.hooks <span class="im">import</span> hook_impl</span>
 <span id="annotated-cell-13-6"><a href="#annotated-cell-13-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-13-7"><a href="#annotated-cell-13-7" aria-hidden="true" tabindex="-1"></a>cities <span class="op">=</span> [</span>
-<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>, </span>
+<span id="annotated-cell-13-8"><a href="#annotated-cell-13-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>,</span>
 <span id="annotated-cell-13-9"><a href="#annotated-cell-13-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Recife"</span>, <span class="st">"Rio"</span>, <span class="st">"Salvador"</span>, <span class="st">"Sao_Luiz"</span>, <span class="st">"Sao_Paulo"</span>, <span class="st">"Vitoria"</span></span>
 <span id="annotated-cell-13-10"><a href="#annotated-cell-13-10" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="annotated-cell-13-11"><a href="#annotated-cell-13-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -1006,7 +1009,7 @@ Tip
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-13-57" class="code-annotation-target"><a href="#annotated-cell-13-57" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'log_artifacts'</span>]:</span>
 <span id="annotated-cell-13-58"><a href="#annotated-cell-13-58" aria-hidden="true" tabindex="-1"></a>                        local_path <span class="op">=</span> <span class="ss">f"./data/08_reporting/</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model_graph.png"</span></span>
 <span id="annotated-cell-13-59"><a href="#annotated-cell-13-59" aria-hidden="true" tabindex="-1"></a>                        outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>].model.to_graphviz(</span>
-<span id="annotated-cell-13-60"><a href="#annotated-cell-13-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path, </span>
+<span id="annotated-cell-13-60"><a href="#annotated-cell-13-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path,</span>
 <span id="annotated-cell-13-61"><a href="#annotated-cell-13-61" aria-hidden="true" tabindex="-1"></a>                            figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>)</span>
 <span id="annotated-cell-13-62"><a href="#annotated-cell-13-62" aria-hidden="true" tabindex="-1"></a>                        )</span>
 <span id="annotated-cell-13-63"><a href="#annotated-cell-13-63" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># log graph representation of model</span></span>
@@ -1054,7 +1057,7 @@ Tip
 <span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.hooks <span class="im">import</span> hook_impl</span>
 <span id="annotated-cell-14-6"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>cities <span class="op">=</span> [</span>
-<span id="annotated-cell-14-8"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>, </span>
+<span id="annotated-cell-14-8"><a href="#annotated-cell-14-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>,</span>
 <span id="annotated-cell-14-9"><a href="#annotated-cell-14-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Recife"</span>, <span class="st">"Rio"</span>, <span class="st">"Salvador"</span>, <span class="st">"Sao_Luiz"</span>, <span class="st">"Sao_Paulo"</span>, <span class="st">"Vitoria"</span></span>
 <span id="annotated-cell-14-10"><a href="#annotated-cell-14-10" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="annotated-cell-14-11"><a href="#annotated-cell-14-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -1096,8 +1099,8 @@ Tip
 <span id="annotated-cell-14-47"><a href="#annotated-cell-14-47" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]:</span>
 <span id="annotated-cell-14-48"><a href="#annotated-cell-14-48" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Start a nested run</span></span>
 <span id="annotated-cell-14-49"><a href="#annotated-cell-14-49" aria-hidden="true" tabindex="-1"></a>                    mlflow.start_run(</span>
-<span id="annotated-cell-14-50"><a href="#annotated-cell-14-50" aria-hidden="true" tabindex="-1"></a>                        run_name<span class="op">=</span>city, </span>
-<span id="annotated-cell-14-51"><a href="#annotated-cell-14-51" aria-hidden="true" tabindex="-1"></a>                        nested<span class="op">=</span><span class="va">True</span>, </span>
+<span id="annotated-cell-14-50"><a href="#annotated-cell-14-50" aria-hidden="true" tabindex="-1"></a>                        run_name<span class="op">=</span>city,</span>
+<span id="annotated-cell-14-51"><a href="#annotated-cell-14-51" aria-hidden="true" tabindex="-1"></a>                        nested<span class="op">=</span><span class="va">True</span>,</span>
 <span id="annotated-cell-14-52"><a href="#annotated-cell-14-52" aria-hidden="true" tabindex="-1"></a>                        parent_run_id<span class="op">=</span><span class="va">self</span>.run_ids[<span class="st">'parent_run_id'</span>]</span>
 <span id="annotated-cell-14-53"><a href="#annotated-cell-14-53" aria-hidden="true" tabindex="-1"></a>                    )</span>
 <span id="annotated-cell-14-54"><a href="#annotated-cell-14-54" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Store city specific run ids for later</span></span>
@@ -1106,7 +1109,7 @@ Tip
 <span id="annotated-cell-14-57"><a href="#annotated-cell-14-57" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'log_artifacts'</span>]:</span>
 <span id="annotated-cell-14-58"><a href="#annotated-cell-14-58" aria-hidden="true" tabindex="-1"></a>                        local_path <span class="op">=</span> <span class="ss">f"./data/08_reporting/</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model_graph.png"</span></span>
 <span id="annotated-cell-14-59"><a href="#annotated-cell-14-59" aria-hidden="true" tabindex="-1"></a>                        outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>].model.to_graphviz(</span>
-<span id="annotated-cell-14-60"><a href="#annotated-cell-14-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path, </span>
+<span id="annotated-cell-14-60"><a href="#annotated-cell-14-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path,</span>
 <span id="annotated-cell-14-61"><a href="#annotated-cell-14-61" aria-hidden="true" tabindex="-1"></a>                            figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>)</span>
 <span id="annotated-cell-14-62"><a href="#annotated-cell-14-62" aria-hidden="true" tabindex="-1"></a>                        )</span>
 <span id="annotated-cell-14-63"><a href="#annotated-cell-14-63" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># log graph representation of model</span></span>
@@ -1125,7 +1128,7 @@ Tip
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-14" data-code-lines="66,67,68,69,70,71,72,73" data-code-annotation="1">Log divergences if any occured during sampling.</span>
+<span data-code-cell="annotated-cell-14" data-code-lines="66,67,68,69,70,71,72,73" data-code-annotation="1">Log divergences if any occurred during sampling.</span>
 </dd>
 <dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
 <dd>
@@ -1143,7 +1146,7 @@ Tip
 <span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.hooks <span class="im">import</span> hook_impl</span>
 <span id="annotated-cell-15-6"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a>cities <span class="op">=</span> [</span>
-<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>, </span>
+<span id="annotated-cell-15-8"><a href="#annotated-cell-15-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>,</span>
 <span id="annotated-cell-15-9"><a href="#annotated-cell-15-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Recife"</span>, <span class="st">"Rio"</span>, <span class="st">"Salvador"</span>, <span class="st">"Sao_Luiz"</span>, <span class="st">"Sao_Paulo"</span>, <span class="st">"Vitoria"</span></span>
 <span id="annotated-cell-15-10"><a href="#annotated-cell-15-10" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="annotated-cell-15-11"><a href="#annotated-cell-15-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -1185,8 +1188,8 @@ Tip
 <span id="annotated-cell-15-47"><a href="#annotated-cell-15-47" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]:</span>
 <span id="annotated-cell-15-48"><a href="#annotated-cell-15-48" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Start a nested run</span></span>
 <span id="annotated-cell-15-49"><a href="#annotated-cell-15-49" aria-hidden="true" tabindex="-1"></a>                    mlflow.start_run(</span>
-<span id="annotated-cell-15-50"><a href="#annotated-cell-15-50" aria-hidden="true" tabindex="-1"></a>                        run_name<span class="op">=</span>city, </span>
-<span id="annotated-cell-15-51"><a href="#annotated-cell-15-51" aria-hidden="true" tabindex="-1"></a>                        nested<span class="op">=</span><span class="va">True</span>, </span>
+<span id="annotated-cell-15-50"><a href="#annotated-cell-15-50" aria-hidden="true" tabindex="-1"></a>                        run_name<span class="op">=</span>city,</span>
+<span id="annotated-cell-15-51"><a href="#annotated-cell-15-51" aria-hidden="true" tabindex="-1"></a>                        nested<span class="op">=</span><span class="va">True</span>,</span>
 <span id="annotated-cell-15-52"><a href="#annotated-cell-15-52" aria-hidden="true" tabindex="-1"></a>                        parent_run_id<span class="op">=</span><span class="va">self</span>.run_ids[<span class="st">'parent_run_id'</span>]</span>
 <span id="annotated-cell-15-53"><a href="#annotated-cell-15-53" aria-hidden="true" tabindex="-1"></a>                    )</span>
 <span id="annotated-cell-15-54"><a href="#annotated-cell-15-54" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Store city specific run ids for later</span></span>
@@ -1195,14 +1198,14 @@ Tip
 <span id="annotated-cell-15-57"><a href="#annotated-cell-15-57" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'log_artifacts'</span>]:</span>
 <span id="annotated-cell-15-58"><a href="#annotated-cell-15-58" aria-hidden="true" tabindex="-1"></a>                        local_path <span class="op">=</span> <span class="ss">f"./data/08_reporting/</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model_graph.png"</span></span>
 <span id="annotated-cell-15-59"><a href="#annotated-cell-15-59" aria-hidden="true" tabindex="-1"></a>                        outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>].model.to_graphviz(</span>
-<span id="annotated-cell-15-60"><a href="#annotated-cell-15-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path, </span>
+<span id="annotated-cell-15-60"><a href="#annotated-cell-15-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path,</span>
 <span id="annotated-cell-15-61"><a href="#annotated-cell-15-61" aria-hidden="true" tabindex="-1"></a>                            figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>)</span>
 <span id="annotated-cell-15-62"><a href="#annotated-cell-15-62" aria-hidden="true" tabindex="-1"></a>                        )</span>
 <span id="annotated-cell-15-63"><a href="#annotated-cell-15-63" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># log graph representation of model</span></span>
 <span id="annotated-cell-15-64"><a href="#annotated-cell-15-64" aria-hidden="true" tabindex="-1"></a>                        mlflow.log_artifact(local_path<span class="op">=</span>local_path, artifact_path<span class="op">=</span><span class="st">"figures"</span>)</span>
 <span id="annotated-cell-15-65"><a href="#annotated-cell-15-65" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># log divergences and inference data attributes</span></span>
 <span id="annotated-cell-15-66"><a href="#annotated-cell-15-66" aria-hidden="true" tabindex="-1"></a>                    mlflow.log_param(</span>
-<span id="annotated-cell-15-67"><a href="#annotated-cell-15-67" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"divergences"</span>, </span>
+<span id="annotated-cell-15-67"><a href="#annotated-cell-15-67" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"divergences"</span>,</span>
 <span id="annotated-cell-15-68"><a href="#annotated-cell-15-68" aria-hidden="true" tabindex="-1"></a>                        (</span>
 <span id="annotated-cell-15-69"><a href="#annotated-cell-15-69" aria-hidden="true" tabindex="-1"></a>                            outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>]</span>
 <span id="annotated-cell-15-70"><a href="#annotated-cell-15-70" aria-hidden="true" tabindex="-1"></a>                              .idata.sample_stats.diverging.<span class="bu">sum</span>()</span>
@@ -1214,7 +1217,7 @@ Tip
 <span id="annotated-cell-15-76"><a href="#annotated-cell-15-76" aria-hidden="true" tabindex="-1"></a></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-15-77" class="code-annotation-target"><a href="#annotated-cell-15-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node.name <span class="kw">in</span> [<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_forecasts_evaluation"</span> <span class="cf">for</span> city <span class="kw">in</span> cities]:</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-15-78" class="code-annotation-target"><a href="#annotated-cell-15-78" aria-hidden="true" tabindex="-1"></a>            city <span class="op">=</span> re.search(<span class="vs">r"</span><span class="kw">(</span><span class="dv">.</span><span class="op">*</span><span class="kw">)</span><span class="ex">(</span><span class="fu">?=</span><span class="vs">_forecasts_evaluation</span><span class="ex">)</span><span class="vs">"</span>, node.name).group(<span class="dv">1</span>)</span>
-<span id="annotated-cell-15-79"><a href="#annotated-cell-15-79" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]: </span>
+<span id="annotated-cell-15-79"><a href="#annotated-cell-15-79" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]:</span>
 <span id="annotated-cell-15-80"><a href="#annotated-cell-15-80" aria-hidden="true" tabindex="-1"></a>                <span class="co"># start up again our city specific runs to log metrics</span></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-15-81" class="code-annotation-target"><a href="#annotated-cell-15-81" aria-hidden="true" tabindex="-1"></a>                mlflow.start_run(</span>
 <span id="annotated-cell-15-82"><a href="#annotated-cell-15-82" aria-hidden="true" tabindex="-1"></a>                    run_id<span class="op">=</span><span class="va">self</span>.run_ids[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_run_id"</span>],</span>
@@ -1276,11 +1279,11 @@ Tip
 <span id="annotated-cell-16-24"><a href="#annotated-cell-16-24" aria-hidden="true" tabindex="-1"></a><span class="co">            n_ahead: The number of future time steps to predict.</span></span>
 <span id="annotated-cell-16-25"><a href="#annotated-cell-16-25" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
 <span id="annotated-cell-16-26"><a href="#annotated-cell-16-26" aria-hidden="true" tabindex="-1"></a>        preds_normalized <span class="op">=</span> <span class="va">self</span>.model.sample_posterior_predictive(</span>
-<span id="annotated-cell-16-27"><a href="#annotated-cell-16-27" aria-hidden="true" tabindex="-1"></a>            n_ahead<span class="op">=</span>n_ahead.iloc[:, <span class="dv">0</span>].values.item(), </span>
-<span id="annotated-cell-16-28"><a href="#annotated-cell-16-28" aria-hidden="true" tabindex="-1"></a>            extend_idata<span class="op">=</span><span class="va">False</span>, </span>
+<span id="annotated-cell-16-27"><a href="#annotated-cell-16-27" aria-hidden="true" tabindex="-1"></a>            n_ahead<span class="op">=</span>n_ahead.iloc[:, <span class="dv">0</span>].values.item(),</span>
+<span id="annotated-cell-16-28"><a href="#annotated-cell-16-28" aria-hidden="true" tabindex="-1"></a>            extend_idata<span class="op">=</span><span class="va">False</span>,</span>
 <span id="annotated-cell-16-29"><a href="#annotated-cell-16-29" aria-hidden="true" tabindex="-1"></a>            combined<span class="op">=</span><span class="va">False</span></span>
 <span id="annotated-cell-16-30"><a href="#annotated-cell-16-30" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="annotated-cell-16-31"><a href="#annotated-cell-16-31" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> preds_normalized <span class="op">*</span> <span class="va">self</span>.model.idata.attrs[<span class="st">'y_std'</span>] <span class="op">+</span> </span>
+<span id="annotated-cell-16-31"><a href="#annotated-cell-16-31" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> preds_normalized <span class="op">*</span> <span class="va">self</span>.model.idata.attrs[<span class="st">'y_std'</span>] <span class="op">+</span></span>
 <span id="annotated-cell-16-32"><a href="#annotated-cell-16-32" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.model.idata.attrs[<span class="st">'y_mean'</span>]</span>
 <span id="annotated-cell-16-33"><a href="#annotated-cell-16-33" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> preds.rename_vars(</span>
 <span id="annotated-cell-16-34"><a href="#annotated-cell-16-34" aria-hidden="true" tabindex="-1"></a>            {<span class="st">"temperature_normalized_fut"</span>: <span class="st">"temperature_fut"</span>}</span>
@@ -1304,7 +1307,7 @@ Tip
 <span id="annotated-cell-17-5"><a href="#annotated-cell-17-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kedro.framework.hooks <span class="im">import</span> hook_impl</span>
 <span id="annotated-cell-17-6"><a href="#annotated-cell-17-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-17-7"><a href="#annotated-cell-17-7" aria-hidden="true" tabindex="-1"></a>cities <span class="op">=</span> [</span>
-<span id="annotated-cell-17-8"><a href="#annotated-cell-17-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>, </span>
+<span id="annotated-cell-17-8"><a href="#annotated-cell-17-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Belem"</span>, <span class="st">"Curitiba"</span>, <span class="st">"Fortaleza"</span>, <span class="st">"Goiania"</span>, <span class="st">"Macapa"</span>, <span class="st">"Manaus"</span>,</span>
 <span id="annotated-cell-17-9"><a href="#annotated-cell-17-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Recife"</span>, <span class="st">"Rio"</span>, <span class="st">"Salvador"</span>, <span class="st">"Sao_Luiz"</span>, <span class="st">"Sao_Paulo"</span>, <span class="st">"Vitoria"</span></span>
 <span id="annotated-cell-17-10"><a href="#annotated-cell-17-10" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="annotated-cell-17-11"><a href="#annotated-cell-17-11" aria-hidden="true" tabindex="-1"></a></span>
@@ -1346,8 +1349,8 @@ Tip
 <span id="annotated-cell-17-47"><a href="#annotated-cell-17-47" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]:</span>
 <span id="annotated-cell-17-48"><a href="#annotated-cell-17-48" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Start a nested run</span></span>
 <span id="annotated-cell-17-49"><a href="#annotated-cell-17-49" aria-hidden="true" tabindex="-1"></a>                    mlflow.start_run(</span>
-<span id="annotated-cell-17-50"><a href="#annotated-cell-17-50" aria-hidden="true" tabindex="-1"></a>                        run_name<span class="op">=</span>city, </span>
-<span id="annotated-cell-17-51"><a href="#annotated-cell-17-51" aria-hidden="true" tabindex="-1"></a>                        nested<span class="op">=</span><span class="va">True</span>, </span>
+<span id="annotated-cell-17-50"><a href="#annotated-cell-17-50" aria-hidden="true" tabindex="-1"></a>                        run_name<span class="op">=</span>city,</span>
+<span id="annotated-cell-17-51"><a href="#annotated-cell-17-51" aria-hidden="true" tabindex="-1"></a>                        nested<span class="op">=</span><span class="va">True</span>,</span>
 <span id="annotated-cell-17-52"><a href="#annotated-cell-17-52" aria-hidden="true" tabindex="-1"></a>                        parent_run_id<span class="op">=</span><span class="va">self</span>.run_ids[<span class="st">'parent_run_id'</span>]</span>
 <span id="annotated-cell-17-53"><a href="#annotated-cell-17-53" aria-hidden="true" tabindex="-1"></a>                    )</span>
 <span id="annotated-cell-17-54"><a href="#annotated-cell-17-54" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># Store city specific run ids for later</span></span>
@@ -1356,7 +1359,7 @@ Tip
 <span id="annotated-cell-17-57"><a href="#annotated-cell-17-57" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'log_artifacts'</span>]:</span>
 <span id="annotated-cell-17-58"><a href="#annotated-cell-17-58" aria-hidden="true" tabindex="-1"></a>                        local_path <span class="op">=</span> <span class="ss">f"./data/08_reporting/</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model_graph.png"</span></span>
 <span id="annotated-cell-17-59"><a href="#annotated-cell-17-59" aria-hidden="true" tabindex="-1"></a>                        outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>].model.to_graphviz(</span>
-<span id="annotated-cell-17-60"><a href="#annotated-cell-17-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path, </span>
+<span id="annotated-cell-17-60"><a href="#annotated-cell-17-60" aria-hidden="true" tabindex="-1"></a>                            save<span class="op">=</span>local_path,</span>
 <span id="annotated-cell-17-61"><a href="#annotated-cell-17-61" aria-hidden="true" tabindex="-1"></a>                            figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>)</span>
 <span id="annotated-cell-17-62"><a href="#annotated-cell-17-62" aria-hidden="true" tabindex="-1"></a>                        )</span>
 <span id="annotated-cell-17-63"><a href="#annotated-cell-17-63" aria-hidden="true" tabindex="-1"></a>                        <span class="co"># log graph representation of model</span></span>
@@ -1385,7 +1388,7 @@ Tip
 <span id="annotated-cell-17-86"><a href="#annotated-cell-17-86" aria-hidden="true" tabindex="-1"></a>                            )</span>
 <span id="annotated-cell-17-87"><a href="#annotated-cell-17-87" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># log divergences and inference data attributes</span></span>
 <span id="annotated-cell-17-88"><a href="#annotated-cell-17-88" aria-hidden="true" tabindex="-1"></a>                    mlflow.log_param(</span>
-<span id="annotated-cell-17-89"><a href="#annotated-cell-17-89" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"divergences"</span>, </span>
+<span id="annotated-cell-17-89"><a href="#annotated-cell-17-89" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"divergences"</span>,</span>
 <span id="annotated-cell-17-90"><a href="#annotated-cell-17-90" aria-hidden="true" tabindex="-1"></a>                        (</span>
 <span id="annotated-cell-17-91"><a href="#annotated-cell-17-91" aria-hidden="true" tabindex="-1"></a>                            outputs[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_model"</span>]</span>
 <span id="annotated-cell-17-92"><a href="#annotated-cell-17-92" aria-hidden="true" tabindex="-1"></a>                              .idata.sample_stats.diverging.<span class="bu">sum</span>()</span>
@@ -1397,7 +1400,7 @@ Tip
 <span id="annotated-cell-17-98"><a href="#annotated-cell-17-98" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-17-99"><a href="#annotated-cell-17-99" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node.name <span class="kw">in</span> [<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_forecasts_evaluation"</span> <span class="cf">for</span> city <span class="kw">in</span> cities]:</span>
 <span id="annotated-cell-17-100"><a href="#annotated-cell-17-100" aria-hidden="true" tabindex="-1"></a>            city <span class="op">=</span> re.search(<span class="vs">r"</span><span class="kw">(</span><span class="dv">.</span><span class="op">*</span><span class="kw">)</span><span class="ex">(</span><span class="fu">?=</span><span class="vs">_forecasts_evaluation</span><span class="ex">)</span><span class="vs">"</span>, node.name).group(<span class="dv">1</span>)</span>
-<span id="annotated-cell-17-101"><a href="#annotated-cell-17-101" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]: </span>
+<span id="annotated-cell-17-101"><a href="#annotated-cell-17-101" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.params[<span class="st">'mlflow_config'</span>][<span class="st">'use_mlflow'</span>]:</span>
 <span id="annotated-cell-17-102"><a href="#annotated-cell-17-102" aria-hidden="true" tabindex="-1"></a>                <span class="co"># start up again our city specific runs to log metrics</span></span>
 <span id="annotated-cell-17-103"><a href="#annotated-cell-17-103" aria-hidden="true" tabindex="-1"></a>                mlflow.start_run(</span>
 <span id="annotated-cell-17-104"><a href="#annotated-cell-17-104" aria-hidden="true" tabindex="-1"></a>                    run_id<span class="op">=</span><span class="va">self</span>.run_ids[<span class="ss">f"</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_run_id"</span>],</span>
@@ -1407,7 +1410,7 @@ Tip
 <span id="annotated-cell-17-108"><a href="#annotated-cell-17-108" aria-hidden="true" tabindex="-1"></a>                )</span>
 <span id="annotated-cell-17-109"><a href="#annotated-cell-17-109" aria-hidden="true" tabindex="-1"></a>                mlflow.log_metrics(outputs[<span class="ss">f'</span><span class="sc">{</span>city<span class="sc">}</span><span class="ss">_evaluation'</span>])</span>
 <span id="annotated-cell-17-110"><a href="#annotated-cell-17-110" aria-hidden="true" tabindex="-1"></a>                mlflow.end_run()</span>
-<span id="annotated-cell-17-111"><a href="#annotated-cell-17-111" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="annotated-cell-17-111"><a href="#annotated-cell-17-111" aria-hidden="true" tabindex="-1"></a></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-17" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-17-112" class="code-annotation-target"><a href="#annotated-cell-17-112" aria-hidden="true" tabindex="-1"></a>    <span class="at">@hook_impl</span></span>
 <span id="annotated-cell-17-113"><a href="#annotated-cell-17-113" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> after_pipeline_run(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
 <span id="annotated-cell-17-114"><a href="#annotated-cell-17-114" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Hook implementation to end the MLflow run</span></span>
@@ -1495,7 +1498,7 @@ Note
 <figcaption>City Specific Model Graph</figcaption>
 </figure>
 </div>
-<p>The artifacts are visible/accesible via the <code>MLFlow</code> UI, but remember that these objects are stored in our MinIO service. You can access the storage directly on <code>localhost:9001</code> and locate the objects in our default bucket:</p>
+<p>The artifacts are visible/accessible via the <code>MLFlow</code> UI, but remember that these objects are stored in our MinIO service. You can access the storage directly on <code>localhost:9001</code> and locate the objects in our default bucket:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="minio_fig1.png" class="img-fluid figure-img"></p>

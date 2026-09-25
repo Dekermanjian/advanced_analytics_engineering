@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.10.18">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -14,10 +14,13 @@
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
 */
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -76,14 +79,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-35673c1328022ec05f8a1bab69fe76b7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-88e8eab2b9e74ff2b2dcb2dc0227e102.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-1c1815d0886522b660dbd358737c537f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-0bdc59fcf4c41de9ca6aa5cdff7392a7.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-f81b8a2cc0190c5d11b1b9c1543c8d16.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-b4862f6b9affa9e56bf4d95ff27ba5fe.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-ec7c29a2585db08ed0545a64f4b5cb13.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2edaa639837daf60c44a8d7db61c42c8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -125,7 +128,7 @@ gtag('config', 'G-36QNMRMV1B', { 'anonymize_ip': true});
 <link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 const typesetMath = (el) => {
@@ -481,14 +484,14 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <h1>WordPiece in Python</h1>
 <p>Our <code>Tokenizer</code> class is responsible for tokenizing text using the <code>WordPieceEncoder</code> after the <code>WordPieceTrainer</code> has been trained on a given corpus. The tokenizer is initialized with a normalizer and a pre-tokenizer, along with classes for post-processing and encoding. We pass the classes themselves rather than pre-instantiated objects because the post-processing and encoding logic depends on the specific vocabulary generated during training.</p>
 <p>The <code>train</code> method accepts a corpus and a trainer, which fits a vocabulary to the corpus and subsequently instantiates the post-processor and encoder classes using that vocabulary. We also provide <code>encode</code> and <code>decode</code> methods. The <code>encode</code> method transforms text into a tokenized representation (including IDs and offsets), while the decode method reconstructs the original text from those tokens.</p>
-<div id="6ea624a8" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re </span>
+<div id="d89432a7" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter, defaultdict</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> urllib <span class="im">import</span> request</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="a3359cae" class="cell" data-execution_count="3">
+<div id="b9c78268" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Tokenizer:</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, normalizer<span class="op">=</span><span class="va">None</span>, pre_tokenizer<span class="op">=</span><span class="va">None</span>, post_processor_class<span class="op">=</span><span class="va">None</span>, encoder_class<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.token_to_id <span class="op">=</span> {}</span>
@@ -509,10 +512,10 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> text <span class="kw">in</span> corpus:</span>
 <span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            normalized <span class="op">=</span> <span class="va">self</span>.normalizer(text) <span class="cf">if</span> <span class="va">self</span>.normalizer <span class="cf">else</span> text</span>
 <span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>            words.extend(<span class="va">self</span>.pre_tokenizer(normalized) <span class="cf">if</span> <span class="va">self</span>.pre_tokenizer <span class="cf">else</span> [normalized])</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2. Fit the trainer</span></span>
 <span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        vocab <span class="op">=</span> trainer.train(words)</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3. Build mappings</span></span>
 <span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.token_to_id <span class="op">=</span> {tok: i <span class="cf">for</span> i, tok <span class="kw">in</span> <span class="bu">enumerate</span>(vocab)}</span>
 <span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.id_to_token <span class="op">=</span> {i: tok <span class="cf">for</span> tok, i <span class="kw">in</span> <span class="va">self</span>.token_to_id.items()}</span>
@@ -526,7 +529,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> encode(<span class="va">self</span>, text: <span class="bu">str</span>):</span>
 <span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="va">self</span>.token_to_id:</span>
 <span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Tokenizer has not been trained yet."</span>)</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        normalized <span class="op">=</span> <span class="va">self</span>.normalizer(text)</span>
 <span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        pre_tokenized <span class="op">=</span> <span class="va">self</span>.pre_tokenizer(normalized)</span>
 <span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
@@ -584,26 +587,26 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Remove spaces before punctuation</span></span>
 <span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="pp">[.,!?;:]</span><span class="kw">)</span><span class="vs">"</span>, <span class="vs">r"</span><span class="ch">\1</span><span class="vs">"</span>, decoded_string)</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Remove spaces around apostrophes</span></span>
 <span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">'</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">"'"</span>, decoded_string)</span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Remove spaces around hyphens for compounds</span></span>
 <span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="vs">-</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">"-"</span>, decoded_string)</span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Handle parentheses and brackets</span></span>
 <span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="ch">\(</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">"("</span>, decoded_string)</span>
 <span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="ch">\)</span><span class="vs">"</span>, <span class="st">")"</span>, decoded_string)</span>
 <span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="dv">\s</span><span class="op">+</span><span class="ch">\[</span><span class="vs">"</span>, <span class="st">"["</span>, decoded_string)</span>
 <span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> re.sub(<span class="vs">r"</span><span class="ch">\]</span><span class="dv">\s</span><span class="op">+</span><span class="vs">"</span>, <span class="st">"]"</span>, decoded_string)</span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Standardize extra whitespaces</span></span>
 <span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>        decoded_string <span class="op">=</span> decoded_string.strip()</span>
 <span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> decoded_string</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For simplicity, our normalization pipeline is implemented as a class that performs only lower-case transformation. Similarly, our pre-tokenizer splits the text into words and punctuation marks. We also define a post-processor that adds the special tokens expected by a BERT model, along with an attention mask and a special tokens mask to ensure special tokens are omitted from the loss calculation.</p>
-<div id="acd444fb" class="cell" data-execution_count="4">
+<div id="aeaac5fd" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LowercaseNormalizer:</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__call__</span>(<span class="va">self</span>, text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> text.lower()</span>
@@ -638,7 +641,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>        }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>WordPieceTrainer</code> class, implemented below, handles the training process. It accepts a target vocabulary size, a minimum frequency threshold, and an optional list of special tokens. By applying the algorithm described above to a list of pre-tokenized words, the train method produces the final vocabulary.</p>
-<div id="8148e967" class="cell" data-execution_count="5">
+<div id="01094ce4" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WordPieceTrainer:</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, vocab_size: <span class="bu">int</span>, min_frequency: <span class="bu">int</span> <span class="op">=</span> <span class="dv">2</span>, special_tokens<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.vocab_size <span class="op">=</span> vocab_size</span>
@@ -647,11 +650,11 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _init_word(<span class="va">self</span>, word: <span class="bu">str</span>):</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [c <span class="cf">if</span> i <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="ss">f"##</span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> i, c <span class="kw">in</span> <span class="bu">enumerate</span>(word)]</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> train(<span class="va">self</span>, words: <span class="bu">list</span>[<span class="bu">str</span>]):</span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        counts <span class="op">=</span> Counter(words)</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        word_freqs <span class="op">=</span> {<span class="st">" "</span>.join(<span class="va">self</span>._init_word(w)): freq <span class="cf">for</span> w, freq <span class="kw">in</span> counts.items()}</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        vocab <span class="op">=</span> <span class="bu">set</span>(tok <span class="cf">for</span> w <span class="kw">in</span> word_freqs.keys() <span class="cf">for</span> tok <span class="kw">in</span> w.split())</span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        max_merges <span class="op">=</span> <span class="va">self</span>.vocab_size <span class="op">-</span> <span class="bu">len</span>(vocab)</span>
@@ -690,7 +693,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>                a, b <span class="op">=</span> best_pair</span>
 <span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>                target <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>a<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>b<span class="sc">}</span><span class="ss">"</span></span>
 <span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>                replacement <span class="op">=</span> a <span class="op">+</span> b[<span class="dv">2</span>:] <span class="cf">if</span> b.startswith(<span class="st">"##"</span>) <span class="cf">else</span> a <span class="op">+</span> b</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>                new_word_freqs <span class="op">=</span> {}</span>
 <span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> word, freq <span class="kw">in</span> word_freqs.items():</span>
 <span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>                    new_word <span class="op">=</span> word.replace(target, replacement)</span>
@@ -712,7 +715,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> vocab</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The <code>WordPieceEncoder</code> class utilizes the <code>token_to_id</code> mapping generated during the training process. Its <code>__call__</code> method accepts a word and returns a tuple containing the subword tokens, their corresponding input IDs, and the character offsets that align each subword to its position in the original word.</p>
-<div id="a1176872" class="cell" data-execution_count="6">
+<div id="87b7f793" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> WordPieceEncoder:</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, token_to_id):</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.token_to_id <span class="op">=</span> token_to_id</span>
@@ -752,7 +755,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tokens, ids, offsets</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Below is an example of putting it all together and fitting a tokenizer to a corpus.</p>
-<div id="451f90ae" class="cell" data-execution_count="7">
+<div id="383eda8d" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://www.gutenberg.org/files/132/132-0.txt"</span> <span class="co"># art of war book</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> request.urlopen(url) <span class="im">as</span> response:</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    art_of_war <span class="op">=</span> []</span>
@@ -761,7 +764,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        art_of_war.append(line.decode(<span class="st">'utf-8'</span>).strip())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="8683dccb" class="cell" data-execution_count="8">
+<div id="40c91d5e" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define pipieline steps</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>norm <span class="op">=</span> LowercaseNormalizer()</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>pre <span class="op">=</span> BertPreTokenizer()</span>
@@ -773,7 +776,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Train</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>tok.train(art_of_war, trainer)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="19b6dc6a" class="cell" data-execution_count="9">
+<div id="ad28ab51" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>example_string <span class="op">=</span> <span class="st">"Hello World!"</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>encoding <span class="op">=</span> tok.encode(example_string)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>encoding</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -793,7 +796,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
  'special_tokens_mask': [1, 0, 0, 0, 0, 0, 0, 0, 1]}</code></pre>
 </div>
 </div>
-<div id="31c49b82" class="cell" data-execution_count="10">
+<div id="e28de263" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>tok.decode(encoding[<span class="st">"ids"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>'[CLS]hello world![SEP]'</code></pre>
@@ -884,7 +887,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>        dict<span class="op">.</span>set_item(<span class="st">"ids"</span><span class="op">,</span> <span class="op">&amp;</span>enc<span class="op">.</span>ids)<span class="op">.</span>unwrap()<span class="op">;</span></span>
 <span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>        dict<span class="op">.</span>set_item(<span class="st">"tokens"</span><span class="op">,</span> <span class="op">&amp;</span>enc<span class="op">.</span>tokens)<span class="op">.</span>unwrap()<span class="op">;</span></span>
 <span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>        dict<span class="op">.</span>set_item(<span class="st">"offsets"</span><span class="op">,</span> <span class="op">&amp;</span>enc<span class="op">.</span>offsets)<span class="op">.</span>unwrap()<span class="op">;</span></span>
-<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> attention_mask<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u32</span><span class="op">&gt;</span> <span class="op">=</span> enc<span class="op">.</span>attention_mask<span class="op">.</span>iter()<span class="op">.</span>map(<span class="op">|&amp;</span>x<span class="op">|</span> x <span class="kw">as</span> <span class="dt">u32</span>)<span class="op">.</span>collect()<span class="op">;</span></span>
 <span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> special_tokens_mask<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">u32</span><span class="op">&gt;</span> <span class="op">=</span> enc<span class="op">.</span>special_tokens_mask<span class="op">.</span>iter()<span class="op">.</span>map(<span class="op">|&amp;</span>x<span class="op">|</span> x <span class="kw">as</span> <span class="dt">u32</span>)<span class="op">.</span>collect()<span class="op">;</span></span>
 <span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a></span>
@@ -911,7 +914,7 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-90"><a href="#cb12-90" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Once we have our Rust implementation ready, we need to compile it into a shared library that can be used by Python. We can do this by using Maturin which is a tool for building and publishing Python packages that use Rust code. The command to build the package is: <code>maturin develop</code>. We can now import the <code>PyTokenizer</code> class in our Python script and use it as follows:</p>
-<div id="c7967b6e" class="cell" data-execution_count="11">
+<div id="acf15893" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fast_wordpiece <span class="im">import</span> PyTokenizer</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -921,15 +924,15 @@ score_{i, j} = \frac{freq(i, j)}{freq(i) \cdot freq(j)}
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Rust training time: </span><span class="sc">{</span>end <span class="op">-</span> start<span class="sc">:.4f}</span><span class="ss"> seconds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-Rust training time: 2.8676 seconds</code></pre>
+Rust training time: 2.9790 seconds</code></pre>
 </div>
 </div>
 <p>This is significantly faster than our Python implementation! Now let’s take a look at how to encode new text using the Rust tokenizer.</p>
-<div id="c1cfdc8f" class="cell" data-execution_count="12">
+<div id="17ee0d53" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rust_encoded <span class="op">=</span> tok.encode(<span class="st">"Hello world!"</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>rust_encoded</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>{'ids': [2, 54, 15, 2500, 13, 2711, 102, 3],
+<pre><code>{'ids': [2, 22, 17, 2500, 11, 2711, 94, 3],
  'tokens': ['[CLS]', 'h', '##e', '##ll', '##o', 'world', '!', '[SEP]'],
  'offsets': [(0, 0),
   (0, 1),
@@ -944,7 +947,7 @@ Rust training time: 2.8676 seconds</code></pre>
 </div>
 </div>
 <p>Finally, let’s decode our encoded tokens back into text.</p>
-<div id="f20f6e7c" class="cell" data-execution_count="13">
+<div id="ffdf42ec" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tok.decode(rust_encoded[<span class="st">"ids"</span>], skip_special_tokens<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>'hello world!'</code></pre>
