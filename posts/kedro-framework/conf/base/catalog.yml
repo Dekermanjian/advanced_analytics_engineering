@@ -3,7 +3,7 @@
 cities_temperatures:
   type: partitions.PartitionedDataset
   path: data/01_raw/
-  dataset: 
+  dataset:
     type: polars.LazyPolarsDataset
     file_format: csv
 

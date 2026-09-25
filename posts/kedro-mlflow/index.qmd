@@ -11,13 +11,13 @@ css: styles.css
 In part three of this series, we configure MLFlow for production by defining our tracking server as a containerized PostgreSQL database and our artifact store as containerized MinIO storage. We then integrate MLFlow into our Kedro project in order to start tracking our model development.
 
 # Introduction
-In the previous [post](/posts/kedro-pymc-modelbuilder/index.qmd) of this series, we configured the `ModelBuilder` class to add structure to our custom time-series model which in turn enhanced both reproducibility and scalability. In this post, we are going to transition from running our project on our local environment to running inside a containerized environment. In addition, we are going to walkthough setting up `MLFlow` and its necessary components as containerized services. Finally, we are going to levarge `Kedro` hooks to track our machine learning experiments with `MLFlow`.
+In the previous [post](/posts/kedro-pymc-modelbuilder/index.qmd) of this series, we configured the `ModelBuilder` class to add structure to our custom time-series model which in turn enhanced both reproducibility and scalability. In this post, we are going to transition from running our project on our local environment to running inside a containerized environment. In addition, we are going to walkthrough setting up `MLFlow` and its necessary components as containerized services. Finally, we are going to levarge `Kedro` hooks to track our machine learning experiments with `MLFlow`.
 
 # Getting Started
 First thing we need to do is to add `MLFlow` as a dependency to our `environment.yml` file. We are also going to need to install `psycopg2` to allow `MLFlow` to interact with `PostgreSQL`.
 
 :::{.callout-caution}
-Depending on what opperating system you are using you may need to install `psycopg2-binary` intead of `psycopg2`. In this post we are going to be running everything from inside containers that are running `Linux`. So we will be using `psycopg2-binary`.
+Depending on what opperating system you are using you may need to install `psycopg2-binary` instead of `psycopg2`. In this post we are going to be running everything from inside containers that are running `Linux`. So we will be using `psycopg2-binary`.
 :::
 
 ```yml
@@ -150,7 +150,7 @@ Note how we are using `POSTGRES_USER_FILE` instead of `POSTGRES_USER`. This is a
 :::
 
 ## Artifact Store
-We need a place to store larger file objects like our models, figures, or artifacts. For that, we are going to define another service in our `docker-compose.yml` that will host a `MinIO` S3-compatible object store. Again, we define a username and password like we did before. Let's also define a default bucket that will be created on creation of the service where we will store our artifacts. Again, like we did for our backend store our artifact store needs a persistant volume. So far we have:
+We need a place to store larger file objects like our models, figures, or artifacts. For that, we are going to define another service in our `docker-compose.yml` that will host a `MinIO` S3-compatible object store. Again, we define a username and password like we did before. Let's also define a default bucket that will be created on creation of the service where we will store our artifacts. Again, like we did for our backend store our artifact store needs a persistent volume. So far we have:
 
 ```yml
 #./docker-compose.yml
@@ -411,7 +411,7 @@ A lot of times you don't actually need to define a `__init__()` method for you h
 :::
 
 ## Configure MLFlow
-Before we start experiment tracking with `MLFlow`, let's set up some configuration variables inside of `conf/base/parameters_ML.yml`. First, let's have the option to either use or not use `MLFlow`. Second, artifact logging can use up quite a bit of storage, so let's make that optional as well. Finally, let's set an experiment name and tags that will help differentiate experiment runs. 
+Before we start experiment tracking with `MLFlow`, let's set up some configuration variables inside of `conf/base/parameters_ML.yml`. First, let's have the option to either use or not use `MLFlow`. Second, artifact logging can use up quite a bit of storage, so let's make that optional as well. Finally, let's set an experiment name and tags that will help differentiate experiment runs.
 
 ```yml
 #conf/base/parameters_ML.yml
@@ -426,7 +426,7 @@ mlflow_config:
 ```
 
 ## Initialize MLFlow
-Now we need to initialze `MLFlow` whenever we start a run of our pipeline. As a reminder we are going to do that using the `Kedro` hook we defined scaffolding for earlier.
+Now we need to initialize `MLFlow` whenever we start a run of our pipeline. As a reminder we are going to do that using the `Kedro` hook we defined scaffolding for earlier.
 
 ```python
 # /src/climate_brazil/hooks.py
@@ -509,7 +509,7 @@ import mlflow
 from kedro.framework.hooks import hook_impl
 
 cities = [
-    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus", 
+    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus",
     "Recife", "Rio", "Salvador", "Sao_Luiz", "Sao_Paulo", "Vitoria"
 ]
 
@@ -561,7 +561,7 @@ class ModelTrackingHooks:
                     if self.params['mlflow_config']['log_artifacts']: # <6>
                         local_path = f"./data/08_reporting/{city}_model_graph.png" # <6>
                         outputs[f"{city}_model"].model.to_graphviz(
-                            save=local_path, 
+                            save=local_path,
                             figsize=(12,8)
                         ) # <6>
                         # log graph representation of model
@@ -589,7 +589,7 @@ import mlflow
 from kedro.framework.hooks import hook_impl
 
 cities = [
-    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus", 
+    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus",
     "Recife", "Rio", "Salvador", "Sao_Luiz", "Sao_Paulo", "Vitoria"
 ]
 
@@ -631,8 +631,8 @@ class ModelTrackingHooks:
                 if self.params['mlflow_config']['use_mlflow']:
                     # Start a nested run
                     mlflow.start_run(
-                        run_name=city, 
-                        nested=True, 
+                        run_name=city,
+                        nested=True,
                         parent_run_id=self.run_ids['parent_run_id']
                     )
                     # Store city specific run ids for later
@@ -641,7 +641,7 @@ class ModelTrackingHooks:
                     if self.params['mlflow_config']['log_artifacts']:
                         local_path = f"./data/08_reporting/{city}_model_graph.png"
                         outputs[f"{city}_model"].model.to_graphviz(
-                            save=local_path, 
+                            save=local_path,
                             figsize=(12,8)
                         )
                         # log graph representation of model
@@ -659,7 +659,7 @@ class ModelTrackingHooks:
                     mlflow.end_run()
 ```
 
-1. Log divergences if any occured during sampling.
+1. Log divergences if any occurred during sampling.
 2. Log Inference Data attributes.
 
 ## Logging Metrics
@@ -673,7 +673,7 @@ import mlflow
 from kedro.framework.hooks import hook_impl
 
 cities = [
-    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus", 
+    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus",
     "Recife", "Rio", "Salvador", "Sao_Luiz", "Sao_Paulo", "Vitoria"
 ]
 
@@ -715,8 +715,8 @@ class ModelTrackingHooks:
                 if self.params['mlflow_config']['use_mlflow']:
                     # Start a nested run
                     mlflow.start_run(
-                        run_name=city, 
-                        nested=True, 
+                        run_name=city,
+                        nested=True,
                         parent_run_id=self.run_ids['parent_run_id']
                     )
                     # Store city specific run ids for later
@@ -725,14 +725,14 @@ class ModelTrackingHooks:
                     if self.params['mlflow_config']['log_artifacts']:
                         local_path = f"./data/08_reporting/{city}_model_graph.png"
                         outputs[f"{city}_model"].model.to_graphviz(
-                            save=local_path, 
+                            save=local_path,
                             figsize=(12,8)
                         )
                         # log graph representation of model
                         mlflow.log_artifact(local_path=local_path, artifact_path="figures")
                     # log divergences and inference data attributes
                     mlflow.log_param(
-                        "divergences", 
+                        "divergences",
                         (
                             outputs[f"{city}_model"]
                               .idata.sample_stats.diverging.sum()
@@ -744,7 +744,7 @@ class ModelTrackingHooks:
 
         if node.name in [f"{city}_forecasts_evaluation" for city in cities]: # <1>
             city = re.search(r"(.*)(?=_forecasts_evaluation)", node.name).group(1) # <2>
-            if self.params['mlflow_config']['use_mlflow']: 
+            if self.params['mlflow_config']['use_mlflow']:
                 # start up again our city specific runs to log metrics
                 mlflow.start_run( # <3>
                     run_id=self.run_ids[f"{city}_run_id"], # <3>
@@ -792,11 +792,11 @@ class PyMCModelWrapper(PythonModel):
             n_ahead: The number of future time steps to predict.
         """
         preds_normalized = self.model.sample_posterior_predictive(
-            n_ahead=n_ahead.iloc[:, 0].values.item(), 
-            extend_idata=False, 
+            n_ahead=n_ahead.iloc[:, 0].values.item(),
+            extend_idata=False,
             combined=False
         )
-        preds = preds_normalized * self.model.idata.attrs['y_std'] + 
+        preds = preds_normalized * self.model.idata.attrs['y_std'] +
                 self.model.idata.attrs['y_mean']
         preds = preds.rename_vars(
             {"temperature_normalized_fut": "temperature_fut"}
@@ -817,7 +817,7 @@ import mlflow
 from kedro.framework.hooks import hook_impl
 
 cities = [
-    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus", 
+    "Belem", "Curitiba", "Fortaleza", "Goiania", "Macapa", "Manaus",
     "Recife", "Rio", "Salvador", "Sao_Luiz", "Sao_Paulo", "Vitoria"
 ]
 
@@ -859,8 +859,8 @@ class ModelTrackingHooks:
                 if self.params['mlflow_config']['use_mlflow']:
                     # Start a nested run
                     mlflow.start_run(
-                        run_name=city, 
-                        nested=True, 
+                        run_name=city,
+                        nested=True,
                         parent_run_id=self.run_ids['parent_run_id']
                     )
                     # Store city specific run ids for later
@@ -869,7 +869,7 @@ class ModelTrackingHooks:
                     if self.params['mlflow_config']['log_artifacts']:
                         local_path = f"./data/08_reporting/{city}_model_graph.png"
                         outputs[f"{city}_model"].model.to_graphviz(
-                            save=local_path, 
+                            save=local_path,
                             figsize=(12,8)
                         )
                         # log graph representation of model
@@ -879,7 +879,7 @@ class ModelTrackingHooks:
                         input_schema = mlflow.types.Schema( # <1>
                             [ # <1>
                                 mlflow.types.ColSpec( # <1>
-                                    name="n_ahead", # <1> 
+                                    name="n_ahead", # <1>
                                     type=mlflow.types.DataType.integer # <1>
                                 ), # <1>
                             ] # <1>
@@ -898,7 +898,7 @@ class ModelTrackingHooks:
                             ) # <2>
                     # log divergences and inference data attributes
                     mlflow.log_param(
-                        "divergences", 
+                        "divergences",
                         (
                             outputs[f"{city}_model"]
                               .idata.sample_stats.diverging.sum()
@@ -910,7 +910,7 @@ class ModelTrackingHooks:
 
         if node.name in [f"{city}_forecasts_evaluation" for city in cities]:
             city = re.search(r"(.*)(?=_forecasts_evaluation)", node.name).group(1)
-            if self.params['mlflow_config']['use_mlflow']: 
+            if self.params['mlflow_config']['use_mlflow']:
                 # start up again our city specific runs to log metrics
                 mlflow.start_run(
                     run_id=self.run_ids[f"{city}_run_id"],
@@ -920,7 +920,7 @@ class ModelTrackingHooks:
                 )
                 mlflow.log_metrics(outputs[f'{city}_evaluation'])
                 mlflow.end_run()
-        
+
     @hook_impl # <3>
     def after_pipeline_run(self) -> None: # <3>
         """Hook implementation to end the MLflow run
@@ -978,7 +978,7 @@ Under the `/figures` path, we can find the model graph figure that we logged.
 
 ![City Specific Model Graph](mlflow_fig4.png)
 
-The artifacts are visible/accesible via the `MLFlow` UI, but remember that these objects are stored in our MinIO service. You can access the storage directly on `localhost:9001` and locate the objects in our default bucket:
+The artifacts are visible/accessible via the `MLFlow` UI, but remember that these objects are stored in our MinIO service. You can access the storage directly on `localhost:9001` and locate the objects in our default bucket:
 
 ![MinIO Artifact Storage](minio_fig1.png)
 

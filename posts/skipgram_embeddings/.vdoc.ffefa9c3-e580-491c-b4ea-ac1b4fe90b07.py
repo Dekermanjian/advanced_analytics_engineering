@@ -153,7 +153,7 @@ def build_word_index(text: str) -> tuple[dict[str, int], list[str]]:
         text (str): Input text to extract vocabulary from.
 
     Returns:
-        Tuple[Dict[str, int], List[str]]: 
+        Tuple[Dict[str, int], List[str]]:
             - word_to_index: A dictionary mapping each word to a unique integer ID.
             - vocabulary: A sorted list of unique vocabulary words including "<unk>".
     """

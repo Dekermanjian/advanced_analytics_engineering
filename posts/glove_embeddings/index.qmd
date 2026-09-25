@@ -6,7 +6,7 @@ categories: [Natural Language Processing]
 code-annotations: below
 image: "thumbnail.png"
 jupyter: jax_recsys
-execute: 
+execute:
   cache: true
 ---
 
@@ -57,7 +57,7 @@ def tokenize_and_filter(text: str, min_occurrence: int) -> list[str]:
 
     Returns
     -------
-    list[str]: 
+    list[str]:
         A list of tokens that occur more than `min_occurrence` times.
     """
     # Convert text to lowercase and tokenize
@@ -86,7 +86,7 @@ def build_word_index(text: str, min_occurence: int = 0) -> tuple[dict[str, int],
 
     Returns
     -------
-    Tuple[Dict[str, int], List[str]]: 
+    Tuple[Dict[str, int], List[str]]:
         - word_to_index: A dictionary mapping each word to a unique integer ID.
         - vocabulary: A sorted list of unique vocabulary words including "<unk>".
     """
@@ -131,47 +131,47 @@ def tokens_to_ids(text: str, word_to_index: dict[str, int], min_occurence: int =
 
 # Global Vectors for Word Representation (GloVe)
 
-Conceptually, GloVe is simpler than Skip-Gram with Negative Sampling (SGNS) because it avoids negative sampling and works directly with co-occurrence statistics. However, in practice SGNS can be easier to scale to very large corpora, since GloVe requires building and storing a co-occurrence matrix in memory. 
+Conceptually, GloVe is simpler than Skip-Gram with Negative Sampling (SGNS) because it avoids negative sampling and works directly with co-occurrence statistics. However, in practice SGNS can be easier to scale to very large corpora, since GloVe requires building and storing a co-occurrence matrix in memory.
 
-That being said let's take a look at how we can generate our co-occurrence matrix. 
+That being said let's take a look at how we can generate our co-occurrence matrix.
 
-## Co-occurence Matrices 
+## Co-occurence Matrices
 
-In addition to creating the matrix, we need a utility that uses this matrix and returns a tuple of row indices, column indices, and co-occurrence counts. This is how we will pass the information to our loss function. 
+In addition to creating the matrix, we need a utility that uses this matrix and returns a tuple of row indices, column indices, and co-occurrence counts. This is how we will pass the information to our loss function.
 
 ```{python}
 def build_cooc_matrix(corpus_tokens: list[str], vocabulary: list[str], word_to_index: dict[str, int], window_size: int = 5) -> np.ndarray:
     """
     Build a co-occurrence matrix of a specified window size.
-    
+
     Parameters
     ----------
-    corpus_tokens: list[str] 
+    corpus_tokens: list[str]
         tokenized text corpus
     vocabulary: list[str]
         sorted vocabulary
     word_to_index: dict[str, int]
         mapping from word to index in vocab
-    window_size: int 
+    window_size: int
         number of words to consider on each side
-    
+
     Returns
     -------
-    np.ndarray 
+    np.ndarray
         cooc of shape (vocabulary_size, vocabulary_size)
     """
     vocab_size = len(vocabulary)
     cooc_matrix = np.zeros((vocab_size, vocab_size), dtype=np.float32)
-    
+
     for idx, word in enumerate(corpus_tokens):
         if word not in word_to_index:
             continue  # skip OOV words
         i = word_to_index[word]
-        
+
         # Context window boundaries
         start = max(0, idx - window_size)
         end = min(len(corpus_tokens), idx + window_size + 1)
-        
+
         for j in range(start, end):
             if j == idx:
                 continue  # skip the word itself
@@ -179,22 +179,22 @@ def build_cooc_matrix(corpus_tokens: list[str], vocabulary: list[str], word_to_i
             if context_word not in word_to_index:
                 continue
             k = word_to_index[context_word]
-            
+
             distance = abs(j - idx)
             cooc_matrix[i, k] += 1.0 / distance  # inverse distance weighting
-    
+
     return cooc_matrix
 
 
 def cooc_matrix_to_arrays(cooc_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Convert a dense co-occurrence matrix to separate arrays of indices and counts.
-    
+
     Parameters
     ----------
     cooc_matrix: np.ndarray
         cooccurrence matrix
-        
+
     Returns
     -------
     i_indices: np.ndarray[int32]
@@ -203,7 +203,7 @@ def cooc_matrix_to_arrays(cooc_matrix: np.ndarray) -> tuple[np.ndarray, np.ndarr
     """
     i_indices, j_indices = np.nonzero(cooc_matrix)
     counts = cooc_matrix[i_indices, j_indices]
-    
+
     return (
         i_indices.astype(np.int32),
         j_indices.astype(np.int32),
@@ -269,7 +269,7 @@ i_indices, j_indices, counts = cooc_matrix_to_arrays(cooc_matrix)
 
 ## Define Training Loop
 
-Our training loop is very similar to what we had in the previous post, however, we wrap everything up in functions for a cleaner representation. 
+Our training loop is very similar to what we had in the previous post, however, we wrap everything up in functions for a cleaner representation.
 
 ```{python}
 def nearest_neighbors(word: str, vectors: jnp.ndarray, k:int = 3) -> list[str]:
@@ -319,17 +319,17 @@ def log_step(epoch, params, total_loss, n_samples):
     print(f'word: "tyranny" neighbors: {nearest_neighbors("tyranny", embeddings)}\n')
 
 def train_glove(
-    i_indices: np.ndarray, 
-    j_indices: np.ndarray, 
-    counts: np.ndarray, 
-    vocab_size: int, 
-    dim: int = 300, 
-    epochs: int = 50, 
-    lr: float = 1e-3, 
+    i_indices: np.ndarray,
+    j_indices: np.ndarray,
+    counts: np.ndarray,
+    vocab_size: int,
+    dim: int = 300,
+    epochs: int = 50,
+    lr: float = 1e-3,
     batch_size: int = 512
 ):
     """
-    
+
     """
     key = jax.random.PRNGKey(0)
     W = jax.random.normal(key, (vocab_size, dim)) * 0.01
@@ -385,7 +385,7 @@ embeddings = trained_params[0] + trained_params[1]
 
 # Inspect learned embeddings
 
-We use the same nearest neighbors approach to inspect our learned embeddings, as we did in the previous post. However, we added a plotting utility to plot the nearest neighbors after reducing the vector embeddings dimensions using UMAP. It's a little more exciting to have a visual, I suppose. 
+We use the same nearest neighbors approach to inspect our learned embeddings, as we did in the previous post. However, we added a plotting utility to plot the nearest neighbors after reducing the vector embeddings dimensions using UMAP. It's a little more exciting to have a visual, I suppose.
 
 Looking at the results, below, it is apparent that our embeddings have learned word relationships based on the cooccurrences within the corpus.
 
@@ -400,7 +400,7 @@ def reduce_umap(vectors, n_components=2, normalize=True, n_neighbors=10, min_dis
         n_neighbors=n_neighbors,
         min_dist=min_dist,
         random_state=seed,
-        metric='cosine', 
+        metric='cosine',
         n_jobs=1
     )
     return reducer.fit_transform(arr)
@@ -408,7 +408,7 @@ def reduce_umap(vectors, n_components=2, normalize=True, n_neighbors=10, min_dis
 def plot_neighbors(word: str, vectors: jnp.ndarray, k: int = 5, theme="light"):
     """
     Create a 2D Plotly scatterplot of nearest neighbors for a given word.
-    
+
     Parameters
     ----------
     word: str
@@ -419,7 +419,7 @@ def plot_neighbors(word: str, vectors: jnp.ndarray, k: int = 5, theme="light"):
         Number of neighbors.
     theme: str
         The plots theme (light, dark)
-        
+
     Returns
     -------
     plotly.graph_objects.Figure
@@ -433,17 +433,17 @@ def plot_neighbors(word: str, vectors: jnp.ndarray, k: int = 5, theme="light"):
     # Get neighbors
     neighbors = nearest_neighbors(word, vectors, k=k)
     words = [word] + neighbors
-    
+
     # Get their embeddings
     indices = np.array([tokens_to_ids(w, word_to_index)[0] for w in words])
     emb = np.array(vectors[indices])
-    
+
     # Reduce to 2D
     emb_2d = reduce_umap(emb, 2, True, k)
-    
+
     # plotly scatter plot
     fig = go.Figure()
-    
+
     fig.add_trace(
         go.Scatter(
             x = emb_2d[:,0],

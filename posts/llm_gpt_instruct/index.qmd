@@ -6,7 +6,7 @@ categories: [Natural Language Processing]
 code-annotations: below
 css: styles.css
 jupyter: nnx_env
-execute: 
+execute:
   cache: true
 bibliography: references.bib
 nocite: |
@@ -39,7 +39,7 @@ from tqdm.auto import tqdm
 
 # Overview
 
-This is the second post in a three-part series on building a large language model from scratch. 
+This is the second post in a three-part series on building a large language model from scratch.
 
 In the previous post we covered the first stage, pretraining a decoder-only GPT on next-token prediction. In this post we tackle the second stage: instruction tuning.
 
@@ -137,7 +137,7 @@ As in the pretraining post, we use GPT-2's pretrained Byte-Pair Encoding vocabul
 tokenizer = tiktoken.get_encoding("gpt2")
 ```
 
-The `InstructionDataset` below holds our examples and pre-encodes them up front. For each entry it builds the full training text by concatenating the formatted prompt with a `### Response:` section containing the desired output, then tokenizes the whole thing once in `__post_init__`. Encoding eagerly trades a little memory for speed: we pay the tokenization cost once rather than on every epoch. 
+The `InstructionDataset` below holds our examples and pre-encodes them up front. For each entry it builds the full training text by concatenating the formatted prompt with a `### Response:` section containing the desired output, then tokenizes the whole thing once in `__post_init__`. Encoding eagerly trades a little memory for speed: we pay the tokenization cost once rather than on every epoch.
 
 ```{python}
 @dataclass
@@ -159,7 +159,7 @@ class InstructionDataset:
 
     def __getitem__(self, idx: int):
         return self.encoded_texts[idx]
-    
+
 def collate_fn(
     batch,
     pad_token_id=50256,
@@ -174,7 +174,7 @@ def collate_fn(
             padded = (new_item + [pad_token_id] *(batch_max_length - len(new_item)))
             inputs = np.array(padded[:-1])
             targets = np.array(padded[1:])
-            
+
             mask = targets == pad_token_id
             indices = np.nonzero(mask)[0]
 
@@ -203,7 +203,7 @@ A natural question is why we do not also mask out the *prompt* tokens (the instr
 
 :::
 
-With a dataset and a collate function, we wrap everything in a `grain` data loader. 
+With a dataset and a collate function, we wrap everything in a `grain` data loader.
 
 ```{python}
 def load_and_preprocess_data(data: list, batch_size: int, shuffle=False):
@@ -297,7 +297,7 @@ class MultiHeadAttention(nnx.Module):
 
         attn_logits = jnp.matmul(q, k.transpose(0, 1, 3, 2)) / jnp.sqrt(self.head_dim)
         attn_logits = jnp.where(mask, -jnp.inf, attn_logits)
-        
+
         attn_weights = jax.nn.softmax(attn_logits, axis=-1)
         attn_weights = self.dropout(attn_weights)
         out = jnp.matmul(attn_weights, v).transpose(0, 2, 1, 3).reshape(batch, seq_len, self.d_model)
@@ -392,7 +392,7 @@ instruction_train_model = GPT(config=config, rngs=rngs)
 save_directory = Path("./model_checkpoint/GPT_jax")
 checkpointer = orbax.PyTreeCheckpointer()
 restored_state = checkpointer.restore(
-    save_directory.absolute(), 
+    save_directory.absolute(),
     args=orbax.args.PyTreeRestore(nnx.state(instruction_train_model))
 )
 nnx.update(instruction_train_model, restored_state)
@@ -418,8 +418,8 @@ def generate_text_simple(model, idx, max_new_tokens, context_size, eos_id=None):
         logits = model(idx_cond)
 
         logits = logits[:, -1, :]
-        idx_next = jnp.argmax(logits, axis=-1, keepdims=True) 
-        
+        idx_next = jnp.argmax(logits, axis=-1, keepdims=True)
+
         if idx_next == eos_id:
             break
         idx = jnp.concatenate((idx, idx_next), axis=1)
@@ -587,7 +587,7 @@ for i, idx in enumerate(random_examples):
     print(f"\nExample {i + 1}\n----------\n")
 
     input_text = format_input(test_data[idx])
-    
+
     token_ids = generate_text_simple(
         model=instruction_eval_model,
         idx=text_to_token_ids(input_text, tokenizer),
@@ -646,7 +646,7 @@ def load_openai_gpt2_weights(model, variant="gpt2"):
     """Load OpenAI GPT-2 weights (HuggingFace safetensors) into our nnx GPT, in place.
 
     Works for any size in GPT2_VARIANTS. The `model` must be built with the matching
-    architecture. GPT-2 stores its attention/MLP projections as Conv1D layers whose weights are already in 
+    architecture. GPT-2 stores its attention/MLP projections as Conv1D layers whose weights are already in
     `(in, out)` orientation so no transposes are needed except for the tied output head.
     """
     repo_id = GPT2_VARIANTS[variant]["repo_id"]
@@ -818,7 +818,7 @@ for i, idx in enumerate(random_examples):
     print(f"\nExample {i + 1}\n----------\n")
 
     input_text = format_input(test_data[idx])
-    
+
     token_ids = generate_text_simple(
         model=gpt2_model,
         idx=text_to_token_ids(input_text, tokenizer),

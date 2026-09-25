@@ -13,5 +13,4 @@ fxhash = "0.2"
 rayon = "1.10"
 hashbrown = "0.14"
 indicatif = "0.17"
-regex = "1.10" 
-
+regex = "1.10"

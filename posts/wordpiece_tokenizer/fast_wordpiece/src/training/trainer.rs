@@ -149,7 +149,7 @@ pub fn train_wordpiece_internal(
     for (i, tok) in vocab.iter().enumerate() {
         final_map.insert(tok.clone(), i as u32);
     }
-    
+
     let mut id_to_token = HashMap::new();
     for (k, v) in final_map.iter() {
         id_to_token.insert(v.clone(), k.clone());

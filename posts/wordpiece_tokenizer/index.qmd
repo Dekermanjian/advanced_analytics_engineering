@@ -6,7 +6,7 @@ categories: [Natural Language Processing]
 code-annotations: below
 jupyter: nnx_env
 image: "thumbnail.png"
-execute: 
+execute:
   cache: true
 ---
 
@@ -72,7 +72,7 @@ Our `Tokenizer` class is responsible for tokenizing text using the `WordPieceEnc
 The `train` method accepts a corpus and a trainer, which fits a vocabulary to the corpus and subsequently instantiates the post-processor and encoder classes using that vocabulary. We also provide `encode` and `decode` methods. The `encode` method transforms text into a tokenized representation (including IDs and offsets), while the decode method reconstructs the original text from those tokens.
 
 ```{python}
-import re 
+import re
 
 from collections import Counter, defaultdict
 from tqdm import tqdm
@@ -100,10 +100,10 @@ class Tokenizer:
         for text in corpus:
             normalized = self.normalizer(text) if self.normalizer else text
             words.extend(self.pre_tokenizer(normalized) if self.pre_tokenizer else [normalized])
-        
+
         # 2. Fit the trainer
         vocab = trainer.train(words)
-        
+
         # 3. Build mappings
         self.token_to_id = {tok: i for i, tok in enumerate(vocab)}
         self.id_to_token = {i: tok for tok, i in self.token_to_id.items()}
@@ -117,7 +117,7 @@ class Tokenizer:
     def encode(self, text: str):
         if not self.token_to_id:
             raise ValueError("Tokenizer has not been trained yet.")
-        
+
         normalized = self.normalizer(text)
         pre_tokenized = self.pre_tokenizer(normalized)
 
@@ -175,19 +175,19 @@ class Tokenizer:
 
         # Remove spaces before punctuation
         decoded_string = re.sub(r"\s+([.,!?;:])", r"\1", decoded_string)
-        
+
         # Remove spaces around apostrophes
         decoded_string = re.sub(r"\s+'\s+", "'", decoded_string)
-        
+
         # Remove spaces around hyphens for compounds
         decoded_string = re.sub(r"\s+-\s+", "-", decoded_string)
-        
+
         # Handle parentheses and brackets
         decoded_string = re.sub(r"\(\s+", "(", decoded_string)
         decoded_string = re.sub(r"\s+\)", ")", decoded_string)
         decoded_string = re.sub(r"\s+\[", "[", decoded_string)
         decoded_string = re.sub(r"\]\s+", "]", decoded_string)
-        
+
         # Standardize extra whitespaces
         decoded_string = decoded_string.strip()
 
@@ -246,11 +246,11 @@ class WordPieceTrainer:
 
     def _init_word(self, word: str):
         return [c if i == 0 else f"##{c}" for i, c in enumerate(word)]
-    
+
     def train(self, words: list[str]):
         counts = Counter(words)
         word_freqs = {" ".join(self._init_word(w)): freq for w, freq in counts.items()}
-        
+
         vocab = set(tok for w in word_freqs.keys() for tok in w.split())
 
         max_merges = self.vocab_size - len(vocab)
@@ -289,7 +289,7 @@ class WordPieceTrainer:
                 a, b = best_pair
                 target = f"{a} {b}"
                 replacement = a + b[2:] if b.startswith("##") else a + b
-                
+
                 new_word_freqs = {}
                 for word, freq in word_freqs.items():
                     new_word = word.replace(target, replacement)
@@ -481,7 +481,7 @@ impl PyTokenizer {
         dict.set_item("ids", &enc.ids).unwrap();
         dict.set_item("tokens", &enc.tokens).unwrap();
         dict.set_item("offsets", &enc.offsets).unwrap();
-        
+
         let attention_mask: Vec<u32> = enc.attention_mask.iter().map(|&x| x as u32).collect();
         let special_tokens_mask: Vec<u32> = enc.special_tokens_mask.iter().map(|&x| x as u32).collect();
 

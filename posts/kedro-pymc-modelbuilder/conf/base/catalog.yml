@@ -3,7 +3,7 @@
 cities_temperatures:
   type: partitions.PartitionedDataset
   path: data/01_raw/
-  dataset: 
+  dataset:
     type: polars.LazyPolarsDataset
     file_format: csv
 
@@ -80,7 +80,7 @@ Vitoria_model:
 city_models:
   type: partitions.PartitionedDataset
   path: data/06_models/
-  dataset: 
+  dataset:
     type: kedro_framework.datasets.pymc_model_dataset.PyMCModelDataset
 
 # Model outputs ------------------------------------------
@@ -135,7 +135,7 @@ Vitoria_forecasts_evaluation:
 city_forecasts:
   type: partitions.PartitionedDataset
   path: data/07_model_output/
-  dataset: 
+  dataset:
     type: kedro_framework.datasets.pymc_forecast_dataset.PyMCForecastDataset
 
 # Forecast plots

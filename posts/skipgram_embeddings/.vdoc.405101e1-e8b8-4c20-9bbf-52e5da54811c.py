@@ -154,7 +154,7 @@ def build_word_index(text: str, min_occurence: int = 0) -> tuple[dict[str, int],
         min_occurrence (int): Minimum number of times a token must appear in the text to be included.
 
     Returns:
-        Tuple[Dict[str, int], List[str]]: 
+        Tuple[Dict[str, int], List[str]]:
             - word_to_index: A dictionary mapping each word to a unique integer ID.
             - vocabulary: A sorted list of unique vocabulary words including "<unk>".
     """

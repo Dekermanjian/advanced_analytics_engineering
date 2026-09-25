@@ -14,7 +14,7 @@ about:
 
 ---
 
-Welcome to my blog! 
+Welcome to my blog!
 
 My name is Jonathan Dekermanjian and I am a data professional with nearly 10 years of experience. I have worked both in academia as a data science researcher as well as in industry as a data scientist & machine learning engineer.
 

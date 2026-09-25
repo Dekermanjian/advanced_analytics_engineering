@@ -4,6 +4,7 @@ author: "Jonathan Dekermanjian"
 date: "2025-03-26"
 categories: [Engineering]
 image: "ts-plot.png"
+jupyter: kedro_kedro_framework
 ---
 
 # Overview
@@ -17,7 +18,7 @@ In this post we are going to talk about and walkthrough using the Kedro framewor
 * Creating a Kedro pipeline
 * Integrating Kedro plugins
 
-If you want to learn how to use Kedro's more advanced features check out the official [documention](https://docs.kedro.org/en/stable/).
+If you want to learn how to use Kedro's more advanced features check out the official [documentation](https://docs.kedro.org/en/stable/).
 
 # Getting Started
 Let's start off by creating a clean environment. We are going to use `Conda` in this example but you can you whatever virtual environment you prefer. After installing [Anaconda](https://www.anaconda.com/download/success) or [Miniconda](https://docs.anaconda.com/miniconda/install/), you can create a new environment by executing the following command in your terminal:
@@ -88,18 +89,18 @@ pip install -r requirements.txt
 ```
 
 # Defining a Data Catalog
-All Input/Output (IO) operations are defined in a data catalog, when using Kedro. This allows you to declaratively define your data sources whether they are stored as local files, or stored remotely in a SQL/NoSQL database, or just in some form of remote storage like S3. 
+All Input/Output (IO) operations are defined in a data catalog, when using Kedro. This allows you to declaratively define your data sources whether they are stored as local files, or stored remotely in a SQL/NoSQL database, or just in some form of remote storage like S3.
 
 :::{.callout-tip}
 In our simple example, all the data are stored locally. Therefore, we don't need to define any credentials to access the data. However, in practice it is likely that you need to access data from a database or cloud storage. In that case, you would define your credentials in `/conf/local/credentials.yml`.
 :::
 
-Before we edit our catalog, go ahead and download the data to `/data/01_raw/`. You can get the data files from [Kaggle](https://www.kaggle.com/datasets/volpatto/temperature-timeseries-for-some-brazilian-cities?select=station_belem.csv). 
+Before we edit our catalog, go ahead and download the data to `/data/01_raw/`. You can get the data files from [Kaggle](https://www.kaggle.com/datasets/volpatto/temperature-timeseries-for-some-brazilian-cities?select=station_belem.csv).
 
-We declare our `base` catalog by modifying `/conf/base/catalog.yml`. The base catalog will be inhereted by all other Kedro enviornments you create. For example, if you create a `dev` environment you don't need to repeat the catalog entries that are in `/conf/base/catalog.yml` inside of `/conf/dev/catalog.yml`. 
+We declare our `base` catalog by modifying `/conf/base/catalog.yml`. The base catalog will be inherited by all other Kedro environments you create. For example, if you create a `dev` environment you don't need to repeat the catalog entries that are in `/conf/base/catalog.yml` inside of `/conf/dev/catalog.yml`.
 
 :::{.callout-caution}
-If you declare a catalog entry in `/conf/dev/catalog.yml` that shares the same key as an entry in `/conf/base/catalog.yml` you will override the `base` catalog when you are working in the `dev` environment. 
+If you declare a catalog entry in `/conf/dev/catalog.yml` that shares the same key as an entry in `/conf/base/catalog.yml` you will override the `base` catalog when you are working in the `dev` environment.
 :::
 
 There are several ways that we can add our data to the catalog. The simplest way is to define one entry for each Brazilian city:
@@ -130,7 +131,7 @@ If you have a lot of cities it can get really tedious. Luckily, Kedro has a feat
   filepath: data/01_raw/station_{city}.csv
 ```
 
-Kedro is smart enough that during runtime it will use Regex to match `{city}` to the corresponding dataset city. Finally, the approach we will use is to declare the data as a `PartitionedDataset`. You can think of each Brazilian city as a partition of the entire dataset that would be composed of all the Brazilian cities. Kedro will return a dictionary object with each file's name as the key and the load method as the corresponding value. 
+Kedro is smart enough that during runtime it will use Regex to match `{city}` to the corresponding dataset city. Finally, the approach we will use is to declare the data as a `PartitionedDataset`. You can think of each Brazilian city as a partition of the entire dataset that would be composed of all the Brazilian cities. Kedro will return a dictionary object with each file's name as the key and the load method as the corresponding value.
 
 :::{.callout-important}
 Note that when using a `PartitionedDataset` the data is loaded lazily. This means that the data is actually not loaded until you call the load method. This prevents Out-Of-Memory (OOM) errors if your data can't fit into memory.
@@ -143,7 +144,7 @@ We can declare our data as a `PartitionedDataset` like this:
 cities_temperatures:
   type: partitions.PartitionedDataset
   path: data/01_raw/
-  dataset: 
+  dataset:
     type: polars.LazyPolarsDataset
     file_format: csv
 ```
@@ -290,7 +291,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/cities_ts_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -307,7 +308,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/cities_ts_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -322,7 +323,7 @@ fig.update_layout(
 fig.show()
 ```
 
-Now that we have defined our nodes, let's see how we can chain them together into a simple pipeline. We define our data processing pipeline in the `pipeline.py` file that Kedro creates for us in the `data_processing` directory. 
+Now that we have defined our nodes, let's see how we can chain them together into a simple pipeline. We define our data processing pipeline in the `pipeline.py` file that Kedro creates for us in the `data_processing` directory.
 
 ```python
 # /src/climate_brazil/pipelines/data_processing/pipeline.py
@@ -349,7 +350,7 @@ def create_pipeline(**kwargs) -> Pipeline:
 Notice that the input to the `process_datasets` function is the name that we chose for our dataset when we defined it inside of our catalog. Also note that we are choosing to name the output from the `process_datasets` function as `cities_temperatures_processed` and we are passing that as the input to the function `timeseries_plot`.
 
 :::{.callout-caution}
-Kedro automatically infers the dependencies of your pipeline and will run it in an order that may not be the same order as you defined. 
+Kedro automatically infers the dependencies of your pipeline and will run it in an order that may not be the same order as you defined.
 :::
 
 Before we move on to the next section, it is important to know that both our outputs will be `MemoryDatasets` this mean that they will only exist while the Kedro session is still active. In order to persist the outputs we need to add them to our catalog.
@@ -360,7 +361,7 @@ Before we move on to the next section, it is important to know that both our out
 cities_temperatures:
   type: partitions.PartitionedDataset
   path: data/01_raw/
-  dataset: 
+  dataset:
     type: polars.LazyPolarsDataset
     file_format: csv
 
@@ -412,7 +413,7 @@ Your browser should automatically launch and you will be greeted by the followin
 Our simple example doesn't do Kedro-Viz justice. In practice, you'll have many datasets coming from disparate sources that will require more complex processing and joining. In such a scenario, being able to see the lineage and dependencies of your data becomes very useful. Kedro-Viz is interactive in that you can optionally preview the data, you can view static or interactive figures, and you can view the code of the nodes all in the user interface. I recommend that you try this plugin for you next project!
 
 # Source Control & Pre-Commit
-I am sure that everyone reading this already understands the importance of source/version control, so I will keep this breif. When we created our project Kedro was nice enough to create a `.gitignore` file and `.gitkeep` files. The `.gitignore` file makes sure that you don't accidentally commit any data or any credentials that you store in `conf/local/credentials.yml` to a remote repository. Kedro does not, unfortunately, set up any pre-commit configuration so you need to do that manually. Here is an example of a pre-commit configuration that includes linting with `ruff` checking your codebase for missing docstrings with `interrogate` and stripping out any confidentiat data from notebooks with `nbstripout`.
+I am sure that everyone reading this already understands the importance of source/version control, so I will keep this brief. When we created our project Kedro was nice enough to create a `.gitignore` file and `.gitkeep` files. The `.gitignore` file makes sure that you don't accidentally commit any data or any credentials that you store in `conf/local/credentials.yml` to a remote repository. Kedro does not, unfortunately, set up any pre-commit configuration so you need to do that manually. Here is an example of a pre-commit configuration that includes linting with `ruff` checking your codebase for missing docstrings with `interrogate` and stripping out any confidentiat data from notebooks with `nbstripout`.
 
 ```yaml
 # .pre-commit-config.yaml
@@ -472,10 +473,10 @@ git init
 pre-commit install
 ```
 
-Wonderul, we are all set now with source control and mitigating the possibility of commiting anything confidential to your repository.
+Wonderul, we are all set now with source control and mitigating the possibility of committing anything confidential to your repository.
 
 # Running Pipelines in Containers
-We can also run the pipeline we just built inside of a container. Kedro maintains the `kedro-docker` plugin which facilitates getting your Kedro project running inside a container. 
+We can also run the pipeline we just built inside of a container. Kedro maintains the `kedro-docker` plugin which facilitates getting your Kedro project running inside a container.
 
 :::{.callout-note}
 While the plugin is named `kedro-docker` you can use it with other containerization frameworks such as `Podman`
@@ -536,7 +537,7 @@ EXPOSE 8888
 CMD ["kedro", "run"]
 ```
 
-Kedro will automatically assume that you want to run all your pipelines (or your defualt pipeline) but you can, quite easily, change the specified command in the generated docker file. 
+Kedro will automatically assume that you want to run all your pipelines (or your default pipeline) but you can, quite easily, change the specified command in the generated docker file.
 
 Now that we have a `Dockerfile` and `.dockerignore` we can build our image.
 

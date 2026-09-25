@@ -7,7 +7,7 @@ code-annotations: below
 css: styles.css
 jupyter: jax_env
 image: "thumbnail.png"
-execute: 
+execute:
   cache: true
 bibliography: references.bib
 nocite: |
@@ -20,17 +20,17 @@ We go over contextual embeddings and recurrent neural networks. Describing their
 
 # Introduction
 
-In previous posts we learned what embeddings are, why they are important and how they can be levaraged in practice. We got our hands dirty by implementing two of the earliest foundational methods GloVe and Skip-gram with negative sampling (SGNS). 
+In previous posts we learned what embeddings are, why they are important and how they can be leveraged in practice. We got our hands dirty by implementing two of the earliest foundational methods GloVe and Skip-gram with negative sampling (SGNS).
 
-If you need a refresher or just hadn't seen them you can check out my posts on [GloVe](/posts/glove_embeddings/index.qmd) and [SGNS](/posts/skipgram_embeddings/index.qmd). 
+If you need a refresher or just hadn't seen them you can check out my posts on [GloVe](/posts/glove_embeddings/index.qmd) and [SGNS](/posts/skipgram_embeddings/index.qmd).
 
-In this post we will briefly review the differences between static and contextual embeddings and discuss some of the methodologies used to create contextual embeddings. Leading us to the architecture of recurrent neural networks and how they are leveraged in contextual embeddings. 
+In this post we will briefly review the differences between static and contextual embeddings and discuss some of the methodologies used to create contextual embeddings. Leading us to the architecture of recurrent neural networks and how they are leveraged in contextual embeddings.
 
 Finally, we will delve into the architecture of Embeddings from Language Models (ELMo), and implement it from scratch.
 
 # From Static to Contextual Embeddings
 
-As a reminder, a strength of contextual embeddings is the ability to discriminate between polysemous words. For example, the word "ship" can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. In contrast, contextual embeddings are able to disambiguate the two meanings of the same word. 
+As a reminder, a strength of contextual embeddings is the ability to discriminate between polysemous words. For example, the word "ship" can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. In contrast, contextual embeddings are able to disambiguate the two meanings of the same word.
 
 Since our vectors now need to be aware of context, the sequence in which words occur must influence the resultant vectors. Importantly, not only during training must our vectors be aware of context but also during inference. Therefore, we must build vector embeddings dynamically (on the fly) during inference to ensure that this is the case. This contrasts with earlier methods like SGNS or GloVe:
 
@@ -75,7 +75,7 @@ flowchart BT
 :::
 
 
-The Elman RNN maintains only one hidden state, at each time step the same computation must compress all past information into a single $h_{t}$. This is challenging to do for longer time dependencies. Additionally, Elman RNNs are prone to vanishing/exploding gradients due to the gradients needing to repeatedly pass through $W_{h}$ and the nonlinearity $\phi$, via backpropagation through time. In practice, these limitations are enough to opt for a modified RNN architecture. 
+The Elman RNN maintains only one hidden state, at each time step the same computation must compress all past information into a single $h_{t}$. This is challenging to do for longer time dependencies. Additionally, Elman RNNs are prone to vanishing/exploding gradients due to the gradients needing to repeatedly pass through $W_{h}$ and the nonlinearity $\phi$, via backpropagation through time. In practice, these limitations are enough to opt for a modified RNN architecture.
 
 
 ## Long Short-Term Memory
@@ -102,9 +102,9 @@ $$
 o_{t} = \sigma(W_{o} \cdot [h_{t-1}, x_{t}] + b_{o})
 $$
 
-You may be thinking if all the computations are the same how do the different gates perform different functions? Well, that is a good question and one that is not obvious. However, their distinct roles emerge from how each gate modulates different computational paths in the forward pass, and how gradients propagate through those paths during backpropagation. 
+You may be thinking if all the computations are the same how do the different gates perform different functions? Well, that is a good question and one that is not obvious. However, their distinct roles emerge from how each gate modulates different computational paths in the forward pass, and how gradients propagate through those paths during backpropagation.
 
-In the remaining equations you can see how these gates act as controls on the input, cell state, and hidden state. 
+In the remaining equations you can see how these gates act as controls on the input, cell state, and hidden state.
 
 $$
 \tilde{c}_{t} = \tanh(W_{c} \cdot [h_{t-1}, x_{t}] + b_{c})
@@ -156,7 +156,7 @@ flowchart BT
 
 # Embeddings from Language Models
 
-Now that we better understanding of RNNs, specifically LSTMs, we are ready to talk about a deep learning architecture used to generate contextual embeddings. The influential Embeddings from Language Models (ELMo) architecture. 
+Now that we better understanding of RNNs, specifically LSTMs, we are ready to talk about a deep learning architecture used to generate contextual embeddings. The influential Embeddings from Language Models (ELMo) architecture.
 
 Before transformers became popular ELMo was one of the dominant models for generating contextual embeddings. ELMo blends character‑level convolutional neural networks (CNN) token encodings for handling out-of-vocabulary (OOV) words, multi‑layer bidirectional LSTMs to capture both left-to-right and right-to-left long range dependencies, and a trainable weighted sum of their hidden states to produce word‑level embeddings that are both context‑sensitive and adaptable through fine‑tuning.
 
@@ -294,7 +294,7 @@ $$
 
 # Hands-on Implementation
 
-Okay then, time to get our hands dirty! We are going to build an ELMo model from scratch using the JAX deep learning ecosystem. 
+Okay then, time to get our hands dirty! We are going to build an ELMo model from scratch using the JAX deep learning ecosystem.
 
 Specifically, we will pre-train the model using the aforementioned language modeling objective. Subsequently, we will fine-tune our scalar mix on a downstream task to evaluate our embeddings. I hope you enjoy!
 
@@ -302,15 +302,15 @@ In this part of the post, I’ll collapse all but the most important code cells,
 
 ## Processing Utilities
 
-To get started we are going to need some toy data. I chose the c4 dataset provided by AllenAI because it had nice long textual examples that were relatively clean. 
+To get started we are going to need some toy data. I chose the c4 dataset provided by AllenAI because it had nice long textual examples that were relatively clean.
 
 In order to keep things running on a local machine I took one million examples for training and 50,000 examples for validation. I personally streamed the data to my local disk for faster and easier of reinitialization. However, with the streaming dataset utility function we define you can also just stream the data directly from HuggingFace.
 
-We also need to initialize our vocabulary, at the character level for our character level CNN and at the word level to feed into our language modeling head. 
+We also need to initialize our vocabulary, at the character level for our character level CNN and at the word level to feed into our language modeling head.
 
-For our character level vocabulary we simply use the characters that you'd typically see in english text, in addition to an index for a padding character and an unknown character. 
+For our character level vocabulary we simply use the characters that you'd typically see in english text, in addition to an index for a padding character and an unknown character.
 
-Our word vocabulary is specified very similarly to how we have done it in the previous posts. We build a word vocabulary of up to 100,000 words with a minimum word frequency of 20 words. 
+Our word vocabulary is specified very similarly to how we have done it in the previous posts. We build a word vocabulary of up to 100,000 words with a minimum word frequency of 20 words.
 
 :::{.callout-note}
 
@@ -318,7 +318,7 @@ We use a simple tokenizer, splitting text on spaces, which is not canonically wh
 
 :::
 
-Finally, as I eluded to earlier we need a way to stream batches of our data to the model as we are training. The utility defined below handles shuffling, tokenizing, and encoding both characters and words before yielding them to the model. 
+Finally, as I eluded to earlier we need a way to stream batches of our data to the model as we are training. The utility defined below handles shuffling, tokenizing, and encoding both characters and words before yielding them to the model.
 
 :::{.callout-important}
 
@@ -648,7 +648,7 @@ vocab, _ = build_word_vocab(hf_ds)
 
 ## Define Architecture Components
 
-We went over the bulk of the architecture up above with the diagrams and the LSTM overview, however, I wanted to focus on a component within the character-level CNN called the `highway`. 
+We went over the bulk of the architecture up above with the diagrams and the LSTM overview, however, I wanted to focus on a component within the character-level CNN called the `highway`.
 
 The CNN applies a set of parallel one‑dimensional convolutions with varying kernel widths over the character sequences. Each filter’s output is max‑pooled across the temporal dimension, and the pooled features from all filters are concatenated to form a fixed‑size vector. This vector is then fed into a `highway` network, which learns a gated mixture of the raw CNN output and a transformed version of it, yielding the final character‑level embedding.
 
@@ -670,7 +670,7 @@ $$
 highway(x) = gate(x) \odot trans + (1 - gate(x)) \odot x
 $$
 
-You'll notice that it is possible for gates to be zero implying that the raw CNN outputs flow through unchanged. The `highway` layers add robustness to vanisihing/exploding gradients and to noisy CNN outputs. They also allow learning more diverse representations because the network can keep low-level, high-frequency patterns or mix them into higher-level, smoothed features. 
+You'll notice that it is possible for gates to be zero implying that the raw CNN outputs flow through unchanged. The `highway` layers add robustness to vanisihing/exploding gradients and to noisy CNN outputs. They also allow learning more diverse representations because the network can keep low-level, high-frequency patterns or mix them into higher-level, smoothed features.
 
 ```{python}
 class Highway(nnx.Module):
@@ -1014,7 +1014,7 @@ class StackedBiLSTM(nnx.Module):
         Random number generators
 
     Returns
-    ------- 
+    -------
       1. ``outs`` - A list containing the *raw input* followed by the
          concatenated output of each layer.  Hence ``len(outs) ==
          num_layers + 1`` and the last element has shape
@@ -1085,9 +1085,9 @@ We define our ELMo model by initializing and chaining together the subcomponents
 2. Bidirectional LSTM
 3. Language Modeling Heads
 
-In addition, we also initialize ELMo's scalar mix parameters that are used to adapt the embeddings during fine-tuning on downstream specific tasks, and we define model regularization in the form of dropout. Our ELMo model has three layers of dropout, at the input layer, the LSTM layer, and the output layer. 
+In addition, we also initialize ELMo's scalar mix parameters that are used to adapt the embeddings during fine-tuning on downstream specific tasks, and we define model regularization in the form of dropout. Our ELMo model has three layers of dropout, at the input layer, the LSTM layer, and the output layer.
 
-In our implementation you'll notice we project outputs into a common dimension to ensure the dimensional correctness for matrix multiplication, and you'll also notice that the method `forward_embeddings` is only used during fine-tuning to tune the scalar mix parameters on downstream specific tasks. 
+In our implementation you'll notice we project outputs into a common dimension to ensure the dimensional correctness for matrix multiplication, and you'll also notice that the method `forward_embeddings` is only used during fine-tuning to tune the scalar mix parameters on downstream specific tasks.
 
 
 :::{.callout-important}
@@ -1293,12 +1293,12 @@ class ElmoModel(nnx.Module):
         x = self.gamma.value * x
 
         return x
-        
+
 ```
 
 ## Loss Function
 
-We have already discussed the learning objective, below is an implementation of a masked cross entropy loss function that masks padding from the loss computation. 
+We have already discussed the learning objective, below is an implementation of a masked cross entropy loss function that masks padding from the loss computation.
 
 ```{python}
 #| code-fold: true
@@ -1463,8 +1463,8 @@ model = ElmoModel(
     hidden_dim=hidden_dim,
     num_layers=num_layers,
     word_vocab_size=word_vocab_size,
-    input_dropout=0.1, 
-    lstm_dropout=0.3, 
+    input_dropout=0.1,
+    lstm_dropout=0.3,
     output_dropout=0.1,
     rngs=rngs
 )
@@ -1601,7 +1601,7 @@ checkpointer = ocp.StandardCheckpointer()
 
 :::{.callout-caution}
 
-When creating your checkpoints, ensure you are checkpointing the state from the model that has the updated weights. In our case the one initialized in our trainer class tied to our optimizer and not the initialized `model` from above as those weights will not be updated. 
+When creating your checkpoints, ensure you are checkpointing the state from the model that has the updated weights. In our case the one initialized in our trainer class tied to our optimizer and not the initialized `model` from above as those weights will not be updated.
 
 :::
 
@@ -1639,7 +1639,7 @@ for epoch in range(epochs):
     checkpointer.save(
         os.path.abspath(
             os.path.join(ckpt_dir, f"epoch{ epoch + 1 }")
-        ), 
+        ),
         state
     )
 
@@ -1650,11 +1650,11 @@ for epoch in range(epochs):
 
 ## Evaluate Learned Embeddings on Downstream Task
 
-Okay, now that we have a pre-trained ELMo model on hand we are going to fine-tune it for a text classification task. For this task, we are going to use the Stanford Sentiment Treebank v2 (SST‑2) dataset. 
+Okay, now that we have a pre-trained ELMo model on hand we are going to fine-tune it for a text classification task. For this task, we are going to use the Stanford Sentiment Treebank v2 (SST‑2) dataset.
 
 ### Compare Random Weights to Pretrained Model
 
-We are going to compare how a random weights initialized ELMo model performs in comparison to our breifly pre-trained ELMo model. Below we initialize a random model, very much the same way we initialized a model for pre-training. We also load our pre-trained weights from our saved checkpoint.
+We are going to compare how a random weights initialized ELMo model performs in comparison to our briefly pre-trained ELMo model. Below we initialize a random model, very much the same way we initialized a model for pre-training. We also load our pre-trained weights from our saved checkpoint.
 
 ```{python}
 #| code-fold: true
@@ -1695,8 +1695,8 @@ model_random = ElmoModel(
     hidden_dim=hidden_dim,
     num_layers=num_layers,
     word_vocab_size=word_vocab_size,
-    input_dropout=0.1, 
-    lstm_dropout=0.3, 
+    input_dropout=0.1,
+    lstm_dropout=0.3,
     output_dropout=0.1,
     rngs=rngs
 )
@@ -1796,7 +1796,7 @@ checkpointer = ocp.StandardCheckpointer()
 # Pass abstract_state
 restored_state = checkpointer.restore(
     checkpoint_path,
-    abstract_state 
+    abstract_state
 )
 
 # Load into the model
@@ -1809,8 +1809,8 @@ model_trained = nnx.merge(graphdef, restored_state)
 Okey-dokes, let's put together a classifier head to leverage our ELMo embeddings on our downstream text classification task. The sub-components for our network will be:
 
 1. The ELMo model as the backbone
-2. An attention pooling layer with explicit padding masking to collapse our seqeunces into a single representation
-3. A two-layer multilayer perceptron with dropout and ReLU activation yeilding our logits
+2. An attention pooling layer with explicit padding masking to collapse our sequences into a single representation
+3. A two-layer multilayer perceptron with dropout and ReLU activation yielding our logits
 
 It is worth noting that the attention pooling layer here is not the same as attention in transformer models. This layer simply learns a scalar scoring function over token embeddings.
 
@@ -2113,9 +2113,9 @@ Phase 1 as a “High‑level” adaptation:
 
 Phase 2 as a “Deep” adaptation:
 
-* The bi‑LSTM parameters are now unfrozen so that the encoder can adjust its internal representations to the target task. 
+* The bi‑LSTM parameters are now unfrozen so that the encoder can adjust its internal representations to the target task.
 
-* The scalar‑mix weights and the classifier head remain trainable. 
+* The scalar‑mix weights and the classifier head remain trainable.
 
 * A very small learning rate is employed to limit catastrophic forgetting.
 
@@ -2159,7 +2159,7 @@ In the first phase we instantiate two copies of the model:
 1. one with random‑initialized ELMo backbone weights, and
 2. one with pre‑trained ELMo weights.
 
-This dual run lets us directly compare performance and confirm that our pre‑training regime is effective. We run phase-1 for 10 epochs. 
+This dual run lets us directly compare performance and confirm that our pre‑training regime is effective. We run phase-1 for 10 epochs.
 
 Below you will notice the large difference in performance between the random weights backbone and the pre-trained backbone; Suggesting that our pre-training regime was indeed effective.
 
@@ -2175,7 +2175,7 @@ def train_step(model_opt, batch, rng, *, trainable_phase):
     ----------
     model_opt: OptimizerWrapper
         A lightweight optimizer object that holds the current model
-        parameters 
+        parameters
 
     batch: dict[str, jnp.ndarray]
         A batch dictionary produced by :func:`sst2_loader`.
@@ -2280,16 +2280,16 @@ for epoch in range(num_epochs):
     epoch_acc_trained = []
 
     for batch in train_loader:
-        
+
         train_rng, subkey = jax.random.split(train_rng)
         model_opt_random, loss_random, acc_random, grads_random = train_step(model_opt_random, batch, rng=subkey, trainable_phase=trainable_phase1)
         model_opt_trained, loss_trained, acc_trained, grads_trained = train_step(model_opt_trained, batch, rng=subkey, trainable_phase=trainable_phase1)
-        
+
         epoch_loss_random.append(float(loss_random))
         epoch_acc_random.append(float(acc_random))
         epoch_loss_trained.append(float(loss_trained))
         epoch_acc_trained.append(float(acc_trained))
-        
+
 
     print(f"Epoch {epoch + 1} | loss={np.mean(epoch_loss_random):.4f} | acc={np.mean(epoch_acc_random):.4f}")
     print(f"Epoch {epoch + 1} | loss={np.mean(epoch_loss_trained):.4f} | acc={np.mean(epoch_acc_trained):.4f}")
@@ -2357,18 +2357,18 @@ for batch in val_loader:
     acc.append(batch_acc)
 
 print(f"Accuracy on validation: {np.mean(acc): .3f}")
-    
+
 ```
 
 # Conclusion
 
 This was a long one. Good job making it all the way to the end!
 
- In this post we reviewed the differences beween static and contextual embeddings, we delved into the math and architecture of recurrent neural networks, and we implemented ELMo practically from scratch in JAX. In addition to all of that, we also then fine-tined ELMo to perform text classification and we showed the difference in having pre-trained embeddings versus random weights. 
+ In this post we reviewed the differences between static and contextual embeddings, we delved into the math and architecture of recurrent neural networks, and we implemented ELMo practically from scratch in JAX. In addition to all of that, we also then fine-tuned ELMo to perform text classification and we showed the difference in having pre-trained embeddings versus random weights.
 
 # Coming Next
 
-In the next post of this series, we will go over the transformer architecture, take a look at how attention works and implement a transformer model from scratch. 
+In the next post of this series, we will go over the transformer architecture, take a look at how attention works and implement a transformer model from scratch.
 
 I hope to see you there!
 

@@ -63,7 +63,7 @@ services:
       - pg_mlflow_db:/var/lib/postgresql/data
 
   ray-head:
-    build: 
+    build:
       dockerfile: ray.Dockerfile
     shm_size: 24G
     command: >
@@ -83,7 +83,7 @@ services:
           memory: 24G
 
   ray-worker:
-    build: 
+    build:
       dockerfile: ray.Dockerfile
     shm_size: 24G
     command: >

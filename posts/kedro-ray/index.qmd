@@ -11,10 +11,10 @@ css: styles.css
 In the final part of this series, we focus our attention on scaling the model training task. We begin by highlight the steps necessary to configure a Ray cluster. Followed by a refactoring of our training node to leverage the cluster resources. By the end, you should have no problem training tens of thousands of models even on a modest two-node cluster.
 
 # Introduction
-In the previous [post](/posts/kedro-mlflow/index.qmd) of this series, we configured the components of `MLFlow` and integrated experiment tracking into our project using `Kedro` hooks. In this post, we are going to configure a Ray cluster and leverage it to train our models at scale. 
+In the previous [post](/posts/kedro-mlflow/index.qmd) of this series, we configured the components of `MLFlow` and integrated experiment tracking into our project using `Kedro` hooks. In this post, we are going to configure a Ray cluster and leverage it to train our models at scale.
 
 # Getting Started
-The first thing we need to do is add `Ray` as a dependency to our project. 
+The first thing we need to do is add `Ray` as a dependency to our project.
 
 :::{.callout-important}
 We need to be very careful here because the version of `Ray` and `Python` of the client must match the versions running on the cluster.
@@ -58,7 +58,7 @@ Next, we need to configure our Ray cluster.
 # Configuring a Ray Cluster
 In practice you will want to configure your cluster independently from the current project you are working on because you will want to use this cluster across many projects. However, because this is a blog post, to keep things palatable we are going to configure our cluster coupled to our current project. I will attempt to call out where things differ and what you will need to do to configure your cluster in that situation.
 
-We are going to start by defining a single container image that we will use to set up our head and worker(s) nodes so that all of our cluster components are running with the same environment. Notice that we are using the same `environment.yml` file that we have defined for our main project. However, in practice different projects may require different dependencies. I find it is best to start with a base environment with standard modules that you/your team typically use inside the image that defines the Ray environment and then when submitting the job to the cluster you can specify additional project specific dependencies that Ray will install in a new environment. 
+We are going to start by defining a single container image that we will use to set up our head and worker(s) nodes so that all of our cluster components are running with the same environment. Notice that we are using the same `environment.yml` file that we have defined for our main project. However, in practice different projects may require different dependencies. I find it is best to start with a base environment with standard modules that you/your team typically use inside the image that defines the Ray environment and then when submitting the job to the cluster you can specify additional project specific dependencies that Ray will install in a new environment.
 
 ```dockerfile
 # ./ray.Dockerfile
@@ -95,7 +95,7 @@ In this post, we are going to bring up the head node and one worker node on the 
 # ./docker-compose.yml
 services:
   ray-head:
-    build: 
+    build:
       dockerfile: ray.Dockerfile
     shm_size: 24G
     command: >
@@ -115,7 +115,7 @@ services:
           memory: 24G
 
   ray-worker:
-    build: 
+    build:
       dockerfile: ray.Dockerfile
     shm_size: 24G
     command: >
@@ -132,7 +132,7 @@ services:
 ```
 
 :::{.callout-important title="PLEASE READ!"}
-Notice that we are specifying the shared memory size `shm_size` of our Ray services This is necessary because typically Docker will only allocate 64mb to `/dev/shm` and this shared memory is what Ray will use to store objects during runtime. If you don't increase this parameter then `Ray` will store object on disk using `/tmp` and this will hit performance. 
+Notice that we are specifying the shared memory size `shm_size` of our Ray services This is necessary because typically Docker will only allocate 64mb to `/dev/shm` and this shared memory is what Ray will use to store objects during runtime. If you don't increase this parameter then `Ray` will store object on disk using `/tmp` and this will hit performance.
 :::
 
 Alright, let's bring up our services by executing:
@@ -149,13 +149,13 @@ Great! Now that our cluster is up and running it is time to refactor our trainin
 
 # Refactor Training
 
-To leverage our running cluster we need to refactor our ML pipeline's train node. The changes that we will need to make are: 
+To leverage our running cluster we need to refactor our ML pipeline's train node. The changes that we will need to make are:
 
 1. Initialize a connection to the cluster
 2. Define a Ray task: This is simply a Python function that is decorated with `@ray.remote`
 3. Place our data on the clusters object store: This is so that each worker doesn't copy the data n-worker times saving on memory utilization
 4. Submit your task to the cluster
-5. Asynchronously do stuff with the completed tasks as the rest are still running 
+5. Asynchronously do stuff with the completed tasks as the rest are still running
 
 ```python
 # /src/climate_brazil/ML/nodes.py
@@ -222,7 +222,7 @@ def train(training_dataset: pl.DataFrame, model_config: dict, sampler_config: di
 4. Call your Ray task over your parallelization unit
 5. Perform actions on completed tasks as they are ready
 
-At this point, if we only had a handful of models to fit then this would be fine. However, there is still room for additional gain in performance. We are currently setting aside four cpus to handle just one city. In addition, `PyMC` has to compile every model and becomes costly the more models you need to fit. In order to get around all of that we can train our models on batches of cities, that way we only compile a model and reserve four cpus for each batch. For the sake of simplicity and brevity, we will leave this as an excercise for the interested reader to implement by refactoring the `PyMC` model.
+At this point, if we only had a handful of models to fit then this would be fine. However, there is still room for additional gain in performance. We are currently setting aside four cpus to handle just one city. In addition, `PyMC` has to compile every model and becomes costly the more models you need to fit. In order to get around all of that we can train our models on batches of cities, that way we only compile a model and reserve four cpus for each batch. For the sake of simplicity and brevity, we will leave this as an exercise for the interested reader to implement by refactoring the `PyMC` model.
 
 :::{.callout-note}
 In a time-series model, in order to vectorise across batches your time-series time range needs to be fixed. In this case, we would be able to fit 7 cities in one batch and the rest as single city batches.
@@ -261,4 +261,4 @@ We've come to the end of the "Reproducibility & Scalability" series! If you've b
 
 4. How to scale your end-to-end machine learning project built with Kedro on a Ray cluster
 
-That is quite a lot!! I hope this series proved to be valuable to you, and I hope to see you in the next one! 
+That is quite a lot!! I hope this series proved to be valuable to you, and I hope to see you in the next one!

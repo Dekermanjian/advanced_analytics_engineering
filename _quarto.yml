@@ -13,9 +13,11 @@ website:
       - icon: linkedin
         href: http://www.linkedin.com/in/jonathan-dekermanjian
   draft-mode: unlinked
+execute:
+  freeze: auto
 format:
   html:
-    grid: 
+    grid:
       body-width: 1000px
       sidebar-width: 300px
       margin-width: 200px
@@ -32,6 +34,3 @@ format:
     toc: true
     toc-location: left
     highlight-style: gruvbox
-
-
-

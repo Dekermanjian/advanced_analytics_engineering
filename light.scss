@@ -1,8 +1,10 @@
 /*-- scss:defaults --*/
 // $link-color: #248CFC;
-b {
-    font-weight: 900 !important;
-  }
+$web-font-path: "https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&display=swap";
+
 /*-- scss:rules --*/
+b, strong {
+    font-weight: 800;
+  }
 .light-mode { display: block; }
 .dark-mode { display: none; }

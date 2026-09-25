@@ -1,7 +1,11 @@
 /*-- scss:defaults --*/
 // $link-color: #248CFC;
 // $code-color: #bb8acf;
+$web-font-path: "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap";
 
 /*-- scss:rules --*/
+b, strong {
+    font-weight: 900;
+  }
 .dark-mode { display: block; }
 .light-mode { display: none; }

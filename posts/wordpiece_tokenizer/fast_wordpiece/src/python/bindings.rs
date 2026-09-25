@@ -62,7 +62,7 @@ impl PyTokenizer {
         dict.set_item("ids", &enc.ids).unwrap();
         dict.set_item("tokens", &enc.tokens).unwrap();
         dict.set_item("offsets", &enc.offsets).unwrap();
-        
+
         let attention_mask: Vec<u32> = enc.attention_mask.iter().map(|&x| x as u32).collect();
         let special_tokens_mask: Vec<u32> = enc.special_tokens_mask.iter().map(|&x| x as u32).collect();
 

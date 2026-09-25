@@ -5,6 +5,7 @@ date: "2025-04-02"
 categories: [Engineering, Analytics]
 css: styles.css
 image: "thumbnail.png"
+jupyter: kedro_kedro_framework
 ---
 
 # Overview
@@ -63,7 +64,7 @@ We need to create a new Kedro pipeline that will contain all of our code related
 ```zsh
 kedro pipeline create ML
 ```
-Great! Now similary to how we defined our nodes in our data processing pipeline we will do the same for our ML pipeline. We are going to need to create nodes that do the following:
+Great! Now similarly to how we defined our nodes in our data processing pipeline we will do the same for our ML pipeline. We are going to need to create nodes that do the following:
 
 - split our training data into train and test portions
 - train the model
@@ -156,9 +157,9 @@ with pm.Model() as model:
     amplitude_trend = pm.HalfNormal("amplitude_trend", 1.0)
     ls_trend = pm.Gamma("ls_trend", alpha=48, beta=2)
     cov_trend = amplitude_trend * pm.gp.cov.ExpQuad(1, ls_trend)
-    
+
     gp_trend = pm.gp.HSGP(
-        m=[10], 
+        m=[10],
         c=5.,
         cov_func=cov_trend
     )
@@ -189,7 +190,7 @@ At this point we could pass in the expected data (time_range, fourier_terms, and
 ## Configuring ModelBuilder
 The `ModelBuilder` class from the `pymc-extras` package gives us a nice scaffolding that facilitates taking `PyMC` models into production. There are seven required methods that we need to define inside of our model class that inherits from `ModelBuilder`. However, it is often the case that we need to override some default methods in accordance to our modeling needs. Let's go over the required methods first.
 
-We need to implement `_generate_and_preprocess_model_data()` which is a method that performs our final processing of the data before it is fed into the model. In our case, we normalize the data and define our fourier features to capture yearly (12 months) seasonality. 
+We need to implement `_generate_and_preprocess_model_data()` which is a method that performs our final processing of the data before it is fed into the model. In our case, we normalize the data and define our fourier features to capture yearly (12 months) seasonality.
 
 ```python
 # ModelBuilder Required Method Implementation
@@ -287,8 +288,8 @@ def build_model(self, X: pl.DataFrame, y: pl.Series, normalize_target: bool = Fa
         cov_trend = amplitude_trend * pm.gp.cov.ExpQuad(1, ls_trend)
 
         gp_trend = pm.gp.HSGP(
-            m=[10], 
-            c=5., 
+            m=[10],
+            c=5.,
             cov_func=cov_trend
         )
         trend = gp_trend.prior("trend", X=t[:, None], dims="obs_id")
@@ -369,9 +370,9 @@ sampler_config:
 
 Our model configurations contain the priors that we defined for our model above. Whereas, the sampler configurations define parameters related to our MCMC sampler.
 
-With the required `ModelBuilder` methods out of the way, let's talk about some of the methods that we will override to accomodate our specific use case.
+With the required `ModelBuilder` methods out of the way, let's talk about some of the methods that we will override to accommodate our specific use case.
 
-First, since we are using a time-series model our predictions are generated differently than how you'd generate predictions from a typical regression or classification task. So we need to make changes to the `sample_posterior_predictive()` method to accomdate a time-series model. We take the approach of defining a new model specifically for forecasting purposes. Notice that we are calling `_data_setter()` to generate our future model input, which is our forecast horizon.
+First, since we are using a time-series model our predictions are generated differently than how you'd generate predictions from a typical regression or classification task. So we need to make changes to the `sample_posterior_predictive()` method to accommodate a time-series model. We take the approach of defining a new model specifically for forecasting purposes. Notice that we are calling `_data_setter()` to generate our future model input, which is our forecast horizon.
 
 ```python
 # ModelBuilder Override method
@@ -398,8 +399,8 @@ def sample_posterior_predictive(self, n_ahead: int, extend_idata: bool, combined
         cov_trend = amplitude_trend * pm.gp.cov.ExpQuad(1, ls_trend)
 
         gp_trend = pm.gp.HSGP(
-            m=[10], 
-            c=5., 
+            m=[10],
+            c=5.,
             cov_func=cov_trend
         )
         trend = gp_trend.prior("trend", X=t[:, None], dims="obs_id")
@@ -422,7 +423,7 @@ def sample_posterior_predictive(self, n_ahead: int, extend_idata: bool, combined
             observed=self.y_normalized,
             dims="obs_id",
             )
-        
+
         self.model.add_coords({"obs_id_fut": np.arange(self.start, self.end, 1)})
 
         t_fut = pm.Data("time_range_fut", np.arange(self.start, self.end, 1))
@@ -457,7 +458,7 @@ def sample_posterior_predictive(self, n_ahead: int, extend_idata: bool, combined
     return posterior_predictive_samples
 ```
 
-We also need to update the `fit()` method for a couple of reasons. The first is because we implemented a `normalize_target` method and we need to propogate that into the `fit()` method which calls our `build_model()` method. Second, because the defualt `fit()` method defines additional sampler configurations that we don't want because we have already centralized all of our configurations to be handled by `Kedro`. 
+We also need to update the `fit()` method for a couple of reasons. The first is because we implemented a `normalize_target` method and we need to propagate that into the `fit()` method which calls our `build_model()` method. Second, because the default `fit()` method defines additional sampler configurations that we don't want because we have already centralized all of our configurations to be handled by `Kedro`.
 
 ```python
 # ModelBuilder Override method
@@ -487,7 +488,7 @@ def fit(self, X: pl.DataFrame, y: pl.Series, normalize_target: bool = False) -> 
     return self.idata
 ```
 
-Lastly (I promise), we need to define a new method that will handle our model evaluations. We are going to use the root mean squared error as a metric to evaluate our model. We will also measure the coverage of our 80% Highest Density Interval (HDI). Additionally, it is a good idea to include in our model serialization the city the model is fitted to, and if we are standardizing the data then we should also include the mean and standard deviation of our target temperature values. 
+Lastly (I promise), we need to define a new method that will handle our model evaluations. We are going to use the root mean squared error as a metric to evaluate our model. We will also measure the coverage of our 80% Highest Density Interval (HDI). Additionally, it is a good idea to include in our model serialization the city the model is fitted to, and if we are standardizing the data then we should also include the mean and standard deviation of our target temperature values.
 
 ```python
 # ModelBuilder override Init
@@ -574,7 +575,7 @@ def evaluate(self, y_true: pl.Series, forecasts: xr.Dataset, back_transform: boo
             )
             .select(pl.col("coverage").mean()).item()
     )
-    
+
     return {"RMSE": RMSE, "HDI_COVERAGE": COVERAGE}
 
 def _save_input_params(self, idata) -> None:
@@ -880,7 +881,7 @@ class TSModel(ModelBuilder):
     @abstractmethod
     def _serializable_model_config(self) -> dict[str, int | float | dict]:
         """
-        Converts non-serializable values from model_config to their serializable reversable equivalent.
+        Converts non-serializable values from model_config to their serializable reversible equivalent.
         Data types like pandas DataFrame, Series or datetime aren't JSON serializable,
         so in order to save the model they need to be formatted.
 
@@ -984,10 +985,10 @@ def train(training_dataset: pl.DataFrame, model_config: dict, sampler_config: di
 <mark><b>DO NOT</b></mark> use this training node in production! We are going to refactor this code in the last part of this series to scale more efficiently.
 :::
 
-We need to be sure to define catalog entries for our training output otherwise `Kedro` will designate our trained models as `MemoryDataset`'s. However, there is no built-in dataset in `Kedro` that knows how to store our model. So we need to define a custom `Kedro` dataset to accomodate our needs. 
+We need to be sure to define catalog entries for our training output otherwise `Kedro` will designate our trained models as `MemoryDataset`'s. However, there is no built-in dataset in `Kedro` that knows how to store our model. So we need to define a custom `Kedro` dataset to accommodate our needs.
 
 ### Creating a Custom Kedro Dataset
-Creating a custom dataset can be quite simple. All we need to do is inheret from `Kedro`'s `AbstractDataset` and define the `init`, `save`, `load`, and `describe` methods. In our case, the `ModelBuilder` class has `save` and `load` methods that accept a filepath and we will use those methods in our custom dataset:
+Creating a custom dataset can be quite simple. All we need to do is inherit from `Kedro`'s `AbstractDataset` and define the `init`, `save`, `load`, and `describe` methods. In our case, the `ModelBuilder` class has `save` and `load` methods that accept a filepath and we will use those methods in our custom dataset:
 
 ```python
 # /src/climate_brazil/datasets/pymc_model_dataset.py
@@ -1042,7 +1043,7 @@ With our custom dataset defined let's define entries for our training and testin
 cities_temperatures:
   type: partitions.PartitionedDataset
   path: data/01_raw/
-  dataset: 
+  dataset:
     type: polars.LazyPolarsDataset
     file_format: csv
 
@@ -1214,7 +1215,7 @@ class PyMCForecastDataset(AbstractDataset):
 We are almost set! Our catalog is defined, our model is configured, and our nodes are implemented. Let's put everything together and define our machine learning pipeline.
 
 ## Train
-Here we are going to introduce `tags`, another `Kedro` feature that allows you to run specific nodes by tag category. At this stage our pipeline will be the training split node followed by the training node. 
+Here we are going to introduce `tags`, another `Kedro` feature that allows you to run specific nodes by tag category. At this stage our pipeline will be the training split node followed by the training node.
 
 ```python
 # /src/climate_brazil/pipelines/ML/pipeline.py
@@ -1387,7 +1388,7 @@ You can execute your training pipeline by either executing
 kedro run
 ```
 
-or 
+or
 
 ```zsh
 kedro run --pipeline train
@@ -1437,23 +1438,23 @@ def forecast_plot(training_dataset: pl.DataFrame, testing_dataset: pl.DataFrame,
     fig.add_traces(
         [
             go.Scatter(
-                name="", 
-                x=city_training_dataset["date"], 
-                y=hdi["temperature_normalized"][:, 1], 
-                mode="lines", 
-                marker=dict(color="#eb8c34"), 
-                line=dict(width=0), 
+                name="",
+                x=city_training_dataset["date"],
+                y=hdi["temperature_normalized"][:, 1],
+                mode="lines",
+                marker=dict(color="#eb8c34"),
+                line=dict(width=0),
                 legendgroup="HDI",
                 showlegend=False
             ),
             go.Scatter(
-                name="80% HDI", 
-                x=city_training_dataset["date"], 
-                y=hdi["temperature_normalized"][:, 0], 
-                mode="lines", marker=dict(color="#eb8c34"), 
-                line=dict(width=0), 
-                legendgroup="HDI", 
-                fill='tonexty', 
+                name="80% HDI",
+                x=city_training_dataset["date"],
+                y=hdi["temperature_normalized"][:, 0],
+                mode="lines", marker=dict(color="#eb8c34"),
+                line=dict(width=0),
+                legendgroup="HDI",
+                fill='tonexty',
                 fillcolor='rgba(235, 140, 52, 0.5)'
             ),
             go.Scatter(
@@ -1472,23 +1473,23 @@ def forecast_plot(training_dataset: pl.DataFrame, testing_dataset: pl.DataFrame,
                 legendgroup="posterior_mean"
             ),
             go.Scatter(
-                name="", 
-                x=city_testing_dataset["date"], 
-                y=posterior_predictive_hdi["temperature_normalized_fut"][:, 1], 
-                mode="lines", 
-                marker=dict(color="#eb8c34"), 
-                line=dict(width=0), 
+                name="",
+                x=city_testing_dataset["date"],
+                y=posterior_predictive_hdi["temperature_normalized_fut"][:, 1],
+                mode="lines",
+                marker=dict(color="#eb8c34"),
+                line=dict(width=0),
                 legendgroup="HDI",
                 showlegend=False
             ),
             go.Scatter(
-                name="", 
-                x=city_testing_dataset["date"], 
-                y=posterior_predictive_hdi["temperature_normalized_fut"][:, 0], 
-                mode="lines", marker=dict(color="#eb8c34"), 
-                line=dict(width=0), 
-                legendgroup="HDI", 
-                fill='tonexty', 
+                name="",
+                x=city_testing_dataset["date"],
+                y=posterior_predictive_hdi["temperature_normalized_fut"][:, 0],
+                mode="lines", marker=dict(color="#eb8c34"),
+                line=dict(width=0),
+                legendgroup="HDI",
+                fill='tonexty',
                 fillcolor='rgba(235, 140, 52, 0.5)',
                 showlegend=False
             ),
@@ -1570,9 +1571,9 @@ plot_node = [
 ]
 
 return pipeline(
-    split_train_nodes 
-    + forecast_training_nodes 
-    + forecast_nodes 
+    split_train_nodes
+    + forecast_training_nodes
+    + forecast_nodes
     + plot_node
 )
 ```
@@ -1607,7 +1608,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Belem_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1624,7 +1625,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Belem_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1647,7 +1648,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Curitiba_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1664,7 +1665,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Curitiba_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1687,7 +1688,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Fortaleza_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1704,7 +1705,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Fortaleza_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1727,7 +1728,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Goiania_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1744,7 +1745,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Goiania_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1767,7 +1768,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Macapa_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1784,7 +1785,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Macapa_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1807,7 +1808,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Manaus_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1824,7 +1825,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Manaus_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1847,7 +1848,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Recife_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1864,7 +1865,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Recife_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1887,7 +1888,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Rio_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1904,7 +1905,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Rio_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1927,7 +1928,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Salvador_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1944,7 +1945,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Salvador_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -1967,7 +1968,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Sao_Luiz_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -1984,7 +1985,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Sao_Luiz_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -2007,7 +2008,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Sao_Paulo_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -2024,7 +2025,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Sao_Paulo_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',
@@ -2047,7 +2048,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Vitoria_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     font=dict(
         family="Verdana",
@@ -2064,7 +2065,7 @@ import plotly.graph_objects as go
 import json
 with open('./data/08_reporting/Vitoria_plot.json', 'r') as f:
     fig = go.Figure(json.load(f))
-    
+
 fig.update_layout(
     plot_bgcolor='black',
     paper_bgcolor='black',

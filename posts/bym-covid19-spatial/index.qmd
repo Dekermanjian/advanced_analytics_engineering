@@ -7,7 +7,7 @@ code-annotations: below
 css: styles.css
 image: "thumbnail.png"
 jupyter: bym-covid19-spatial
-execute: 
+execute:
   cache: true
 ---
 
@@ -17,7 +17,7 @@ We extend the Besag–York–Mollié (BYM2) model by combining its spatially str
 
 # Introduction
 
-When tracking infectious diseases, public-health agencies and officials need to be able to identify high‑risk areas, anticipate outbreaks, and allocate resources appropriately. Unfortunately, data availability will be sparse, often missing. Nonetheless, if we data is absent in a geographical area we need to be able to estimate the progression of disease in that area regardless. 
+When tracking infectious diseases, public-health agencies and officials need to be able to identify high‑risk areas, anticipate outbreaks, and allocate resources appropriately. Unfortunately, data availability will be sparse, often missing. Nonetheless, if we data is absent in a geographical area we need to be able to estimate the progression of disease in that area regardless.
 
 We are going to work through a case study, estimating the relative risk of COVID‑19 across United States, to illustrate how to:
 
@@ -33,34 +33,34 @@ By the end, readers will understand how to build, fit, and interpret a fully spa
 
 # Data Sources & Descriptions
 
-We will use publicly available data from the Centers for Disease Control and Prevention (CDC). The CDC offers a Socrata Open Data API (SODA) that gives access to a range of open‑data resources. 
+We will use publicly available data from the Centers for Disease Control and Prevention (CDC). The CDC offers a Socrata Open Data API (SODA) that gives access to a range of open‑data resources.
 
-For this project we will draw on the <b>Weekly Hospital Respiratory Data (HRD) Metrics by Jurisdiction, National Healthcare Safety Network (NHSN) dataset</b>, which is updated weekly with counts of hospital admissions for various respiratory illnesses. Our primary interest lies in COVID‑19 admissions. 
+For this project we will draw on the <b>Weekly Hospital Respiratory Data (HRD) Metrics by Jurisdiction, National Healthcare Safety Network (NHSN) dataset</b>, which is updated weekly with counts of hospital admissions for various respiratory illnesses. Our primary interest lies in COVID‑19 admissions.
 
 Learn more about the data source [here](https://data.cdc.gov/Public-Health-Surveillance/Weekly-Hospital-Respiratory-Data-HRD-Metrics-by-Ju/rhwp-grxi/about_data).
 
 # Model
 
-A scaled BYM (BYM2) model constructs a latent spatial field whose covariance structure is derived from a neighborhood graph. 
+A scaled BYM (BYM2) model constructs a latent spatial field whose covariance structure is derived from a neighborhood graph.
 
-The general idea is that when modeling the risk of a disease across states, such as COVID-19, we expect that a state's relative risk will be similar to the surrounding states; A concept that is referred to as spatial smoothing. This is exactly what an ICAR prior does by encoding that each state's latent values should be similar to the average latent value of the surrounding states. 
+The general idea is that when modeling the risk of a disease across states, such as COVID-19, we expect that a state's relative risk will be similar to the surrounding states; A concept that is referred to as spatial smoothing. This is exactly what an ICAR prior does by encoding that each state's latent values should be similar to the average latent value of the surrounding states.
 
-More formally, for each spatial unit (states in our case) we define a random effect (latent) variable $\phi_{i}$ representing the unobserved log-risk deviation for region i. The vector of latent variables is 
-
-$$ 
-\mathbf{\phi} = (\phi_{1}, \phi_{2}, \dots , \phi_{n}) 
-$$ 
-
-we define a neighborhood graph (adjacency matrix) 
-
-$$ 
-W_{ij} = \begin{cases} 1 && \text{if i and j are neighbors} \\ 0 && \text{otherwise} \end{cases} 
-$$ 
-
-the number of neighbors for region i is defined as 
+More formally, for each spatial unit (states in our case) we define a random effect (latent) variable $\phi_{i}$ representing the unobserved log-risk deviation for region i. The vector of latent variables is
 
 $$
-d_{i} = \sum_{j}W_{ij} 
+\mathbf{\phi} = (\phi_{1}, \phi_{2}, \dots , \phi_{n})
+$$
+
+we define a neighborhood graph (adjacency matrix)
+
+$$
+W_{ij} = \begin{cases} 1 && \text{if i and j are neighbors} \\ 0 && \text{otherwise} \end{cases}
+$$
+
+the number of neighbors for region i is defined as
+
+$$
+d_{i} = \sum_{j}W_{ij}
 $$
 
 The intrinsic conditional autoregressive (ICAR) model is defined through the conditional distributions
@@ -69,7 +69,7 @@ $$
 \phi_{i}|\phi_{-i} \sim N(\frac{\sum_{j}W_{ij}\phi_{j}}{d_{i}}, \frac{\sigma^{2}}{d_{i}})
 $$
 
-Notice how the mean is the average of neighboring values and that the conditional variance decreases as the number of neighbors increases. 
+Notice how the mean is the average of neighboring values and that the conditional variance decreases as the number of neighbors increases.
 
 These conditionals correspond to the joint multivariate Gaussian distribution
 
@@ -77,9 +77,9 @@ $$
 p(\phi) \propto \exp(-\frac{1}{2\sigma^{2}}\phi^{T}(D - W)\phi)
 $$
 
-where $(D - W)$ is the precision matrix $Q$, $W$ is the adjacency matrix and $D$ is the diagonal of number of neighbors of our spatial random effects variables. 
+where $(D - W)$ is the precision matrix $Q$, $W$ is the adjacency matrix and $D$ is the diagonal of number of neighbors of our spatial random effects variables.
 
-The precision matrix plays a role in allowing the prior to penalize the difference between neighbors. Formally, you have 
+The precision matrix plays a role in allowing the prior to penalize the difference between neighbors. Formally, you have
 
 $$
 \phi^{T}Q\phi = \frac{1}{\sigma^{2}}\sum_{i \sim j}(\phi_{i} - \phi_{j})^{2}
@@ -108,7 +108,7 @@ $$
 x_{i} = \frac{1}{\sqrt{\tau}}(\sqrt{\rho}s_{i} + \sqrt{1 - \rho}\epsilon_{i})
 $$
 
-where 
+where
 
 - s is the scaled ICAR spatial field,
 - $\epsilon_{i} \sim N(0, 1)$ are independent effects,
@@ -117,7 +117,7 @@ where
 
 When $\rho = 0$ we have purely unstructured noise. When $\rho = 1$ we have a fully spatially smoothed field, and when $\rho$ is between 0 and 1 we mix unstructured noise with spatially smoothed field.
 
-We augment the BYM2 model with a dynamic temporal process in which the spatial field is allowed to evolve over time through a first‑order autoregressive AR(1) transition. Where the evolutions are defined by 
+We augment the BYM2 model with a dynamic temporal process in which the spatial field is allowed to evolve over time through a first‑order autoregressive AR(1) transition. Where the evolutions are defined by
 
 $$
 x_{t} = \alpha x_{t-1} + w_{t}
@@ -137,7 +137,7 @@ Instead of multiplying by the full covariance we multiply by $L$ this is numeric
 
 :::
 
-Let's talk about the observation model. This is where we convert our latent processes to counts. 
+Let's talk about the observation model. This is where we convert our latent processes to counts.
 
 First, we define the relative mean intensity multiplier as
 
@@ -145,7 +145,7 @@ $$
 \theta_{it} = \exp(\beta_{0} + x_{it})
 $$
 
-then define the expected counts as 
+then define the expected counts as
 
 $$
 \mu_{it} = \theta_{it} E_{it}
@@ -252,7 +252,7 @@ flowchart TD
     x --> th
     th --> mu
     mu --> y_i
-    
+
 ```
 
 :::
@@ -263,7 +263,7 @@ We will need to pre-process the data before we are ready to fit our model. The p
 
 1. Clean-up dates and create weekly numerical indexes
 2. Join in states population census data
-3. Compute the expected weekly counts 
+3. Compute the expected weekly counts
 4. Compute the Standardized Incidence Ratio (SIR)
 5. Join in geographical geometries and express our dataframe as a geo-dataframe
 
@@ -309,9 +309,9 @@ def create_cmap(df, column, text_color, caption = "Relative Risk"):
         (180/255, 4/255, 38/255)     # warm red
     ]
     return cm.LinearColormap(
-        colors=colors, 
-        index=[df[column].min(), 1, df[column].max()], vmin=df[column].min(), vmax=df[column].max(), 
-        caption=caption, 
+        colors=colors,
+        index=[df[column].min(), 1, df[column].max()], vmin=df[column].min(), vmax=df[column].max(),
+        caption=caption,
         text_color=text_color
     )
 ```
@@ -330,7 +330,7 @@ rng = np.random.default_rng(seed)
 # population data downloaded from US census
 pop_df = pl.read_parquet("./state_populations_2024.parquet")
 
-# Geometry data downloaded from 
+# Geometry data downloaded from
 states_gdf = gpd.read_file("./states.json")
 
 # Maps State Abbreviations to State Names
@@ -388,13 +388,13 @@ $$
 SIR_{it} = \frac{Y_{it}}{E_{it}}
 $$
 
-where 
+where
 
 $$
 E_{it} = r_{t}n_{i}
 $$
 
-where 
+where
 
 $$
 r_{t} = \frac{\text{total cases}_{t}}{\text{total population}_{t}}
@@ -443,7 +443,7 @@ counts_df = (
     )
     .group_by("week")
     .agg(
-        pl.col("COVID_Admissions").cast(pl.Float32).sum().alias("total_cases"), 
+        pl.col("COVID_Admissions").cast(pl.Float32).sum().alias("total_cases"),
         pl.col("population").sum().alias("total_pop")
     )
     .drop_nulls()
@@ -485,9 +485,9 @@ cov_df = (
 ```{python}
 cov_gdf = gpd.GeoDataFrame(data = cov_df.to_pandas())
 cov_gdf = cov_gdf.merge(
-    states_gdf, 
-    how="outer", 
-    left_on="states_right", 
+    states_gdf,
+    how="outer",
+    left_on="states_right",
     right_on="name"
 ).set_geometry("geometry")
 
@@ -533,13 +533,13 @@ cov_gdf_obs[["states", "SIR", "geometry"]].rename(columns={"SIR": "Standardized 
 
 We construct an adjacency matrix $W$ that encodes spatial relationships between neighboring states. Each state is represented as a node in a graph, and adjacency is defined using Queen contiguity: two states are considered neighbors if they share either a boundary or a vertex. Equivalently, if a chess queen could move from one state to another in a single move, the corresponding entry in the adjacency matrix is set to 1; otherwise it is 0.
 
-To model spatial dependence, we use an intrinsic conditional autoregressive (ICAR) prior. 
+To model spatial dependence, we use an intrinsic conditional autoregressive (ICAR) prior.
 
 As a reminder, the ICAR precision matrix is given by
 
 $$
 Q = D - W
-$$ 
+$$
 
 where $W$ is the adjacency matrix and $D$ is a diagonal matrix whose entries are the number of neighbors (degrees) of each node.
 
@@ -590,7 +590,7 @@ def scaling_factor_sp_disconnected(A):
     """
     Compute scaling factors for adjacency matrix A that may contain
     multiple connected components.
-    
+
     Returns:
         scale_vec: array of length N, each entry is the scaling factor
                    for the node's connected component.
@@ -687,7 +687,7 @@ with pm.Model(coords=coords) as dyn_BYM_marginal:
         "alpha", mu=0.5, sigma=0.3, lower=-0.99, upper=0.99
     )
 
-   
+
     # BYM covariance (fixed, but rho scales it)
     Sigma_BYM = (
         (1.0 - rho) * np.eye(N)
@@ -731,7 +731,7 @@ with pm.Model(coords=coords) as dyn_BYM_marginal:
 
     x = pm.Deterministic("x", x, dims=("time", "area_idx"))
 
-    
+
     # Observation model
     th = pm.Deterministic(
         "th", pt.exp(beta0 + x),
@@ -779,7 +779,7 @@ rr_gdf = gpd.GeoDataFrame(rr_df, geometry="geometry")
 ```{python}
 #| classes: light-mode
 tmp_plot = (
-    rr_gdf[["states"] + 
+    rr_gdf[["states"] +
     [f"{i}.0" for i in range(1, T+1)]].melt(id_vars="states", value_vars=[f"{i}.0" for i in range(1, T+1)])
 )
 tmp_plot = tmp_plot.merge(cov_gdf_obs[['weekendingdate', 'week']].astype(str).drop_duplicates(), left_on="variable", right_on="week")
@@ -790,7 +790,7 @@ fig.update_layout(template="plotly_white", xaxis=dict(title="Week of Year"), yax
 ```{python}
 #| classes: dark-mode
 tmp_plot = (
-    rr_gdf[["states"] + 
+    rr_gdf[["states"] +
     [f"{i}.0" for i in range(1, T+1)]].melt(id_vars="states", value_vars=[f"{i}.0" for i in range(1, T+1)])
 )
 tmp_plot = tmp_plot.merge(cov_gdf_obs[['weekendingdate', 'week']].astype(str).drop_duplicates(), left_on="variable", right_on="week")
@@ -856,7 +856,7 @@ eps = np.random.normal(
 
 # Prepare output
 x_new_samples = np.zeros((S, N_obs))
-        
+
 # AR(1) propagation
 x_new_samples = alpha_samples[None, :] * x_t + eps
 
@@ -908,7 +908,7 @@ Finally, we will forecast the relative risk for the next week for all states, ev
 
 full_adj_inputs = pd.concat(
     (
-        adj_inputs, 
+        adj_inputs,
         (
             cov_gdf[cov_gdf["COVID_Admissions"].isnull()][['name', "geometry"]]
             .rename(columns={"name": "states"})
@@ -957,7 +957,7 @@ eps = np.random.normal(
     sigma_samples[None, :],
     size=x_t.shape
 )
-        
+
 # AR(1) future propagation
 x_fut_samples = alpha_samples[None, :] * x_t + eps
 
@@ -968,17 +968,17 @@ for s in range(S):
     alpha_s = alpha_samples[s]
     sigma_s = sigma_samples[s]
     rho_s = rho_samples[s]
-    
+
     for j_idx, nb in enumerate(neighbors_new):
         # No neighbors marginal innovation else Use AR1 propagated mean from neighbors
         x_prev = 0.0 if len(nb) == 0 else np.mean(x_t[nb, s])
-        
+
         # Innovation contribution
         if len(nb) == 0:
             w_new = np.random.normal(scale=sigma_s)
         else:
             w_new = np.mean(w_t[nb, s]) + np.random.normal(scale=sigma_s * np.sqrt(1 - rho_s))
-        
+
         # AR(1) propagation
         x_new_samples[s, j_idx] = alpha_s * x_prev + w_new
 
@@ -1023,8 +1023,8 @@ full_rr_posterior.rename(columns={"RR": "Relative Risk"}).round(2).explore(
 
 # Conclusion
 
-In this post we explored how to estimate relative risk while explicitly accounting for spatial and temporal structure. 
+In this post we explored how to estimate relative risk while explicitly accounting for spatial and temporal structure.
 
-We unpacked the mechanics of both the BYM2 model and state‑space approaches, then put theory into practice by modeling COVID‑19 risk across the United States. The result was a tool that can predict risk in unsampled regions and project future hotspots. 
+We unpacked the mechanics of both the BYM2 model and state‑space approaches, then put theory into practice by modeling COVID‑19 risk across the United States. The result was a tool that can predict risk in unsampled regions and project future hotspots.
 
 This is exactly what public health agencies need to target high‑risk areas, anticipate outbreaks, and allocate resources more efficiently.

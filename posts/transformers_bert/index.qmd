@@ -7,7 +7,7 @@ code-annotations: below
 css: styles.css
 jupyter: nnx_env
 image: "thumbnail.png"
-execute: 
+execute:
   cache: true
   eval: false
 bibliography: references.bib
@@ -72,7 +72,7 @@ To implement this pretraining pipeline, we will build the following components:
 
 # Tokenization
 
-In a previous [post](/posts/wordpiece_tokenizer/index.qmd), we took a look at the WordPiece algorithm for tokenization and implemented it from scratch in Python and Rust. Today, we will leverage the [Hugging Face Tokenizers](https://github.com/huggingface/tokenizers) library to do this for us. This allows us to focus on the more interesting parts of our pipeline. 
+In a previous [post](/posts/wordpiece_tokenizer/index.qmd), we took a look at the WordPiece algorithm for tokenization and implemented it from scratch in Python and Rust. Today, we will leverage the [Hugging Face Tokenizers](https://github.com/huggingface/tokenizers) library to do this for us. This allows us to focus on the more interesting parts of our pipeline.
 
 The components of a tokenizer pipeline include:
 
@@ -141,12 +141,12 @@ def encode_texts_in_batches(texts, tokenizer, batch_size=1000):
     # Iterate through the list in chunks of 'batch_size'
     for i in range(0, len(texts), batch_size):
         batch_chunk = texts[i : i + batch_size]
-        
+
         encodings = tokenizer.encode_batch(batch_chunk)
-        
+
         batch_ids = [e.ids for e in encodings]
         batch_masks = [e.attention_mask for e in encodings]
-        
+
         all_inputs.extend(batch_ids)
         all_attention_masks.extend(batch_masks)
 
@@ -164,13 +164,13 @@ There are two primary approaches to data loading: tokenizing data on the fly or 
 
 We consider two padding strategies: fixed-length and dynamic padding. Fixed padding uses a constant length (usually the maximum sequence length in the dataset), whereas dynamic padding adjusts each batch to its longest sequence. The latter is more computationally efficient because it minimizes redundant computations on padding tokens. To implement this, we use a custom collate function.
 
-When we pre-train the model, we are going to be using a `batch_size` of 128 and a maximum sequence length of 512. The maximum sequence length of a model determines how many tokens the model can process at once, we will talk more about this later. 
+When we pre-train the model, we are going to be using a `batch_size` of 128 and a maximum sequence length of 512. The maximum sequence length of a model determines how many tokens the model can process at once, we will talk more about this later.
 
 ```{python}
 batch_size = 128
 num_epochs = 1 # We will handle epochs manually in the training loop.
 maxlen = 512
-    
+
 @dataclass
 class EncodedDataset:
     """Pre-encoded dataset. Faster but requires more memory."""
@@ -184,21 +184,21 @@ class EncodedDataset:
     def __getitem__(self, idx: int):
         inputs = self.input_ids[idx][:self.maxlen] # Truncate
         attention_mask = self.attention_masks[idx][:self.maxlen] # Truncate
-        
+
         return inputs, attention_mask
-    
+
 def collate_fn(batch):
     """Dynamic padding data collator"""
     inputs, masks = zip(*batch)
     batch_max_len = np.max([len(l) for l in inputs])
-    
+
     # Dynamic batching
     padded_inputs = [x + [0] * (batch_max_len - len(x)) for x in inputs]
     padded_masks = [x + [0] * (batch_max_len - len(x)) for x in masks]
-    
+
     inputs = np.stack(padded_inputs, axis=0)
     masks = np.stack(padded_masks, axis=0)
-    return (inputs, masks) 
+    return (inputs, masks)
 
 def load_and_preprocess_data(input_ids, attention_masks, batch_size, maxlen):
 
@@ -229,7 +229,7 @@ val_dl = load_and_preprocess_data(val_input_ids, val_attention_masks, batch_size
 
 # Network Components
 
-The main components of a transformer model are 
+The main components of a transformer model are
 
 1. The self attention mechanism
 2. The feed forward network
@@ -241,7 +241,7 @@ We will implement these components in the following sections.
 
 ## Multihead Attention
 
-The purpose of self-attention is to allow the model to attend to different parts of the input sequence. When we say "attend to a part of the input sequence", we mean that the model learns which tokens are most relevant for computing the representation of other tokens. An example that highlights the importance of self-attention is disambiguating a polysemous word like "bank." The word "bank" can refer to a financial institution or the side of a river. In order for our model to make accurate predictions about which meaning is intended, it must be able to attend to the surrounding context (e.g., "money" vs. "river"). 
+The purpose of self-attention is to allow the model to attend to different parts of the input sequence. When we say "attend to a part of the input sequence", we mean that the model learns which tokens are most relevant for computing the representation of other tokens. An example that highlights the importance of self-attention is disambiguating a polysemous word like "bank." The word "bank" can refer to a financial institution or the side of a river. In order for our model to make accurate predictions about which meaning is intended, it must be able to attend to the surrounding context (e.g., "money" vs. "river").
 
 Notice how in the examples below how the word bank attends (bigger value) to different words in the sentence depending on whether it refers to a financial institution or the side of a river.
 
@@ -251,7 +251,7 @@ Notice how in the examples below how the word bank attends (bigger value) to dif
 #| echo: false
 #| label: tbl-self-attention
 #| tbl-cap: "Self-Attention Examples"
-#| tbl-subcap: 
+#| tbl-subcap:
 #|   - "River Bank Example"
 #|   - "Financial Bank Example"
 #| layout-ncol: 2
@@ -337,7 +337,7 @@ class MultiHeadAttention(nnx.Module):
         if attention_mask is not None:
             # BERT Mask: mask 0s are padding, mask 1s are real tokens
             attn_logits = jnp.where(attention_mask == 0, -1e9, attn_logits)
-        
+
         attn_weights = jax.nn.softmax(attn_logits, axis=-1)
         attn_weights = self.dropout(attn_weights)
         out = jnp.matmul(attn_weights, v).transpose(0, 2, 1, 3).reshape(batch, seq_len, self.d_model)
@@ -347,7 +347,7 @@ class MultiHeadAttention(nnx.Module):
 
 ## Feed Forward Network
 
-The feed forward MLP is quite simple. We have two linear layers with a Gaussian Error Linear Unit (GELU) activation in between. 
+The feed forward MLP is quite simple. We have two linear layers with a Gaussian Error Linear Unit (GELU) activation in between.
 
 Notice that the dropout is applied to the output of the first linear layer. This is a common practice in Transformer models.
 
@@ -405,11 +405,11 @@ class BERTEncoder(nnx.Module):
         # Token and Position Embeddings
         self.token_emb = nnx.Embed(vocab_size, d_model, rngs=rngs)
         self.pos_emb = nnx.Param(jax.random.normal(rngs.params(), (1, max_seq_len, d_model)) * 0.02)
-        
+
         # Encoder Stack
         self.blocks = nnx.List([TransformerBlock(d_model, num_heads, d_ff, mha_dropout_rate, ff_dropout_rate, rngs=rngs) for _ in range(num_layers)])
         self.norm_final = nnx.LayerNorm(d_model, rngs=rngs)
-        
+
         # Linear layer used for classification downstream tasks
         self.pooler_dense = nnx.Linear(d_model, d_model, rngs=rngs)
         self.pooler_act = jax.nn.tanh
@@ -420,14 +420,14 @@ class BERTEncoder(nnx.Module):
     def __call__(self, input_ids, attention_mask=None):
         # input_ids: (batch, seq_len)
         # mask: (batch, seq_len): 1 for real and 0 for padding
-        
+
         b, s = input_ids.shape
-        
+
         # Combine embeddings: Token + Position
         x = self.token_emb(input_ids)
         x = x + self.pos_emb[:, :s, :]
         x = self.embedding_norm(x)
-        
+
         # Transform the mask for the attention mechanism (this is due to multiple heads)
         # (batch, seq_len) -> (batch, 1, 1, seq_len)
         if attention_mask is not None:
@@ -437,24 +437,24 @@ class BERTEncoder(nnx.Module):
 
         for block in self.blocks:
             x = block(x, attention_mask=attn_mask)
-            
+
         x = self.norm_final(x)
-        
+
         # BERT returns the full sequence of hidden states for NER/QA
         # and a "pooled" output for classification
         sequence_output = x
-        
+
         # Pooled output
-        cls_token = x[:, 0, :] 
+        cls_token = x[:, 0, :]
         pooled_output = self.pooler_act(self.pooler_dense(cls_token))
-        
+
         return sequence_output, pooled_output
 
 ```
 
 ## Masked Language Modeling
 
-During pre-training, our objective is to predict the masked tokens in our input sequence. To achieve this, we implement an MLM head that processes the normalized sequence output from the BERT encoder. 
+During pre-training, our objective is to predict the masked tokens in our input sequence. To achieve this, we implement an MLM head that processes the normalized sequence output from the BERT encoder.
 
 The MLM head operates by passing the hidden states through a feed-forward network comprising of linear layers and GELU activation, followed by a dropout layer. To produce the final logits, the output is projected back to the vocabulary size using the weights from the input embedding layer. This technique, known as weight tying, reduces the total parameter count and improves regularization by sharing representations between the input and output layers.
 
@@ -519,7 +519,7 @@ We add a bias term to the logits as this helps the model learn the baseline freq
 
 :::
 
-To facilitate the MLM task, we apply specific disruptions to the input sequences during training. The algorithm works as follows: first, we select 15% of the tokens in a sequence as candidates for modification. Of these selected tokens, 80% are replaced with a `[MASK]` token, 10% are replaced with a random token from the vocabulary, and the remaining 10% are left unchanged. We then pass the corrupted text through the model and train it to predict the original tokens based on the surrounding context. 
+To facilitate the MLM task, we apply specific disruptions to the input sequences during training. The algorithm works as follows: first, we select 15% of the tokens in a sequence as candidates for modification. Of these selected tokens, 80% are replaced with a `[MASK]` token, 10% are replaced with a random token from the vocabulary, and the remaining 10% are left unchanged. We then pass the corrupted text through the model and train it to predict the original tokens based on the surrounding context.
 
 Note that the loss is computed only on the masked tokens, not on the unmasked ones. The figure below depicts these disruptions on the input text (using words rather than token IDs for illustrative purposes).
 
@@ -620,10 +620,10 @@ def mlm_loss_fn(logits, labels, mask):
     one_hot_labels = jax.nn.one_hot(labels, logits.shape[-1])
     log_probs = jax.nn.log_softmax(logits, axis=-1)
     loss = -jnp.sum(one_hot_labels * log_probs, axis=-1)
-    
+
     # Apply the mask so we only penalize predictions on masked tokens
     masked_loss = loss * mask
-    
+
     # Average loss over the number of masked tokens
     return jnp.sum(masked_loss) / (jnp.sum(mask) + 1e-8)
 
@@ -772,10 +772,10 @@ for epoch in range(num_epochs):
             if n_train_batches > 0:
                 train_loss_history.append(total_train_loss / n_train_batches)
 
-            total_val_loss = 0.0 
+            total_val_loss = 0.0
             n_validation_batches = 0
             validation_batch_iter = iter(val_dl) # Initialize the validation batch iterator
-            
+
             for val_batch in validation_batch_iter:
                 val_input_ids, val_attention_mask = val_batch
 
@@ -786,7 +786,7 @@ for epoch in range(num_epochs):
                         mask_token_id,
                         vocab_ids,
                 )
-                
+
                 total_val_loss += float(val_loss_val)
                 n_validation_batches += 1
 

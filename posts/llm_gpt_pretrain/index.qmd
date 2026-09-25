@@ -7,7 +7,7 @@ code-annotations: below
 css: styles.css
 jupyter: nnx_env
 image: "gpt_arch.png"
-execute: 
+execute:
   cache: true
   eval: false
 bibliography: references.bib
@@ -118,7 +118,7 @@ class EncodedDataset:
         inputs  = self.input_ids[start : start + self.maxlen]
         targets = self.input_ids[start + 1 : start + self.maxlen + 1]  # shift by 1, not stride
         return inputs, targets
-    
+
 def collate_fn(batch):
     inputs, targets = zip(*batch)
     return np.stack(inputs), np.stack(targets)
@@ -251,7 +251,7 @@ class MultiHeadAttention(nnx.Module):
 
         attn_logits = jnp.matmul(q, k.transpose(0, 1, 3, 2)) / jnp.sqrt(self.head_dim)
         attn_logits = jnp.where(mask, -jnp.inf, attn_logits)
-        
+
         attn_weights = jax.nn.softmax(attn_logits, axis=-1)
         attn_weights = self.dropout(attn_weights)
         out = jnp.matmul(attn_weights, v).transpose(0, 2, 1, 3).reshape(batch, seq_len, self.d_model)
@@ -376,10 +376,10 @@ def train_step(model, optimizer, inputs, targets):
     # compute gradients
     grad_fn = nnx.value_and_grad(loss_fn)
     loss, grads = grad_fn(model, inputs, targets)
-    
+
     # Update parameters
     optimizer.update(model, grads)
-    
+
     return loss
 
 @nnx.jit
@@ -586,7 +586,7 @@ def generate_text_simple(model, idx, max_new_tokens, context_size):
         logits = model(idx_cond)
 
         logits = logits[:, -1, :]
-        idx_next = jnp.argmax(logits, axis=-1, keepdims=True) 
+        idx_next = jnp.argmax(logits, axis=-1, keepdims=True)
         idx = jnp.concatenate((idx, idx_next), axis=1)
     return idx
 ```
@@ -602,7 +602,7 @@ model = GPT(config=config, rngs=rngs)
 save_directory = Path("./model_checkpoint/GPT_jax")
 checkpointer = orbax.PyTreeCheckpointer()
 restored_state = checkpointer.restore(
-    save_directory.absolute(), 
+    save_directory.absolute(),
     args=orbax.args.PyTreeRestore(nnx.state(model))
 )
 nnx.update(model, restored_state)
@@ -756,7 +756,7 @@ class CachedGPT(nnx.Module):
     def __call__(self, input_ids, start_pos=0, use_cache=False):
         _, seq_len = input_ids.shape
 
-        # Combine embeddings: Token + Position 
+        # Combine embeddings: Token + Position
         # (start_pos offsets the position embedding so cached decode steps get the right slot).
         x = self.token_emb(input_ids)
         x = x + self.pos_emb[:, start_pos:start_pos + seq_len, :]
@@ -808,7 +808,7 @@ cached_model = CachedGPT(config=config, rngs=rngs)
 save_directory = Path("./model_checkpoint/GPT_jax")
 checkpointer = orbax.PyTreeCheckpointer()
 restored_state = checkpointer.restore(
-    save_directory.absolute(), 
+    save_directory.absolute(),
     args=orbax.args.PyTreeRestore(nnx.state(cached_model))
 )
 nnx.update(cached_model, restored_state)

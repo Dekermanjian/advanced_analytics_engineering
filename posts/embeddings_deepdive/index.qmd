@@ -7,6 +7,7 @@ code-annotations: below
 css: styles.css
 image: "thumbnail.png"
 bibliography: references.bib
+jupyter: jax_recsys
 nocite: |
   @*
 ---
@@ -21,21 +22,21 @@ Language is the primary means by which humans transmit and receive information. 
 
 However, machines do not inherently understand sequences of letters or sounds. Therefore, it is essential to represent language in a form that machines can process; namely, as numbers. There are many ways to transform textual data into numerical representations, and the method you choose can significantly impact the performance of your downstream tasks.
 
-In the following sections, we will explore various techniques for representing text as numbers, highlighting the strengths and weaknesses of each approach. 
+In the following sections, we will explore various techniques for representing text as numbers, highlighting the strengths and weaknesses of each approach.
 
 # What are Vector Embeddings?
 
-Vector embeddings as the name suggests are vectors of numerical values. Their purpose is to tranform information from a high dimensional space to a lower dimension latent space, while retaining relevant information to a myriad of downstream specific tasks. 
+Vector embeddings as the name suggests are vectors of numerical values. Their purpose is to transform information from a high dimensional space to a lower dimension latent space, while retaining relevant information to a myriad of downstream specific tasks.
 
-You can think of a high dimensional space as a magical space where the possibilities of some particular event are numerous. As a simple example, let's imagine the space of all the English words. If your event is selecting a word then you have over 600,000 possibilities. In comparison, imagine a space with all the English letters and now your event is selecting a letter from that space. The number of possibilities is much smaller. 
+You can think of a high dimensional space as a magical space where the possibilities of some particular event are numerous. As a simple example, let's imagine the space of all the English words. If your event is selecting a word then you have over 600,000 possibilities. In comparison, imagine a space with all the English letters and now your event is selecting a letter from that space. The number of possibilities is much smaller.
 
-Let's briefly talk about latent spaces. A latent space is typically the resultant of the transformation from a high dimensional space to a lower dimensional space, while retaining relevant information to some task. Let's look at a simple conceptual example of transforming information from one space to another of a lower dimension. 
+Let's briefly talk about latent spaces. A latent space is typically the resultant of the transformation from a high dimensional space to a lower dimensional space, while retaining relevant information to some task. Let's look at a simple conceptual example of transforming information from one space to another of a lower dimension.
 
 Take the following sentence: [**"The quick brown fox jumps over the lazy dog."**]{style="color: blue;"}
 
-now compare that to the following: [**"Te qck brwn fx jmps ovr te lzy dg.".**]{style="color: blue;"}
+now compare that to the following: [**"Te qck brwn fx jmps ovr te lzy dg.".**]{style="color: blue;"} <!-- codespell:ignore -->
 
-Conceptually, the second "sentence" is in a latent space where we have compressed the information into a lower dimensional space (by ommiting some of the letters) while still retaining the relevant information for a specific task; sentence comprehension in this case. 
+Conceptually, the second "sentence" is in a latent space where we have compressed the information into a lower dimensional space (by omitting some of the letters) while still retaining the relevant information for a specific task; sentence comprehension in this case.
 
 # Types of Embeddings
 
@@ -49,7 +50,7 @@ Not all embeddings are created equal. There are different kinds of vector embedd
 
 ## Sparse Embeddings
 
-A sparse embedding is one in which the majority of the values of the vector are 0. The simplest case of a sparse embedding is a one-hot representation of a vocabulary. 
+A sparse embedding is one in which the majority of the values of the vector are 0. The simplest case of a sparse embedding is a one-hot representation of a vocabulary.
 
 For example, let's assume that a given vocabular consists of $N = 30,000$ words and we want to represent the words in the sentence "The quick brown fox jumps over the lazy dog." with a sparse one-hot representation. We would represent each word as a vector of size $N = 30,000$ where out of those 30,000 entries only one entry is non-zero; The position of the vector that corresponds with that specific word in the sentence. An example of a sparse vector can be seen in @tbl-sparse-vector, here we assume our entire vocabulary is only the six words that compose the prior example sentence from above.
 
@@ -73,7 +74,7 @@ sparse_vector
 
 ### Co-occurrence Matrices
 
-One of the earliest tools we had to understanding word relationships and semantics were these co-occurence matrices. These matrices represent how frequently words occur together. 
+One of the earliest tools we had to understanding word relationships and semantics were these co-occurence matrices. These matrices represent how frequently words occur together.
 
 There are a few flavors of a co-occurrence matrix:
 
@@ -81,7 +82,7 @@ There are a few flavors of a co-occurrence matrix:
 
 2. Sentence-based co-occurrence: The matrix rows and columns are the same as with window-based, however, now the cells in the matrix represent the count of sentences the target word co-occurs with the context word.
 
-3. Document-based co-occurrence: The words in the vocabulary still represent the rows of the matrix, however, now each column represents a target document in your corpus, and the cells represent the counts of occurence of the target word inside the target document.
+3. Document-based co-occurrence: The words in the vocabulary still represent the rows of the matrix, however, now each column represents a target document in your corpus, and the cells represent the counts of occurrence of the target word inside the target document.
 
 ```{python}
 #| echo: false
@@ -112,9 +113,9 @@ cooc_df
 
 ```
 
-As you may have already guessed, using the raw frequencies of words occuring besides words, in sentences, or in documents is not adequate in measuring the relationships of words. There are algorithms that improve upon raw frequency co-occurence.
+As you may have already guessed, using the raw frequencies of words occurring besides words, in sentences, or in documents is not adequate in measuring the relationships of words. There are algorithms that improve upon raw frequency co-occurrence.
 
-### Postive Pointwise Mutual Information
+### Positive Pointwise Mutual Information
 
 For window and sentence based co-occurence, we can, generally, get better word relationships by using the Positive Pointwise Mutual Information (PPMI) algorithm. The PPMI algorithm is based on the Pointwise Mutual Information (PMI) equation:
 
@@ -122,12 +123,12 @@ $$
 PMI_{\text(target\_word, context\_word)} = log(\frac{P\text(target\_word, context\_word)}{P\text(target\_word) \times P\text(context\_word)})
 $$
 
-The PMI is a ratio of the joint probability of two words, in this case, and the product of the marginal probabilities of each individual word. If two words are independent then the ratio would be one due to 
+The PMI is a ratio of the joint probability of two words, in this case, and the product of the marginal probabilities of each individual word. If two words are independent then the ratio would be one due to
 $$
 P(A, B) = P(A) \times P(B)
 $$
 
-Thus, the PMI measures how much more or less two words co-occur than we would expect if they were independent. 
+Thus, the PMI measures how much more or less two words co-occur than we would expect if they were independent.
 
 As it turns out, figuring out how much **less** two words co-occur requires us to have a very large corpus which in many cases is not feesible and that is why we use the PPMI instead to only measure how much more two words co-occur than expected.
 
@@ -152,10 +153,10 @@ ppmi_df
 For document based co-occurence, we can improve upon raw frequency co-occurence matrices by using the Term Frequency Inverse Document Frequency (TF-IDF) algorithm. The algorithm is quite simple, we compute the term frequency which is defined as:
 
 $$
-tf_{term, document} = 
+tf_{term, document} =
  \begin{cases}
-  1 + log_{10}(count(term, document)), & \text{if } count(term, document) \gt 0 \\ 
-  0, & \text{otherwise} 
+  1 + log_{10}(count(term, document)), & \text{if } count(term, document) \gt 0 \\
+  0, & \text{otherwise}
  \end{cases}
 $$
 
@@ -212,7 +213,7 @@ dense_vector
 
 ### Static Embeddings
 
-When we say an embedding is static we mean that each word in our vocabulary only has one vector associated with it. You may already notice an obvious limitation with this approach when a word has multiple meanings. For example, the word ship can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. The implication is that a static embedding can not disambigouate different meanings of the same word.
+When we say an embedding is static we mean that each word in our vocabulary only has one vector associated with it. You may already notice an obvious limitation with this approach when a word has multiple meanings. For example, the word ship can refer to the action verb of shipping an item or to the noun of a water vessel. A static embedding would represent both meanings of the word "ship" with the same vector. The implication is that a static embedding can not disambiguate different meanings of the same word.
 
 :::{.callout-note}
 
@@ -232,10 +233,10 @@ Limitations put aside, there are two popular algorithms to generate dense static
 
 Word2Vec is the name of a software that produces static embeddings. Word2Vec has two different algorithms to produce these embeddings:
 
-1. Continuos Bag-of-Words
+1. Continuous Bag-of-Words
 2. Skip-gram with Negative Sampling
 
-We will focus on the skip-gram method because, generally, it performs better. Skip-gram with negative sampling is a self-supervised method that works by training a logistic regression to predict if a context word is likely to occur with a target word. The true samples are generated by using a sliding window around each target word, while the negative samples are randomly sampled words from the corpus. The prediction task, however, is not the main outcome the key is that the weights that the classifier learns for each token are taken to be the embeddings. The implication is that if the prediction task is successful then the weights (each word has its own weight) encode a sufficiently good relationship between the words to achieve this task. 
+We will focus on the skip-gram method because, generally, it performs better. Skip-gram with negative sampling is a self-supervised method that works by training a logistic regression to predict if a context word is likely to occur with a target word. The true samples are generated by using a sliding window around each target word, while the negative samples are randomly sampled words from the corpus. The prediction task, however, is not the main outcome the key is that the weights that the classifier learns for each token are taken to be the embeddings. The implication is that if the prediction task is successful then the weights (each word has its own weight) encode a sufficiently good relationship between the words to achieve this task.
 
 :::{.callout-note}
 
@@ -258,7 +259,7 @@ This section is purposely sparse because we will have an entire post dedicated t
 
 ### Contextual Embeddings
 
-A step up from static embeddings are contextual embeddings. These embeddings capture the meaning of words in the given context as opposed to the general meaning of the word that we get with static embeddings. Generally, contextual embeddings are learned by transformer models that have multiple attention heads. These embeddings are also dynamic in that unlike static embeddings that have a fixed embedding layer, contextual embeddings are computed on the fly using a combination of a static embedding layer, a segment embedding layer to differentiate between input sentences and a positional embedding layer used to pass through information on the position of a word within a sentence. 
+A step up from static embeddings are contextual embeddings. These embeddings capture the meaning of words in the given context as opposed to the general meaning of the word that we get with static embeddings. Generally, contextual embeddings are learned by transformer models that have multiple attention heads. These embeddings are also dynamic in that unlike static embeddings that have a fixed embedding layer, contextual embeddings are computed on the fly using a combination of a static embedding layer, a segment embedding layer to differentiate between input sentences and a positional embedding layer used to pass through information on the position of a word within a sentence.
 
 :::{.callout-note}
 
@@ -266,7 +267,7 @@ We will do a deep dive on transformer models and how they work in a dedicated po
 
 :::
 
-#### Bidirectional Encoder Respresentation Transformer (BERT)
+#### Bidirectional Encoder Representation Transformer (BERT)
 
 Arguably the most popular transformer model that produces contextual embeddings is BERT. The key properties that allow BERT to learn contextual embeddings are:
 
@@ -286,14 +287,14 @@ This section is purposely sparse because we will have an entire post dedicated t
 Vector embeddings are pre-requisite to many downstream tasks such as:
 
 * Text classification
-* Search / Retreival, very important for things like Retrieval Augmented Generation (RAG)
+* Search / Retrieval, very important for things like Retrieval Augmented Generation (RAG)
 * Machine translation
 * Named Entity Recognition
 * Question Answering systems and chat bots
 * Text summarization
 * Recommendation engines
 
-The quality of your embeddings strongly influences your model's performance on all of those tasks! 
+The quality of your embeddings strongly influences your model's performance on all of those tasks!
 
 # How Are Embeddings Used?
 
@@ -375,10 +376,10 @@ train_tf_idf = term_frequencies * inverse_document_frequencies[:, None]
 
 ## Embedding Projections
 
-To inspect our embeddings visually we are going to project from our high-dimensional space of ~35,000 down to 3-dimensions. In order to acheive this projection we are going to use the UMAP (Uniform Manifold Approximation and Projection) algorithm. The algorithm works by constructing a weighted graph in the original space and then learns via stochastic gradient descent (minimizes the cross entropy loss) to project a space in the reduced space that maintains local and global distances of points.
+To inspect our embeddings visually we are going to project from our high-dimensional space of ~35,000 down to 3-dimensions. In order to achieve this projection we are going to use the UMAP (Uniform Manifold Approximation and Projection) algorithm. The algorithm works by constructing a weighted graph in the original space and then learns via stochastic gradient descent (minimizes the cross entropy loss) to project a space in the reduced space that maintains local and global distances of points.
 
 :::{.callout-caution}
-You might be thinking to yourself "Oh, we are going from a space of ~35,000 to a latent space of 3, so we are generating an embedding of an embedding!" and you would be correct. However, remember that embeddings are not created equal. The TF-IDF embeddings are constructed to emphasize symantic representation of the words across the documents while the UMAP embeddings are constructed to capture the structure of the data in the high dimensional space and maintain it in the latent space.
+You might be thinking to yourself "Oh, we are going from a space of ~35,000 to a latent space of 3, so we are generating an embedding of an embedding!" and you would be correct. However, remember that embeddings are not created equal. The TF-IDF embeddings are constructed to emphasize semantic representation of the words across the documents while the UMAP embeddings are constructed to capture the structure of the data in the high dimensional space and maintain it in the latent space.
 :::
 
 ### UMAP Details (optional)
@@ -414,7 +415,7 @@ f(d) = \frac{1}{ 1 + ad^{2b}}
 $$
 
 The function satisfies $f(0) = 1$ representing maximal similarity, and controls how rapidly points are pulled together or pushed apart in the embedding space.
- 
+
 
 Finally, UMAP uses stochastic gradient descent to minimize the cross entropy between $Q_{ij}$ and $P_{ij}$ where the cross entropy loss is defined as
 
@@ -424,11 +425,11 @@ $$
 
 ## Visualize Embeddings in 3D Space
 
-Below you can clearly see that the TF-IDF embeddings encode a representation that is able to discriminate between the three filtered topics in our toy dataset. 
+Below you can clearly see that the TF-IDF embeddings encode a representation that is able to discriminate between the three filtered topics in our toy dataset.
 
 :::{.callout-important}
 
-It is not necessary that the topics be seperable at the reduced dimensional space that our UMAP algorithm generates for these topics to be seperable in their original (TF-IDF) dimension. You may encounter cases where algorithms like Multinomial Regression or Multinomial Naive Bayes can still classify the texts even when your UMAP representation can't separate the classes.
+It is not necessary that the topics be separable at the reduced dimensional space that our UMAP algorithm generates for these topics to be separable in their original (TF-IDF) dimension. You may encounter cases where algorithms like Multinomial Regression or Multinomial Naive Bayes can still classify the texts even when your UMAP representation can't separate the classes.
 
 :::
 
@@ -484,7 +485,7 @@ fig.update_layout(
 
 # Coming Next
 
-We have outlined a few interesting topics to dive into more detail in following posts. We will take a look at the Skip-Gram with Negative Sampling and Global Vectors algorithms and build them from scratch. Following that, we will breakdown how Transformer models work and look at the BERT algorithm and build that from scratch as well. 
+We have outlined a few interesting topics to dive into more detail in following posts. We will take a look at the Skip-Gram with Negative Sampling and Global Vectors algorithms and build them from scratch. Following that, we will breakdown how Transformer models work and look at the BERT algorithm and build that from scratch as well.
 
 I hope to see you there!
 

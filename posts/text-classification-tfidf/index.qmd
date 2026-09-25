@@ -5,7 +5,7 @@ date: "2025-06-28"
 categories: [Natural Language Processing]
 code-annotations: below
 jupyter: python3
-execute: 
+execute:
   cache: true
 ---
 
@@ -17,20 +17,20 @@ We expand on the hands-on example of the last post and show how we can leverage 
 
 In the previous [post](/posts/embeddings_deepdive/index.qmd) we created TF-IDF embeddings using a toy dataset and with the help of some dimensionality reduction plotted our embeddings in three-dimensional space. We showed that the TF-IDF embeddings held enough information within them to allow us to distinguish between the article classes.
 
-In this post we are going to build a classifier using the Bayesian framework to classify an out-of-sample subset of our texts and we are going to also inspect which words are most influential in predicting class membership. 
+In this post we are going to build a classifier using the Bayesian framework to classify an out-of-sample subset of our texts and we are going to also inspect which words are most influential in predicting class membership.
 
 Finally, we are also going to go over some important assumptions that multiclass classification inherently make and look at ways to get around these limitations.
 
 # Multinomial Logistic Regression
 
-Multinomial Logistic Regression (MLR) is the generalization of Logistic Regression to $k$ classes. The goal of MLR is to predict the probability that a sample $i$ belongs to some class $k$. More formally, suppose we have $y \in \{0, 1, ... K - 1\}$ where $K$ are the total number of **mutually exclusive** classes. 
+Multinomial Logistic Regression (MLR) is the generalization of Logistic Regression to $k$ classes. The goal of MLR is to predict the probability that a sample $i$ belongs to some class $k$. More formally, suppose we have $y \in \{0, 1, ... K - 1\}$ where $K$ are the total number of **mutually exclusive** classes.
 
 We want to estimate $P(y = k|\mathbf{x})$. Where $\mathbf{x}$ is our input features in $\mathbf{x} \in \mathbb{R}^{D}$ for one observation.
 
-We condition our probability estimates for each class $k$ on a linear function of the input features 
+We condition our probability estimates for each class $k$ on a linear function of the input features
 $$
 logits_{k} = \alpha_{k} + \mathbf{x}^{T}\pmb{\beta}_{k}
-$$ 
+$$
 
 and transform the outputs to probability space, $P(y = k | \mathbf{x}) \in (0, 1)$, by applying the softmax function
 
@@ -38,7 +38,7 @@ $$
 P(y = k | \mathbf{x}) = \frac{exp(logits_{k})}{\sum_{j=0}^{K-1}exp(logits_{j})}
 $$
 
-The softmax ensures that the sum of the class probabilities sum to one $\sum_{k} P(y = k | \mathbf{x}) = 1$ this property also makes the softmax invariant to additive shifts. This means the softmax applied to our logits vector 
+The softmax ensures that the sum of the class probabilities sum to one $\sum_{k} P(y = k | \mathbf{x}) = 1$ this property also makes the softmax invariant to additive shifts. This means the softmax applied to our logits vector
 
 $$
 \textbf{logits} = \begin{bmatrix} logits_{0} && logits_{1} & ... & logits_{k-1} \end{bmatrix}
@@ -53,7 +53,7 @@ $$
 because we have multiple solutions the model parameters are not identifiable. In order to induce identifiability we need to either
 
 1. Constrain one class as a reference class $\alpha_{k} = 0$ and $\mathbf{\beta}_{k} = 0$ or
-2. Constrain the parameters of all classes to sum to zero $\sum_{k} \mathbf{\beta}_{k} = 0$ 
+2. Constrain the parameters of all classes to sum to zero $\sum_{k} \mathbf{\beta}_{k} = 0$
 
 :::{.callout-tip}
 
@@ -85,7 +85,7 @@ $$
 logP(y_{i} | \hat{\textbf{y}_{i}}) = \sum_{k=0}^{K-1}y_{ik} \cdot log\hat{y}_{ik}
 $$
 
-and because the one-hot vector representation of $y_{i}$ for all classes not the correct class is zero, we can simplify our log-likelihood to 
+and because the one-hot vector representation of $y_{i}$ for all classes not the correct class is zero, we can simplify our log-likelihood to
 
 $$
 logP(y_{i} | \hat{\textbf{y}_{i}}) = log\hat{y}_{ic}
@@ -99,13 +99,13 @@ $$
 \frac{P(y = i | \mathbf{x})}{P(y = j | \mathbf{x})} = exp(logits_{i} - logits_{j})
 $$
 
-which in many cases might not be realistic. 
+which in many cases might not be realistic.
 
-For example, say you are trying to predict the probabilities for three different candidates of winning an election. IIA implies that the odds ratio between any two candidates is independent of the third. However, we know that this can't be true due to the nature of elections as a vote for a particular candidate takes away probability of winning from another. 
+For example, say you are trying to predict the probabilities for three different candidates of winning an election. IIA implies that the odds ratio between any two candidates is independent of the third. However, we know that this can't be true due to the nature of elections as a vote for a particular candidate takes away probability of winning from another.
 
 # Sparse Matrix Multiplication
 
-Coming back to the classification problem at hand. Our input features are the TF-IDF embeddings that we generated in the previous post. Now, we could just use it as is, however, that would be extremely inefficient because most of the matrix multiplications will be zeros. 
+Coming back to the classification problem at hand. Our input features are the TF-IDF embeddings that we generated in the previous post. Now, we could just use it as is, however, that would be extremely inefficient because most of the matrix multiplications will be zeros.
 
 Instead of dense matrix vector multiplication which is defined as
 
@@ -119,7 +119,7 @@ $$
 y_{i} = \sum_{j \in NZ_{i}}^{n}\textbf{A}_{ij}x_{j}
 $$
 
-where $NZ_{i}$ is the set of column indexes where $A_{ij} \ne 0$. Essentially, we skip the zero multiplications and summations. 
+where $NZ_{i}$ is the set of column indexes where $A_{ij} \ne 0$. Essentially, we skip the zero multiplications and summations.
 
 In practice, however, we often represent sparse matrices in compressed sparse row (CSR) format or (CSC) for compressed columns. Since we are going to be working with CSR let's look at how that format is set up and then we can talk about how matrix vector multiplication works with CSR.
 
@@ -131,10 +131,10 @@ The CSR format takes a matrix $A \in \mathbb{R}^{m \times n}$ and breaks it apar
 
 Let's take a look at an example:
 
-Let 
+Let
 
 $$
-A = \begin{bmatrix} 
+A = \begin{bmatrix}
     0 && 0 && 1 && 0 \\
     4 && 0 && 2 && 0 \\
     0 && 2 && 0 && 0
@@ -155,7 +155,7 @@ indices = \begin{bmatrix}
            \end{bmatrix}
 $$
 
-and 
+and
 
 $$
 indptr = \begin{bmatrix}
@@ -165,7 +165,7 @@ $$
 
 Let's discuss how `indptr` is constructed because that is not clear just by looking at it.
 
-We scan through the sparse matrix row-wise and add the number of non-zero elements starting at index zero. Then that value becomes your next starting position. 
+We scan through the sparse matrix row-wise and add the number of non-zero elements starting at index zero. Then that value becomes your next starting position.
 
 So in our example starting at the first row
 
@@ -181,7 +181,7 @@ $$
 \text{next index} = 0 + 1
 $$
 
-The second row we now have 
+The second row we now have
 
 $$
 \text{current index} = 1
@@ -195,7 +195,7 @@ $$
 \text{next index} = 2 + 1 = 3
 $$
 
-Finally, the third and last row we have 
+Finally, the third and last row we have
 
 $$
 \text{current index} = 3
@@ -209,7 +209,7 @@ $$
 \text{next index} = 3 + 1 = 4
 $$
 
-which results in 
+which results in
 
 $$
 indptr = \begin{bmatrix}
@@ -219,7 +219,7 @@ $$
 
 alright, then! Let's walk through how we can perform matrix vector multiplication using a CSR matrix.
 
-Let's re-use our $\textbf{A}$ from above and let's say our vector is
+Let's reuse our $\textbf{A}$ from above and let's say our vector is
 
 $$
 \textbf{x} = \begin{bmatrix}
@@ -246,99 +246,99 @@ Let's walk through it step by step:
 
 ---
 
-we start with $\colorbox{blue}{\color{white}{i = 0}}$ 
+we start with $\colorbox{blue}{\color{white}{i = 0}}$
 
-which gives us $\colorbox{blue}{\color{white}{k = indptr[i=0] = 0}}$ 
+which gives us $\colorbox{blue}{\color{white}{k = indptr[i=0] = 0}}$
 
-and $\colorbox{blue}{\color{white}{indptr[0 + 1] - 1 = 1 - 1 = 0}}$ 
+and $\colorbox{blue}{\color{white}{indptr[0 + 1] - 1 = 1 - 1 = 0}}$
 
-this means our summation for $\colorbox{blue}{\color{white}{i=0}}$ 
+this means our summation for $\colorbox{blue}{\color{white}{i=0}}$
 
-is $\bbox[blue]{\color{white}{\sum_{k=0}^{0}}}$ 
+is $\bbox[blue]{\color{white}{\sum_{k=0}^{0}}}$
 
-just one element. 
+just one element.
 
-With $\colorbox{blue}{\color{white}{k=0}}$ we have 
+With $\colorbox{blue}{\color{white}{k=0}}$ we have
 
 $$
 \colorbox{blue}{\color{white}{data[k=0] = 1}}
-$$ 
+$$
 
-and 
+and
 
 $$
 \colorbox{blue}{\color{white}{\textbf{x}[indices[k=0]] = x[2] = 3}}
-$$ 
+$$
 
 multiplying them together we have $\bbox[blue]{\color{white}{1 \times 3 = 3}}$ for the first element in our resultant vector.
 
 ---
 
-Next, we increment $\colorbox{blue}{\color{white}{i = 1}}$ 
+Next, we increment $\colorbox{blue}{\color{white}{i = 1}}$
 
-which gives us $\colorbox{blue}{\color{white}{k = indptr[i=1] = 1}}$ 
+which gives us $\colorbox{blue}{\color{white}{k = indptr[i=1] = 1}}$
 
-and $\colorbox{blue}{\color{white}{indptr[1 + 1] - 1 = 3 - 1 = 2}}$ 
+and $\colorbox{blue}{\color{white}{indptr[1 + 1] - 1 = 3 - 1 = 2}}$
 
-and now our sum is $\bbox[blue]{\color{white}{\sum_{k=1}^{2}}}$ 
+and now our sum is $\bbox[blue]{\color{white}{\sum_{k=1}^{2}}}$
 
-which implies we have two elements in our summation. 
+which implies we have two elements in our summation.
 
-First, for $\colorbox{blue}{\color{white}{k=1}}$ we have 
+First, for $\colorbox{blue}{\color{white}{k=1}}$ we have
 
 $$
 \colorbox{blue}{\color{white}{data[k=1] = 4}}
-$$ 
+$$
 
-and 
+and
 
 $$
 \colorbox{blue}{\color{white}{\textbf{x}[indices[k=1]] = x[0] = 1}}
-$$ 
+$$
 
-multiplying them together we have $\bbox[blue]{\color{white}{4 \times 1 = 4}}$. 
+multiplying them together we have $\bbox[blue]{\color{white}{4 \times 1 = 4}}$.
 
-Second, for $\colorbox{blue}{\color{white}{k=2}}$ we have 
+Second, for $\colorbox{blue}{\color{white}{k=2}}$ we have
 
 $$
 \colorbox{blue}{\color{white}{data[k=2] = 2}}
-$$ 
+$$
 
-and 
+and
 
 $$
 \colorbox{blue}{\color{white}{\textbf{x}[indices[k=2]] = x[2] = 3}}
-$$ 
+$$
 
 multiplying them together we have $\bbox[blue]{\color{white}{2 \times 3 = 6}}$ and our second element in our resultant vector is  $\colorbox{blue}{\color{white}{4 + 6 = 10}}$
 
 ---
 
-Finally, we increment $\colorbox{blue}{\color{white}{i = 2}}$ 
+Finally, we increment $\colorbox{blue}{\color{white}{i = 2}}$
 
-which gives us $\colorbox{blue}{\color{white}{k = indptr[i=2] = 3}}$ 
+which gives us $\colorbox{blue}{\color{white}{k = indptr[i=2] = 3}}$
 
-and $\colorbox{blue}{\color{white}{indptr[2 + 1] - 1 = 4 - 1 = 3}}$ 
+and $\colorbox{blue}{\color{white}{indptr[2 + 1] - 1 = 4 - 1 = 3}}$
 
-and now our sum is $\bbox[blue]{\color{white}{\sum_{k=3}^{3}}}$ 
+and now our sum is $\bbox[blue]{\color{white}{\sum_{k=3}^{3}}}$
 
-which implies we have one element in our summation. 
+which implies we have one element in our summation.
 
-For $\colorbox{blue}{\color{white}{k=3}}$ we have 
+For $\colorbox{blue}{\color{white}{k=3}}$ we have
 
 $$
 \colorbox{blue}{\color{white}{data[k=3] = 2}}
-$$ 
+$$
 
-and 
+and
 
 $$
 \colorbox{blue}{\color{white}{\textbf{x}[indices[k=3]] = x[1] = 2}}
-$$ 
+$$
 
 multiplying them together we have $\bbox[blue]{\color{white}{2 \times 2 = 4}}$ for the last element in our resultant vector.
 
-Thus, our resultant vector is 
+Thus, our resultant vector is
 
 $$
 y = \textbf{A} \cdot \textbf{x} = \begin{bmatrix} 3 \\ 10 \\ 4 \end{bmatrix}
@@ -348,7 +348,7 @@ $$
 
 # Model Definition
 
-We will start with the "vanilla" MLR specification that assumes IIA. Admittedly, our problem of classifying text using the TF-IDF embeddings most likely satisfies IIA but for demonstration purposes we will implement a model that explicitly deals with IIA. 
+We will start with the "vanilla" MLR specification that assumes IIA. Admittedly, our problem of classifying text using the TF-IDF embeddings most likely satisfies IIA but for demonstration purposes we will implement a model that explicitly deals with IIA.
 
 ## Vanilla MLR:
 
@@ -410,9 +410,9 @@ $$
 \pmb{\Sigma}_{class} \sim \textbf{LKJ}(2.0)
 $$
 
-In this model we specifically model the covariance between the coefficients across classes by placing an $LKJ(\eta)$ prior on the covariance matrix. The $\eta$ parameter adjusts our prior belief on how strong/weak we expect the coefficients to be correlated. 
+In this model we specifically model the covariance between the coefficients across classes by placing an $LKJ(\eta)$ prior on the covariance matrix. The $\eta$ parameter adjusts our prior belief on how strong/weak we expect the coefficients to be correlated.
 
-Where 
+Where
 
 - $\eta = 1$ places a uniform distribution over the correlation matrices
 - $\eta \lt 1$ places more weight over the coefficients being correlated and
@@ -566,9 +566,9 @@ X_test_sparse = csr_matrix(X_test)
 
 ## Vanilla MLR
 
-Alright, with our TF-IDF embeddings created and converted to CSR we are ready to start building our model. Let's start with the typical "vanilla" MLR model that assumes IIA. We are going to be doing all of this in a Bayesian framework which gives us the flexibility to extend this "vanilla" model to include more complex relationships. 
+Alright, with our TF-IDF embeddings created and converted to CSR we are ready to start building our model. Let's start with the typical "vanilla" MLR model that assumes IIA. We are going to be doing all of this in a Bayesian framework which gives us the flexibility to extend this "vanilla" model to include more complex relationships.
 
-Notice that we are enforcing identifiability by enducing a sum to zero over the parameters across the classes and notice that we are computing our logits using a sparse matrix vector multiplication algorithm.
+Notice that we are enforcing identifiability by inducing a sum to zero over the parameters across the classes and notice that we are computing our logits using a sparse matrix vector multiplication algorithm.
 
 ```{python}
 # MLR Model specification
@@ -607,21 +607,21 @@ with sparse_model:
     idata = pm.sample(mp_ctx="spawn", random_seed=rng)
 ```
 
-With our samples in hand, let's pull a summary of the learned weights and inspect what words based on the TF-IDF embeddings have the largest influence over each class. 
+With our samples in hand, let's pull a summary of the learned weights and inspect what words based on the TF-IDF embeddings have the largest influence over each class.
 
 ```{python}
 # Get model summaries
 summary_df = az.summary(idata, kind="stats")
 ```
 
-In the tables below, you'll notice that in the brackets you have "[class name, feature name]" and these have been sorted by the posterior mean to represent the largest influential words per class. 
+In the tables below, you'll notice that in the brackets you have "[class name, feature name]" and these have been sorted by the posterior mean to represent the largest influential words per class.
 
-For the `comp.graphics` class words like "graphics" and "image" are influential to push a document to being classified as `comp.graphics`. This seems sensible to me. 
+For the `comp.graphics` class words like "graphics" and "image" are influential to push a document to being classified as `comp.graphics`. This seems sensible to me.
 
-Similarly, the influential features for the other two classes also seem sensible. 
+Similarly, the influential features for the other two classes also seem sensible.
 
 ```{python}
-#| tbl-cap: Most influencial words for class comp.graphics
+#| tbl-cap: Most influential words for class comp.graphics
 #| label: tbl-vanilla-compgraphics
 
 # Look at weights learned for the comp.graphics class
@@ -631,7 +631,7 @@ summary_df.filter(regex=r"(?i)coefs_raw\[comp", axis='index').sort_values("mean"
 
 
 ```{python}
-#| tbl-cap: Most influencial words for class sci.med
+#| tbl-cap: Most influential words for class sci.med
 #| label: tbl-vanilla-scimed
 
 # Look at weights learned for the sci.med class
@@ -641,7 +641,7 @@ summary_df.filter(regex=r"(?i)coefs_raw\[sci.med", axis='index').sort_values("me
 
 
 ```{python}
-#| tbl-cap: Most influencial words for class sci.space
+#| tbl-cap: Most influential words for class sci.space
 #| label: tbl-vanilla-scispace
 
 # Look at weights learned for the sci.space class
@@ -650,9 +650,9 @@ summary_df.filter(regex=r"(?i)coefs_raw\[sci.space", axis='index').sort_values("
 
 Let's inspect the IIA assumption next.
 
-If we take the most influential feature weight of one of the classes then we should expect that the same feature weight for the other two classes to have a small weight. 
+If we take the most influential feature weight of one of the classes then we should expect that the same feature weight for the other two classes to have a small weight.
 
-This would imply that conditional on the high weight class the other two classes would be dependent. In other words, there would be some correlation (positive in this case) between that feature's weights in the other two classes. 
+This would imply that conditional on the high weight class the other two classes would be dependent. In other words, there would be some correlation (positive in this case) between that feature's weights in the other two classes.
 
 Below, we plot the posterior weights for the feature "space", which is the most influential feature for class `sci.space`, for the classes `comp.graphics` and `sci.med`.
 
@@ -691,7 +691,7 @@ Looking at the `f1-scores`, the model performs well at differentiating between t
 with sparse_model:
     pm.set_data(
         new_data={
-            "X": X_test_sparse, 
+            "X": X_test_sparse,
             "y": np.ones_like(y_test)
         },
         coords={
@@ -715,7 +715,7 @@ print(classification_report(y_true=y_test, y_pred=y_pred))
 
 ## Structured Covariance MLR
 
-Let's extend the previous model to handle IIA. 
+Let's extend the previous model to handle IIA.
 
 As mentioned above, we are setting our prior to assume that the correlations between the classes are minute. However, with the large volume of data used for sampling, if this prior is not appropriate the likelihood will adjust our covariance weights to reflect that.
 
@@ -755,7 +755,7 @@ with pm.Model(coords=coords) as sparse_correlated_model:
     # non-centered parameterization for better sampling
     z = pm.Normal("z", mu=0, sigma=1, shape=(D, K), dims=("features", "classes"))
     coefs_T = pm.Deterministic("coefs_T", pt.dot(z, chol.T), dims=("features", "classes"))
-    
+
     # Enforce identifiability by subtracting mean across the class dimension
     coefs_T_constrained = coefs_T - pt.mean(coefs_T, axis=1, keepdims=True)
 
@@ -787,14 +787,14 @@ corr_tbl = az.summary(correlated_idata, var_names=["class_cov_corr"], kind="stat
 corr_tbl
 ```
 
-Let's also ensure that our influential features still make sense. 
+Let's also ensure that our influential features still make sense.
 
-Notice because of our transposed coefficients in the model definintion we now have the features first and the class second in the brackets. 
+Notice because of our transposed coefficients in the model definition we now have the features first and the class second in the brackets.
 
 Looks like our weights, relatively speaking, are still sensible. You should notice that the weight values themselves are different.
 
 ```{python}
-#| tbl-cap: Most influencial words for class comp.graphics - Structured Covariance Model
+#| tbl-cap: Most influential words for class comp.graphics - Structured Covariance Model
 #| label: tbl-cov-compgraphics
 
 cor_summary_df = az.summary(correlated_idata, var_names=["coefs_T"], kind="stats")
@@ -804,7 +804,7 @@ cor_summary_df.filter(regex=r"(?i)comp.graphics\]$", axis='index').sort_values("
 
 
 ```{python}
-#| tbl-cap: Most influencial words for class sci.med - Structured Covariance Model
+#| tbl-cap: Most influential words for class sci.med - Structured Covariance Model
 #| label: tbl-cov-scimed
 
 cor_summary_df.filter(regex=r"(?i)sci.med\]$", axis='index').sort_values("mean", ascending=False).head(10)
@@ -813,13 +813,13 @@ cor_summary_df.filter(regex=r"(?i)sci.med\]$", axis='index').sort_values("mean",
 
 
 ```{python}
-#| tbl-cap: Most influencial words for class sci.space - Structured Covariance Model
+#| tbl-cap: Most influential words for class sci.space - Structured Covariance Model
 #| label: tbl-cov-scispace
 
 cor_summary_df.filter(regex=r"(?i)sci.space\]$", axis='index').sort_values("mean", ascending=False).head(10)
 ```
 
-Let's inspect the same feature for the same two classes that we did earlier to check whether our structured covariance has appropriately delt with IIA. 
+Let's inspect the same feature for the same two classes that we did earlier to check whether our structured covariance has appropriately dealt with IIA.
 
 Looking at the plot below, we certainly see positive correlation between the two class weights for the "space" feature!
 
@@ -843,7 +843,7 @@ az.plot_pair(correlated_idata, var_names=['coefs_T'], coords={"classes": ['comp.
 
 Now let's generate out-of-sample predictions and evaluate our `f1-scores` to see if we have any differences from the previous "vanilla" model.
 
-Looking at the `f1-scores`, seems like we have a slight improvement due to the additional information captured by the dependecies across the classes.
+Looking at the `f1-scores`, seems like we have a slight improvement due to the additional information captured by the dependencies across the classes.
 
 ```{python}
 #| output: false
@@ -851,7 +851,7 @@ Looking at the `f1-scores`, seems like we have a slight improvement due to the a
 with sparse_correlated_model:
     pm.set_data(
         new_data={
-            "X": X_test_sparse, 
+            "X": X_test_sparse,
             "y": np.ones_like(y_test)
         },
         coords={
@@ -874,9 +874,9 @@ Finally, let's plot a confusion matrix to inspect the predictions and identify w
 
 Looks like our model struggles in discriminating between `sci.med` and `comp.graphics`. This is apparent in the figure below where our model makes the most errors when it predicts `sci.med` when the actual class is `comp.graphics`
 
-My speculation for why these classes are more challenging to discriminate may be due to polysemous words that can be found in both domains. 
+My speculation for why these classes are more challenging to discriminate may be due to polysemous words that can be found in both domains.
 
-For example, words like "screen" in computer graphics can obviously mean the computer screen whereas in medicine it can mean to screen for a disease or condition. Another one I can think of may be the word "virus" where in computer graphics could be referring to a malicous attack versus in medicine which I guess also refers to a malicious attack but you understand what I am saying here. 
+For example, words like "screen" in computer graphics can obviously mean the computer screen whereas in medicine it can mean to screen for a disease or condition. Another one I can think of may be the word "virus" where in computer graphics could be referring to a malicious attack versus in medicine which I guess also refers to a malicious attack but you understand what I am saying here.
 
 ```{python}
 #| fig-cap: Confusion Matrix
@@ -938,7 +938,7 @@ fig.update_layout(
 
 # Conclusion
 
-In this post we saw that TF-IDF embeddings can produce very informative features for tasks like text-classification. We also saw how we can handle features, like TF-IDF, that are sparse to improve computational effiency. 
+In this post we saw that TF-IDF embeddings can produce very informative features for tasks like text-classification. We also saw how we can handle features, like TF-IDF, that are sparse to improve computational efficiency.
 
 Finally, for multi-class single classification using multinomial logistic regression we walked through how to extend the basic principles that impose the IIA assumption to a model that captures the covariances between the classes removing the IIA restrictions.
 

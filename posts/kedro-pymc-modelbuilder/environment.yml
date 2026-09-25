@@ -2,7 +2,7 @@ name: my_environment_name
 channels:
   - conda-forge
   - defaults
-  
+
 dependencies:
   - 'pymc=5.20.1'
   - 'numpyro=0.17.0'

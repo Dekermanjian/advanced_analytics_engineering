@@ -5,8 +5,8 @@ date: "2025-08-31"
 categories: [Natural Language Processing]
 code-annotations: below
 draft: false
-execute: 
-  kernel: jax_recsys
+jupyter: jax_recsys
+execute:
   cache: true
 ---
 
@@ -16,9 +16,9 @@ We explore the Skip-Gram with Negative Sampling algorithm and implement it in JA
 
 # Introduction
 
-In this short post we are going to do a deep dive on the Skip-Gram with Negative Sampling (SGNS) algorithm. SGNS is one of the two algorithms used in Word2Vec that generates dense static embeddings. These embeddings have a fixed dimension, canonically 300 dimensional, and each token in our vocabular is statically assigned one and only one embedding irrepsective of multiple word senses. 
+In this short post we are going to do a deep dive on the Skip-Gram with Negative Sampling (SGNS) algorithm. SGNS is one of the two algorithms used in Word2Vec that generates dense static embeddings. These embeddings have a fixed dimension, canonically 300 dimensional, and each token in our vocabular is statically assigned one and only one embedding irrepsective of multiple word senses.
 
-The key aspects to understading how embeddings are learned under this paradigm are:
+The key aspects to understanding how embeddings are learned under this paradigm are:
 
 1. Understanding the concept of a sliding window
 2. Understanding how training examples are generated
@@ -29,7 +29,7 @@ Therefore, we are going to focus on the above aspects throughout this post. Firs
 
 # Download and Prepare Data
 
-To train our SGNS embeddings we are going to need some data. For this we will use an open source library called (Project Gutenberg)[https://www.gutenberg.org], which has a collection of books that are freely available for use. We are going to include five political books as our corpus. You can download and lightly pre-process the text before saving the data to a text file with the following code snippet. 
+To train our SGNS embeddings we are going to need some data. For this we will use an open source library called (Project Gutenberg)[https://www.gutenberg.org], which has a collection of books that are freely available for use. We are going to include five political books as our corpus. You can download and lightly pre-process the text before saving the data to a text file with the following code snippet.
 
 ## Download
 
@@ -58,7 +58,7 @@ def clean_gutenberg_text(text: str) -> str:
 
     Parameters
     ----------
-    text: 
+    text:
         The downloaded text
     """
     # Find start marker
@@ -101,7 +101,7 @@ with open("political_corpus.txt", "w", encoding="utf-8") as f:
 
 We are going to need a few helper functions:
 
-1. A way to tokenize our text and remove low occurence tokens
+1. A way to tokenize our text and remove low occurrence tokens
 2. A way to map a token to an index
 3. A way to map an index to a token
 
@@ -121,7 +121,7 @@ def tokenize_and_filter(text: str, min_occurrence: int) -> list[str]:
 
     Returns
     -------
-    list[str]: 
+    list[str]:
         A list of tokens that occur more than `min_occurrence` times.
     """
     # Convert text to lowercase and tokenize
@@ -150,7 +150,7 @@ def build_word_index(text: str, min_occurence: int = 0) -> tuple[dict[str, int],
 
     Returns
     -------
-    Tuple[Dict[str, int], List[str]]: 
+    Tuple[Dict[str, int], List[str]]:
         - word_to_index: A dictionary mapping each word to a unique integer ID.
         - vocabulary: A sorted list of unique vocabulary words including "<unk>".
     """
@@ -197,15 +197,15 @@ def tokens_to_ids(text: str, word_to_index: dict[str, int], min_occurence: int =
 
 There are really two parts to understanding how SGNS embeddings come together. First, is understanding how the training examples are generated. Second, is understanding how the loss function is computed.
 
-## Skip-Gram Pairs 
+## Skip-Gram Pairs
 
-We call our training example `Skip-Gram Pairs`, and what that means is that we are pairing our tokens into (inputs and targets). The way that we accomplish this is by selecting a context (targets) window size that determines how many targets each center word (input) will have and selecting the maximum length of any given sequence of tokens. 
+We call our training example `Skip-Gram Pairs`, and what that means is that we are pairing our tokens into (inputs and targets). The way that we accomplish this is by selecting a context (targets) window size that determines how many targets each center word (input) will have and selecting the maximum length of any given sequence of tokens.
 
 For example, our context window size is 2 and our sequence of tokens lets say is:
 
 [**"The quick brown fox jumps over the lazy dog."**]{style="color: blue;"}
 
-We start by sliding our window over each token to contruct our Skip-Gram Pairs. Our window size is equal to [context_window_size $\times$ 2 + 1 = 5]{style="color: orange;"}. As we slide our window over the sequence, we need to ensure that we our center position is on a token that allows 2 tokens to the left and 2 tokens to the right to be included as our context tokens. For our example sequence, this means the first center word that we can accomodate with our window size is the token "brown". So we will have the following:
+We start by sliding our window over each token to construct our Skip-Gram Pairs. Our window size is equal to [context_window_size $\times$ 2 + 1 = 5]{style="color: orange;"}. As we slide our window over the sequence, we need to ensure that we our center position is on a token that allows 2 tokens to the left and 2 tokens to the right to be included as our context tokens. For our example sequence, this means the first center word that we can accommodate with our window size is the token "brown". So we will have the following:
 
 1. "<span style="color:blue;">The</span> <span style="color:blue;">quick</span> <span style="color:red;">brown</span> <span style="color:blue;">fox</span> <span style="color:blue;">jumps</span>"
 
@@ -259,7 +259,7 @@ def generate_skipgram_pairs(sentences: list[str], word_to_index: dict[str, int],
 
     Returns
     -------
-    tuple[jnp.ndarray, jnp.ndarray]: 
+    tuple[jnp.ndarray, jnp.ndarray]:
         - center_words: 1D array of center word IDs (inputs).
         - context_words: 1D array of corresponding context word IDs (targets).
     """
@@ -296,23 +296,23 @@ def generate_skipgram_pairs(sentences: list[str], word_to_index: dict[str, int],
 
 ## Loss Function
 
-Now that we understand how we are generating our examples, let's go over the loss function. We start by setting up our unigram probabilities that are used when we need to sample negative examples. We adjust the raw frequency counts to diversify the words we are sampling as our negative examples otherwise we almost always sample stop words. During the forward pass we simply take the dot product between our center words and context words as a measure of similarity. For our positive samples, we then compute the logistic loss 
+Now that we understand how we are generating our examples, let's go over the loss function. We start by setting up our unigram probabilities that are used when we need to sample negative examples. We adjust the raw frequency counts to diversify the words we are sampling as our negative examples otherwise we almost always sample stop words. During the forward pass we simply take the dot product between our center words and context words as a measure of similarity. For our positive samples, we then compute the logistic loss
 
 $$
 l(logits, labels) = max(logits, 0) - logits \times labels + log(1 + e^{-|logits|})
 $$
 
-where all the labels will be set to one, since this is our positive example. On the otherhand, we sample negative examples (15 in our case) and again compute the dot product between our center words and now our negative example. However, this time when we compute the loss we set the labels to zero since these are negative examples. We proceed by summing our loss over all the negative examples and we take the average similar to the positive example. Finally, we sum both positive and negative losses together to produce our final loss. 
+where all the labels will be set to one, since this is our positive example. On the otherhand, we sample negative examples (15 in our case) and again compute the dot product between our center words and now our negative example. However, this time when we compute the loss we set the labels to zero since these are negative examples. We proceed by summing our loss over all the negative examples and we take the average similar to the positive example. Finally, we sum both positive and negative losses together to produce our final loss.
 
 In the original paper the loss is written in terms of a sum of expectations:
 
 $$
-\mathbb{E}_{(w,c) \sim D} \left[ \log \sigma \big( v_w \cdot v_c \big) \right] 
-\;+\; 
+\mathbb{E}_{(w,c) \sim D} \left[ \log \sigma \big( v_w \cdot v_c \big) \right]
+\;+\;
 k \, \mathbb{E}_{c' \sim P_n} \left[ \log \sigma \big( - v_w \cdot v_{c'} \big) \right]
 $$
 
-Where $k$ is the number of negative examples and the left portion accounts for the positive example and the right portion account for the negative examples. 
+Where $k$ is the number of negative examples and the left portion accounts for the positive example and the right portion account for the negative examples.
 
 ```{python}
 class SGNSLoss:
@@ -360,11 +360,11 @@ class SGNSLoss:
 ```
 
 # Learning Embeddings
-Now that we know how Skip-Gram with Negative sampling works, how the training examples are generated, and how the loss function works, we can get to the hands-on portion and learn the weights of our embeddings matrix. 
+Now that we know how Skip-Gram with Negative sampling works, how the training examples are generated, and how the loss function works, we can get to the hands-on portion and learn the weights of our embeddings matrix.
 
 ## Define Embedding Layer
 
-Below we define our Embeddings matrix using `Flax`. This is a very simple look-up table essentially that gets initialized using the `LeCun Normal` initialization method which is scaled standard normal distribution $N(0, \frac{1}{d})$ where d is the dimension of our embeddings matrix. 
+Below we define our Embeddings matrix using `Flax`. This is a very simple look-up table essentially that gets initialized using the `LeCun Normal` initialization method which is scaled standard normal distribution $N(0, \frac{1}{d})$ where d is the dimension of our embeddings matrix.
 
 ```{python}
 class SkipGramEmbeddings(nn.Module):
@@ -408,13 +408,13 @@ id_counts = dict(
 
 ## Define Hyperparameters & Training Loop
 
-Next we define our hyperparameters. We are going to set the embedding dimension to 300 to match what was used in the original implementation and we will go for 30 epochs with a batch size of 64. 
+Next we define our hyperparameters. We are going to set the embedding dimension to 300 to match what was used in the original implementation and we will go for 30 epochs with a batch size of 64.
 
-We are going to use `tensorflow-datasets`'s data loader to iterate through our examples during training. We need to write up our update function to update the weights in our embeddings matrix and the training loop itself. 
+We are going to use `tensorflow-datasets`'s data loader to iterate through our examples during training. We need to write up our update function to update the weights in our embeddings matrix and the training loop itself.
 
-For the update, we simply apply the forward pass of the SGNS then compute the logistic loss, and finally calculate the gradient with respect to the parameters in our matrix. JAX will handle the computation of the gradients for us and we are using `Optax` to handle the updates. 
+For the update, we simply apply the forward pass of the SGNS then compute the logistic loss, and finally calculate the gradient with respect to the parameters in our matrix. JAX will handle the computation of the gradients for us and we are using `Optax` to handle the updates.
 
-One thing to mention is that we are using the Adaptive Moment Estimation (adam) optimizer with a learning rate of 1e-4. Finally, we need a helper function that will allow us to grab the nearest neighbors of a given token to inspect if our embeddings are actually learning anything useful. 
+One thing to mention is that we are using the Adaptive Moment Estimation (adam) optimizer with a learning rate of 1e-4. Finally, we need a helper function that will allow us to grab the nearest neighbors of a given token to inspect if our embeddings are actually learning anything useful.
 
 ```{python}
 # Hyperparameters
@@ -430,7 +430,7 @@ dataloader = tf.data.Dataset.from_tensor_slices((dataset[0], dataset[1])).shuffl
 model_rng = random.PRNGKey(0)
 sgns_rng = random.PRNGKey(1)
 
-# Dummy data to init our variabels with
+# Dummy data to init our variables with
 dummy_center = jnp.zeros((batch_size,), dtype=jnp.int32)
 dummy_context = jnp.zeros((batch_size,), dtype=jnp.int32)
 
@@ -532,7 +532,7 @@ trained_params = train(params)
 
 Let's print out a few neighbor tokens to a few selected tokens and check if these make any sense.
 
-Looking at the results of the nearest neighbors we can see that there is some sense to the learned vector embeddings. The nearest neighbors to the state of Pennsylvania are other states, the nearest neigbor to nobles are the church, and that of war is criminal. 
+Looking at the results of the nearest neighbors we can see that there is some sense to the learned vector embeddings. The nearest neighbors to the state of Pennsylvania are other states, the nearest neighbor to nobles are the church, and that of war is criminal.
 
 ```{python}
 nearest_neighbors("pennsylvania", trained_params, 5)
